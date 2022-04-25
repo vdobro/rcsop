@@ -3,6 +3,10 @@
 #include <string>
 #include <vector>
 #include <matio.h>
+#include <stdexcept>
+#include <cmath>
+
+#include "utils.h"
 
 mat_t* open_mat_file(const std::string& path);
 

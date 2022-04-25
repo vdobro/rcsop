@@ -1,6 +1,4 @@
 #include "utils.h"
-#include <algorithm>
-#include <filesystem>
 
 using std::make_shared;
 using std::sort;
@@ -58,4 +56,11 @@ Vector3d get_image_position(const Image &image) {
     Vector3d origin = Vector3d();
     origin.setZero();
     return transform_to_world(image, origin);
+}
+
+Vector2d flat_down_from_above(const Vector3d& point) {
+    auto res = Vector2d();
+    res.x() = point.x();
+    res.y() = point.z();
+    return res;
 }

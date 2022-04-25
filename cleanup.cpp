@@ -1,5 +1,4 @@
 #include "cleanup.h"
-#include "utils.h"
 
 using std::unique_ptr;
 using std::vector;

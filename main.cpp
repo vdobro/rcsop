@@ -1,31 +1,36 @@
-#include "cleanup.h"
-#include "utils.h"
-#include "slices.h"
+#include <string>
+using std::string;
 
+#include "utils.h"
+#include "cleanup.h"
+#include "slices.h"
 #include "read_rcs.h"
 
 const bool FILTER_POINTS = false;
 
 int main() {
-    auto path = "data/input";
+    const string data_root_path = "data";
+    auto path = data_root_path + "/input";
+
     auto model = read_model(path);
 
     if (FILTER_POINTS) {
         filter_points(std::move(model), "data/filtered");
     }
 
-    color_slices(std::move(model), "data/colored_slices");
 
-    auto matfile = open_mat_file("data/rcs.mat");
-    auto table = get_table(matfile);
+    auto rcs_file = open_mat_file(data_root_path + "/rcs.mat");
+    auto table = get_table(rcs_file);
     auto index = get_row_for_height(40, table);
 
     auto rcs = get_rcs(index, table);
+    color_slices(std::move(model), rcs, data_root_path + "/colored_slices");
+
     auto rcs_dbs = get_rcs_db(index, table);
     auto angles = get_angles(index, table);
     auto ranges = get_ranges(index, table);
 
-    close_mat_file(matfile);
+    close_mat_file(rcs_file);
 
     return EXIT_SUCCESS;
 }

@@ -1,16 +1,14 @@
 #include "read_rcs.h"
-#include "utils.h"
-
-#include <stdexcept>
-#include <cmath>
 
 using std::vector;
+using std::runtime_error;
+using std::invalid_argument;
 
 mat_t* open_mat_file(const std::string& path) {
     mat_t* matfp = Mat_Open(path.c_str(), MAT_ACC_RDONLY);
 
     if (nullptr == matfp) {
-        throw std::runtime_error("Could not open .mat file");
+        throw runtime_error("Could not open .mat file");
     }
 
     return matfp;
@@ -18,7 +16,7 @@ mat_t* open_mat_file(const std::string& path) {
 
 void close_mat_file(mat_t* file_handle) {
     if (nullptr == file_handle) {
-        throw std::invalid_argument(".mat file already closed");
+        throw invalid_argument(".mat file already closed");
     }
     Mat_Close(file_handle);
 }
@@ -27,7 +25,7 @@ void close_mat_file(mat_t* file_handle) {
 matvar_t* get_table(mat_t* file) {
     matvar_t* matvar = Mat_VarReadInfo(file, "result");
     if (nullptr == matvar) {
-        throw std::runtime_error("Could not read variable 'result'");
+        throw runtime_error("Could not read variable 'result'");
     }
     Mat_VarReadDataAll(file, matvar);
     return matvar;
@@ -53,7 +51,7 @@ unsigned int get_row_for_height(unsigned int height, matvar_t* table) {
         cell = get_variable(++index, name, table);
     }
 
-    throw std::invalid_argument(name);
+    throw invalid_argument(name);
 }
 
 static vector<double> get_raw_values(unsigned int index, const char* name,

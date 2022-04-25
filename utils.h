@@ -2,6 +2,8 @@
 
 #include <string>
 #include <memory>
+#include <algorithm>
+#include <filesystem>
 
 #include "colmap/base/reconstruction.h"
 
@@ -18,6 +20,8 @@ typedef std::pair<unsigned long, colmap::Point3D> point_pair;
 std::vector<point_pair> get_points(const colmap::Reconstruction& model);
 
 Eigen::Vector3d get_image_position(const colmap::Image& image);
+
+Eigen::Vector2d flat_down_from_above(const Eigen::Vector3d& point);
 
 template<typename Source, typename Target, typename MapFunction>
 std::vector<Target> map_vec(const std::vector<Source> &vec, MapFunction map_function) {
