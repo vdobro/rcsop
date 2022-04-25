@@ -45,7 +45,7 @@ void color_slices(unique_ptr<Reconstruction> model, const string &output_path) {
         auto point_id = point_pair.first;
         auto point = point_pair.second;
         auto flat_point = flat_down(point.XYZ());
-        for (int image_id = 0; image_id < image_count; image_id++) {
+        for (size_t image_id = 0; image_id < image_count; image_id++) {
             auto previous_camera_id = image_id == 0 ? image_count - 1 : (image_id - 1);
             auto previous_camera = flat_down(image_positions[previous_camera_id]);
             auto next_camera = flat_down(image_positions[(image_id + 1) % image_count]);
@@ -57,7 +57,7 @@ void color_slices(unique_ptr<Reconstruction> model, const string &output_path) {
             if (is_in_triangle(flat_point, midpoint_to_previous, midpoint_to_next, origin)) {
                 Vector3ub color = Vector3ub();
                 color.setZero();
-                color.x() = image_id * 5;
+                color.x() = static_cast<uint8_t>(image_id * 7 / 2);
                 point.Color() = color;
                 model->Point3D(point_id) = point;
                 continue;

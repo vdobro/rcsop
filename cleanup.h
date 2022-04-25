@@ -3,7 +3,6 @@
 #include <string>
 #include "colmap/base/reconstruction.h"
 
-using namespace colmap;
 using std::unique_ptr;
 using std::string;
 

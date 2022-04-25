@@ -31,7 +31,7 @@ std::vector<Image> get_images(const colmap::Reconstruction &model) {
     images.resize(image_count);
     auto image_map = model.Images();
 
-    for (int i = 1; i <= image_count; ++i) {
+    for (size_t i = 1; i <= image_count; ++i) {
         auto image = image_map[i];
         images[i - 1] = image;
     }

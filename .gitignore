@@ -14,5 +14,4 @@ _deps
 cmake-build-release
 cmake-build-debug
 
-colored_slices/
-input/
+data/

@@ -4,6 +4,8 @@
 using std::unique_ptr;
 using std::vector;
 
+using colmap::Image;
+using colmap::Reconstruction;
 using Eigen::Vector3d;
 
 static double distance_from_origin(const Vector3d& point) {
@@ -22,7 +24,7 @@ void filter_points(const unique_ptr<Reconstruction> model, const string& output_
 
     auto max_camera_distance = max_distance(images);
 
-    for (const auto& point_with_id : points) {
+    for (const auto& point_with_id: points) {
         auto point_id = point_with_id.first;
         auto point = point_with_id.second;
         if (distance_from_origin(point.XYZ()) >= max_camera_distance) {
