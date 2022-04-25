@@ -22,7 +22,8 @@ add_executable(sfm_colors
         cleanup.cpp
         slices.cpp
         space_point.cpp
-        matlab/read_rcs.cpp colors.cpp colors.h)
+        mat_reader.cpp
+        colors.cpp)
 
 target_include_directories(sfm_colors PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}

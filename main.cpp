@@ -4,7 +4,7 @@ using std::string;
 #include "utils.h"
 #include "cleanup.h"
 #include "slices.h"
-#include "read_rcs.h"
+#include "mat_reader.h"
 
 const bool FILTER_POINTS = false;
 

@@ -1,4 +1,4 @@
-#include "read_rcs.h"
+#include "mat_reader.h"
 
 using std::vector;
 using std::runtime_error;
