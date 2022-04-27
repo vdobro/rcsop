@@ -5,7 +5,7 @@
 
 #undef FILTER_POINTS
 #define SLICE_POINTS
-#undef DRAW_LINES
+#define DRAW_LINES
 #undef SUM_PYRAMIDS
 
 void color_slices(const shared_ptr<colmap::Reconstruction>& model,
@@ -24,7 +24,7 @@ void sum_pyramids(const model_ptr& model,
 int main() {
     const string data_root_path = "data";
     const auto input_path = data_root_path + path_separator + "input";
-    const auto output_path =data_root_path + path_separator + "output";
+    const auto output_path = data_root_path + path_separator + "output";
 
     auto model = read_model(input_path + path_separator + "model");
 

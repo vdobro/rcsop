@@ -19,6 +19,6 @@ public:
     explicit rcs_data(const string& path);
 
     [[nodiscard]] vector<double> rcs() const {
-        return _rcs;
+        return _rcs_dbs;
     }
 };
