@@ -1,25 +1,24 @@
 #pragma once
 
-#include <string>
 #include <vector>
-#include <matio.h>
-#include <stdexcept>
-#include <cmath>
+#include <string>
 
-#include "utils.h"
+using std::string;
+using std::vector;
 
-mat_t* open_mat_file(const std::string& path);
+class rcs_data{
+private:
+    vector<double> _rcs;
+    vector<double> _rcs_dbs;
+    vector<long> _angles;
+    vector<long> _ranges;
 
-void close_mat_file(mat_t* file_handle);
+    rcs_data() = default;
 
-matvar_t* get_table(mat_t* file);
+public:
+    explicit rcs_data(const string& path);
 
-unsigned int get_row_for_height(unsigned int height, matvar_t* table);
-
-std::vector<double> get_rcs(unsigned int index, matvar_t* table);
-
-std::vector<long> get_ranges(unsigned int range, matvar_t* table);
-
-std::vector<double> get_rcs_db(unsigned int index, matvar_t* table);
-
-std::vector<long> get_angles(unsigned int index, matvar_t* table);
+    [[nodiscard]] vector<double> rcs() const {
+        return _rcs;
+    }
+};

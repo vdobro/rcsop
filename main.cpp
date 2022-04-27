@@ -1,12 +1,24 @@
 #include <string>
-using std::string;
 
 #include "utils.h"
-#include "cleanup.h"
-#include "slices.h"
 #include "mat_reader.h"
 
-const bool FILTER_POINTS = false;
+#undef FILTER_POINTS
+#define SLICE_POINTS
+#undef DRAW_LINES
+#undef SUM_PYRAMIDS
+
+void color_slices(const shared_ptr<colmap::Reconstruction>& model,
+                  const vector<double>& rcs,
+                  const string& output_path);
+
+void draw_lines(const model_ptr& model,
+                const vector<double>& rcs,
+                const string& output_path);
+
+void sum_pyramids(const model_ptr& model,
+                  const vector<double>& rcs,
+                  const string& output_path);
 
 int main() {
     const string data_root_path = "data";
@@ -14,23 +26,21 @@ int main() {
 
     auto model = read_model(path);
 
-    if (FILTER_POINTS) {
-        filter_points(std::move(model), "data/filtered");
-    }
+#ifdef FILTER_POINTS
+    filter_points(model, data_root_path + "/input");
+#endif
 
+    auto rcs_file = rcs_data(data_root_path + "/rcs.mat");
+    auto rcs = rcs_file.rcs();
 
-    auto rcs_file = open_mat_file(data_root_path + "/rcs.mat");
-    auto table = get_table(rcs_file);
-    auto index = get_row_for_height(40, table);
-
-    auto rcs = get_rcs(index, table);
-    color_slices(std::move(model), rcs, data_root_path + "/colored_slices");
-
-    auto rcs_dbs = get_rcs_db(index, table);
-    auto angles = get_angles(index, table);
-    auto ranges = get_ranges(index, table);
-
-    close_mat_file(rcs_file);
-
+#ifdef SLICE_POINTS
+    color_slices(model, rcs, data_root_path + "/colored_slices");
+#endif
+#ifdef DRAW_LINES
+    draw_lines(model, rcs, data_root_path + "/rcs_lines");
+#endif
+#ifdef SUM_PYRAMIDS
+    sum_pyramids(model, rcs, data_root_path + "/rcs_sums");
+#endif
     return EXIT_SUCCESS;
 }

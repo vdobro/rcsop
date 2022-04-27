@@ -1,4 +1,7 @@
-#include "slices.h"
+#include "utils.h"
+#include "scored_point.h"
+#include "colors.h"
+#include "render_points.h"
 
 using std::vector;
 
@@ -7,6 +10,7 @@ using Eigen::Vector3d;
 using Eigen::Vector3ub;
 
 using colmap::Image;
+using colmap::Reconstruction;
 
 static inline double get_sign(const Vector2d& p1,
                               const Vector2d& p2,
@@ -24,26 +28,23 @@ static bool inline is_in_triangle(const Vector2d& point,
     return (b1 == b2) && (b2 == b3);
 }
 
-void color_slices(unique_ptr<Reconstruction> model,
-                  vector<double> rcs,
+void color_slices(const model_ptr& model,
+                  const vector<double>& rcs,
                   const string& output_path) {
     auto images = get_images(*model);
     auto image_count = images.size();
     auto image_positions = map_vec<Image, Vector3d>(images, get_image_position);
 
-    auto points = get_points(*model);
+    vector<scored_point> points = map_vec<point_pair, scored_point>(get_points(*model), [](point_pair pair) {
+        return scored_point(pair);
+    });
 
     auto origin = Vector2d();
     origin.setZero();
 
-    auto min_rcs = *std::min_element(rcs.begin(), rcs.end());
-    auto max_rcs = *std::max_element(rcs.begin(), rcs.end());
-    auto rcs_colors = map_vec<double, Vector3ub>(rcs, [min_rcs, max_rcs](double rcs_value) {
-        return map_turbo(rcs_value, min_rcs, max_rcs);
-    });
+    const auto rcs_colors = color_values(rcs, map_turbo);
 
-    for (const auto& point_pair: points) {
-        space_point point(point_pair);
+    for (auto& point: points) {
         auto flat_point = point.flat_down();
 
         for (size_t image_id = 0; image_id < image_count; image_id++) {
@@ -57,10 +58,14 @@ void color_slices(unique_ptr<Reconstruction> model,
 
             if (is_in_triangle(flat_point, midpoint_to_previous, midpoint_to_next, origin)) {
                 model->Point3D(point.id()).Color() = rcs_colors[image_id];
+                point.increment_score(rcs[image_id]);
                 continue;
             }
         }
     }
 
-    write_model(*model, output_path);
+    write_model(model, output_path);
+    for (size_t image_id = 1; image_id <= image_count; image_id++) {
+        render_to_image(model, image_id, "data/Audi_40", "data/renders/audi_40", points);
+    }
 }

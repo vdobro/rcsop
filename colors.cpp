@@ -1,6 +1,8 @@
 #include "colors.h"
 
-using Eigen::Vector3ub;
+#include <cmath>
+
+#include "types.h"
 
 // Copyright 2019 Google LLC.
 // SPDX-License-Identifier: Apache-2.0
@@ -43,7 +45,7 @@ Vector3ub map_turbo(double v, double vmin, double vmax) {
  * The colour is clipped at the end of the scales if v is outside
  * the range [vmin,vmax]
 */
-Eigen::Vector3ub map_jet(double v, double vmin, double vmax) {
+Vector3ub map_jet(double v, double vmin, double vmax) {
     double r = 1.0, g = 1.0, b = 1.0; // white
     double dv = vmax - vmin;
 
@@ -73,4 +75,14 @@ Eigen::Vector3ub map_jet(double v, double vmin, double vmax) {
     color.y() = std::lround(g * 255.0);
     color.z() = std::lround(b * 255.0);
     return color;
+}
+
+vector<Vector3ub> color_values(const vector<double>& values,
+                               colormap_func colormap) {
+    auto min_value = *std::min_element(values.begin(), values.end());
+    auto max_value = *std::max_element(values.begin(), values.end());
+
+    return map_vec<double, Vector3ub>(values, [min_value, max_value](double rcs_value) {
+        return map_turbo(rcs_value, min_value, max_value);
+    });
 }

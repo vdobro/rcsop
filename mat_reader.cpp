@@ -1,28 +1,15 @@
 #include "mat_reader.h"
 
-using std::vector;
+#include <stdexcept>
+#include <cmath>
+#include <matio.h>
+
+#include "utils.h"
+
 using std::runtime_error;
 using std::invalid_argument;
 
-mat_t* open_mat_file(const std::string& path) {
-    mat_t* matfp = Mat_Open(path.c_str(), MAT_ACC_RDONLY);
-
-    if (nullptr == matfp) {
-        throw runtime_error("Could not open .mat file");
-    }
-
-    return matfp;
-}
-
-void close_mat_file(mat_t* file_handle) {
-    if (nullptr == file_handle) {
-        throw invalid_argument(".mat file already closed");
-    }
-    Mat_Close(file_handle);
-}
-
-
-matvar_t* get_table(mat_t* file) {
+static matvar_t* get_table(mat_t* file) {
     matvar_t* matvar = Mat_VarReadInfo(file, "result");
     if (nullptr == matvar) {
         throw runtime_error("Could not read variable 'result'");
@@ -38,7 +25,7 @@ static matvar_t* get_variable(unsigned int index,
     return var;
 }
 
-unsigned int get_row_for_height(unsigned int height, matvar_t* table) {
+static unsigned int get_row_for_height(unsigned int height, matvar_t* table) {
     auto index = 0;
     const auto name = "height";
 
@@ -54,7 +41,8 @@ unsigned int get_row_for_height(unsigned int height, matvar_t* table) {
     throw invalid_argument(name);
 }
 
-static vector<double> get_raw_values(unsigned int index, const char* name,
+static vector<double> get_raw_values(unsigned int index,
+                                     const char* name,
                                      matvar_t* table) {
     auto rcs = get_variable(index, name, table);
 
@@ -68,15 +56,15 @@ static vector<double> get_raw_values(unsigned int index, const char* name,
     return raw_values;
 }
 
-vector<double> get_rcs(unsigned int index, matvar_t* table) {
+static vector<double> get_rcs(unsigned int index, matvar_t* table) {
     return get_raw_values(index, "rcs", table);
 }
 
-vector<double> get_rcs_db(unsigned int index, matvar_t* table) {
+static vector<double> get_rcs_db(unsigned int index, matvar_t* table) {
     return get_raw_values(index, "rcs_dB", table);
 }
 
-vector<long> get_angles(unsigned int index, matvar_t* table) {
+static vector<long> get_angles(unsigned int index, matvar_t* table) {
     auto raw_values = get_raw_values(index, "angle", table);
     return map_vec<double, long>(raw_values, [](double angle) {
         return static_cast<long>(angle);
@@ -86,10 +74,27 @@ vector<long> get_angles(unsigned int index, matvar_t* table) {
 /**
  * get measurement ranges in centimeters
  */
-vector<long> get_ranges(unsigned int index, matvar_t* table) {
+static vector<long> get_ranges(unsigned int index, matvar_t* table) {
     auto raw_values = get_raw_values(index, "range", table);
 
     return map_vec<double, long>(raw_values, [](double range) {
         return std::lround(range * 100);
     });
+}
+
+rcs_data::rcs_data(const string& path) {
+    mat_t* mat_file_handle = Mat_Open(path.c_str(), MAT_ACC_RDONLY);
+    if (nullptr == mat_file_handle) {
+        throw runtime_error("Could not open .mat file");
+    }
+
+    auto table = get_table(mat_file_handle);
+    auto index = get_row_for_height(40, table);
+
+    _rcs = get_rcs(index, table);
+    _rcs_dbs = get_rcs_db(index, table);
+    _angles = get_angles(index, table);
+    _ranges = get_ranges(index, table);
+
+    Mat_Close(mat_file_handle);
 }

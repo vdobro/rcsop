@@ -1,12 +1,8 @@
 #pragma once
 
-#include <string>
+#include <base/reconstruction.h>
 
-#include "colmap/base/reconstruction.h"
+#include "types.h"
 
-#include "utils.h"
-
-using std::unique_ptr;
-using std::string;
-
-void filter_points(unique_ptr<colmap::Reconstruction> model, const string& output_path);
+void filter_points(const shared_ptr<colmap::Reconstruction>& model,
+                   const string& output_path);
