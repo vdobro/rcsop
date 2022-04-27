@@ -62,7 +62,7 @@ static vector<rendered_point> project_in_camera_with_color(const vector<image_po
 
 #define RADIUS 20
 #define DOWNSCALER 1
-#define ALPHA 0.7
+#define ALPHA 0.3
 
 static void draw_point(const Cairo::RefPtr<Cairo::Context>& cr,
                        const rendered_point& point) {
@@ -81,9 +81,6 @@ static void draw_point(const Cairo::RefPtr<Cairo::Context>& cr,
     cr->mask(radial_pattern);
     cr->restore();
 }
-
-using std::filesystem::create_directories;
-static const auto path_separator = std::filesystem::path::preferred_separator;
 
 void render_to_image(const model_ptr& model,
                      colmap::image_t image_id,

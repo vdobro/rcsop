@@ -30,6 +30,7 @@ static bool inline is_in_triangle(const Vector2d& point,
 
 void color_slices(const model_ptr& model,
                   const vector<double>& rcs,
+                  const string& input_path,
                   const string& output_path) {
     auto images = get_images(*model);
     auto image_count = images.size();
@@ -65,7 +66,10 @@ void color_slices(const model_ptr& model,
     }
 
     write_model(model, output_path);
+
+    auto render_path = output_path + path_separator + "render";
+    std::filesystem::remove_all(render_path);
     for (size_t image_id = 1; image_id <= image_count; image_id++) {
-        render_to_image(model, image_id, "data/Audi_40", "data/renders/audi_40", points);
+        render_to_image(model, image_id, input_path, render_path, points);
     }
 }

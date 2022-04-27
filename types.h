@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <filesystem>
 #include <vector>
 
 #include "colmap/base/reconstruction.h"
@@ -21,3 +22,6 @@ using colmap::Camera;
 using colmap::Point3D;
 
 typedef shared_ptr<Reconstruction> model_ptr;
+
+using std::filesystem::create_directories;
+static const auto path_separator = std::filesystem::path::preferred_separator;
