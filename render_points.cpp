@@ -61,6 +61,7 @@ static vector<rendered_point> project_in_camera_with_color(const vector<image_po
 #define RGB 256.f
 #define RADIUS 25.f
 #define CENTER_ALPHA 0.2f
+#define GRADIENT_STRENGTH 3.f
 
 static void render_point(
         const rendered_point& point,
@@ -96,6 +97,7 @@ static void render_point(
             static_cast<float>(screen_size.y)));
     shader.setUniform("p_color", sf::Glsl::Vec4(r, g, b, CENTER_ALPHA));
     shader.setUniform("p_center", sf::Glsl::Vec2(x, y));
+    shader.setUniform("degree", GRADIENT_STRENGTH);
     shader.setUniform("p_radius", RADIUS);
 
     render_target.draw(quad, &shader);
