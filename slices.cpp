@@ -69,8 +69,5 @@ void color_slices(const model_ptr& model,
 
     auto render_path = output_path + path_separator + "render";
     std::filesystem::remove_all(render_path);
-
-    for (size_t image_id = 1; image_id <= image_count; image_id++) {
-        render_to_image(model, image_id, input_path, render_path, points);
-    }
+    render_images(model, input_path, render_path, points);
 }

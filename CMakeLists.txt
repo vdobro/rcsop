@@ -9,14 +9,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(Eigen3 3.4 REQUIRED)
 find_package(MATIO REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
-
-find_package(PkgConfig)
-pkg_check_modules(cairo REQUIRED IMPORTED_TARGET "cairomm-1.0")
+find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
 include_directories(${COLMAP_INCLUDE_DIRS}
         ${EIGEN3_INCLUDE_DIR}
         ${MATIO_INCLUDE_DIRS}
-        ${cairo_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR})
 link_directories(${COLMAP_LINK_DIRS})
 
@@ -39,4 +36,4 @@ target_include_directories(sfm_colors PRIVATE
 target_link_libraries(sfm_colors PRIVATE
         ${COLMAP_LIBRARIES}
         ${MATIO_LIBRARIES}
-        PkgConfig::cairo)
+        sfml-graphics)

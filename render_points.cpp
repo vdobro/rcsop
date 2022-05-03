@@ -2,12 +2,9 @@
 
 #include <utility>
 #include <filesystem>
-#include <map>
 
+#include <SFML/Graphics.hpp>
 #include "colmap/util/types.h"
-
-#include "cairomm/context.h"
-#include "cairomm/surface.h"
 
 #include "colors.h"
 
@@ -61,102 +58,104 @@ static vector<rendered_point> project_in_camera_with_color(const vector<image_po
     });
 }
 
-#define RADIUS 20
-#define DOWNSCALER 1
-#define ALPHA 0.5
+#define RGB 256.f
+#define RADIUS 25.f
+#define CENTER_ALPHA 0.2f
 
-static void draw_point(const Cairo::RefPtr<Cairo::Context>& cr,
-                       const rendered_point& point) {
-    const auto [coords, color] = point;
-    const double x = coords.x(),
-            y = coords.y();
-    const double r = color.x() / 256.0,
-            g = color.y() / 256.0,
-            b = color.z() / 256.0;
+static void render_point(
+        const rendered_point& point,
+        sf::RenderTarget& render_target,
+        sf::Shader& shader) {
+    sf::VertexArray quad(sf::Quads, 4);
 
-    auto radial_pattern = Cairo::RadialGradient::create(x, y, 0, x, y, RADIUS);
-    radial_pattern->add_color_stop_rgba(0, r, g, b, ALPHA);
-    radial_pattern->add_color_stop_rgba(1, r, g, b, 0);
+    auto x = static_cast<float>(point.coordinates.x());
+    auto y = static_cast<float>(point.coordinates.y());
 
-    cr->save();
-    cr->rectangle(x - RADIUS, y - RADIUS, x + RADIUS, y + RADIUS);
-    cr->clip();
-    cr->set_source(radial_pattern);
-    cr->mask(radial_pattern);
-    cr->restore();
+    auto x_begin = x - RADIUS;
+    auto x_end = x + RADIUS;
+    auto y_begin = y - RADIUS;
+    auto y_end = y + RADIUS;
+
+    quad[0].position = sf::Vector2f(x_begin, y_begin);
+    quad[1].position = sf::Vector2f(x_end, y_begin);
+    quad[2].position = sf::Vector2f(x_end, y_end);
+    quad[3].position = sf::Vector2f(x_begin, y_end);
+
+    quad[0].color = sf::Color::Transparent;
+    quad[1].color = sf::Color::Transparent;
+    quad[2].color = sf::Color::Transparent;
+    quad[3].color = sf::Color::Transparent;
+
+    const auto r = static_cast<float>(point.color.x()) / RGB,
+            g = static_cast<float>(point.color.y()) / RGB,
+            b = static_cast<float>(point.color.z()) / RGB;
+    auto screen_size = render_target.getSize();
+
+    shader.setUniform("screen_res", sf::Glsl::Vec2(
+            static_cast<float>(screen_size.x),
+            static_cast<float>(screen_size.y)));
+    shader.setUniform("p_color", sf::Glsl::Vec4(r, g, b, CENTER_ALPHA));
+    shader.setUniform("p_center", sf::Glsl::Vec2(x, y));
+    shader.setUniform("p_radius", RADIUS);
+
+    render_target.draw(quad, &shader);
 }
 
-typedef uint64_t rgb_hash;
-typedef vector<Vector2d> point2d_list;
-using std::map;
-
-#define RGB_SIZE 256
-/*
-static void draw_points(const Cairo::RefPtr<Cairo::Context>& cr,
-                        const map<rgb_hash, point2d_list>& color_map) {
-
-    for (auto it = color_map.begin(); it != color_map.end(); it++) {
-        auto hash = it->first;
-        auto points2d = it->second;
-
-        Vector3ub color;
-        color.x() = hash / (RGB_SIZE * RGB_SIZE);
-        color.y() = hash / RGB_SIZE % RGB_SIZE;
-        color.z() = hash % RGB_SIZE;
-        const double r = color.x() / 256.0,
-                g = color.y() / 256.0,
-                b = color.z() / 256.0;
-
-        for (const auto & point : points2d) {
-            const double x = point.x(),y = point.y();
-            auto radial_pattern = Cairo::RadialGradient::create(x, y, 0, x, y, RADIUS);
-            radial_pattern->add_color_stop_rgba(0, r, g, b, ALPHA);
-            radial_pattern->add_color_stop_rgba(1, r, g, b, 0);
-        }
-    }
-}*/
-
-static rgb_hash rgb_to_hex(const Vector3ub& color) {
-    return color.x() * 256 * 256 + color.y() * 256 + color.z();
-}
-
-void render_to_image(const model_ptr& model,
-                     colmap::image_t image_id,
-                     const string& input_path,
-                     const string& output_path,
-                     const vector<scored_point>& points) {
-    auto image = model->Image(image_id);
-    auto camera_id = image.CameraId();
-    auto camera = model->Camera(camera_id);
-
-    auto img_points = map_vec<scored_point, image_point>(points, [image](const scored_point& point) {
-        return project_to_image(image, point);
-    });
-
-    auto rendered_points = project_in_camera_with_color(img_points, camera, map_turbo);
-
-    auto surface = Cairo::ImageSurface::create_from_png(input_path + path_separator + image.Name());
-    auto cr = Cairo::Context::create(surface);
-
-    map<rgb_hash, point2d_list> color_map;
-    for (const auto& rendered_point: rendered_points) {
-        auto [coordinates, color] = rendered_point;
-        auto hash = rgb_to_hex(color);
-        point2d_list grouped_points;
-        if (color_map.find(hash) == color_map.end()) {
-            color_map.insert(std::pair<rgb_hash, point2d_list>(hash, grouped_points));
-        } else {
-            grouped_points = color_map[hash];
-        }
-        grouped_points.push_back(coordinates);
-    }
-
-    for (size_t i = 0; i < rendered_points.size(); i += DOWNSCALER) {
-        const auto point = rendered_points[i];
-        draw_point(cr, point);
-    }
-
+void render_images(const model_ptr& model,
+                   const string& input_path,
+                   const string& output_path,
+                   const vector<scored_point>& points) {
     create_directories(output_path);
-    string filename = output_path + path_separator + image.Name();
-    surface->write_to_png(filename);
+
+    if (!sf::Shader::isAvailable()) {
+        std::cout << "Shaders unsupported." << std::endl;
+        exit(1);
+    }
+    sf::Shader shader;
+    if (!shader.loadFromFile("gradient.frag", sf::Shader::Fragment)) {
+        std::cout << "Could not load required shader." << std::endl;
+        exit(1);
+    }
+
+    auto image_count = model->NumImages();
+    for (size_t image_id = 1; image_id <= image_count; image_id++) {
+        auto image = model->Image(image_id);
+        auto camera_id = image.CameraId();
+        auto camera = model->Camera(camera_id);
+        auto img_points = map_vec<scored_point, image_point>(points, [image](const scored_point& point) {
+            return project_to_image(image, point);
+        });
+        auto rendered_points = project_in_camera_with_color(img_points, camera, map_turbo);
+
+        auto input_file_path = input_path + path_separator + image.Name();
+        auto output_file_path = output_path + path_separator + image.Name();
+
+        sf::RenderTexture render_target;
+        if (!render_target.create(camera.Width(), camera.Height())) {
+            std::cout << "Could not create render texture." << std::endl;
+            exit(2);
+        }
+
+        sf::Texture background;
+        if (!background.loadFromFile(input_file_path)) {
+            std::cout << "Could not load texture " << image.Name() << std::endl;
+            exit(3);
+        }
+
+        sf::Sprite background_sprite;
+        background_sprite.setTexture(background);
+
+        render_target.clear(sf::Color::Black);
+        render_target.draw(background_sprite);
+
+        for (const auto& point: rendered_points) {
+            render_point(point, render_target, shader);
+        }
+
+        render_target.display();
+
+        const auto output_texture = render_target.getTexture();
+        auto output_image = output_texture.copyToImage();
+        output_image.saveToFile(output_file_path);
+    }
 }
