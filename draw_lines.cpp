@@ -1,5 +1,4 @@
 #include <Eigen/Geometry>
-using Eigen::ParametrizedLine;
 
 #include "utils.h"
 #include "colors.h"
@@ -24,7 +23,7 @@ void draw_lines(const model_ptr& model,
         double step = distance / steps;;
         double j = 0.0;
 
-        auto line = ParametrizedLine<double, 3>(position, direction);
+        auto line = model_line(position, direction);
 
         while (j < position.norm()) {
             auto new_point = line.pointAt(j);

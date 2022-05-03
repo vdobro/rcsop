@@ -6,6 +6,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wpedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -Wall -Wpedantic -Werror")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
+endif()
+
 find_package(Eigen3 3.4 REQUIRED)
 find_package(MATIO REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)

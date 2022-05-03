@@ -18,6 +18,8 @@ vector<Image> get_images(const Reconstruction& model);
 
 vector<point_pair> get_points(const Reconstruction& model);
 
+Vector3d transform_to_world(const Image& image, const Vector3d& image_xyz);
+
 Vector3d get_image_position(const Image& image);
 
 Vector2d flat_down_from_above(const Vector3d& point);

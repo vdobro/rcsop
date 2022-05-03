@@ -4,9 +4,9 @@
 #include "mat_reader.h"
 
 #undef FILTER_POINTS
-#define SLICE_POINTS
 #define DRAW_LINES
-#undef SUM_PYRAMIDS
+#define SLICE_POINTS
+#define SUM_PYRAMIDS
 
 void color_slices(const shared_ptr<colmap::Reconstruction>& model,
                   const vector<double>& rcs,

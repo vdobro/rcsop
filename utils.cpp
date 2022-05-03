@@ -55,8 +55,7 @@ vector<point_pair> get_points(const Reconstruction& model) {
     return point_pairs;
 }
 
-static Vector3d transform_to_world(const Image& image,
-                                   const Vector3d& image_xyz) {
+Vector3d transform_to_world(const Image& image, const Vector3d& image_xyz) {
     return image.InverseProjectionMatrix() * image_xyz.homogeneous();
 }
 
