@@ -9,14 +9,16 @@ static Vector3d get_right(const Image& image) {
     Vector3d local_right;
     local_right.setZero();
     local_right.x() = 1;
-    return transform_to_world(image, local_right).normalized();
+    auto direction = transform_to_world(image, local_right) - get_image_position(image);
+    return direction.normalized();
 }
 
 static Vector3d get_up(const Image& image) {
     Vector3d local_right;
     local_right.setZero();
     local_right.y() = -1;
-    return transform_to_world(image, local_right).normalized();
+    auto direction = transform_to_world(image, local_right) - get_image_position(image);
+    return direction.normalized();
 }
 
 struct relative_point {
@@ -34,8 +36,8 @@ static vector<relative_point> extract_point_data(const Image& image,
     auto right = get_right(image);
     auto up = get_up(image);
 
-    const plane vertical_plane = plane(image_pos, right);
-    const plane horizontal_plane = plane(image_pos, up);
+    const plane vertical_plane = plane(right, image_pos);
+    const plane horizontal_plane = plane(up, image_pos);
 
     return map_vec<point_pair, relative_point>(points, [image_pos, vertical_plane, horizontal_plane](
             const point_pair& point_pair) {
@@ -50,8 +52,8 @@ static vector<relative_point> extract_point_data(const Image& image,
 
         auto distance_to_camera = (point_position - image_pos).norm();
 
-        auto horizontal_angle = asin(distance_to_vertical_plane / distance_to_camera) * 180 / M_PI;
-        auto vertical_angle = asin(distance_to_horizontal_plane / distance_to_camera) * 180 / M_PI;
+        auto horizontal_angle = asin(distance_to_vertical_plane / distance_to_camera) * 180.f / M_PI;
+        auto vertical_angle = asin(distance_to_horizontal_plane / distance_to_camera) * 180.f / M_PI;
 
         relative_point point_info = {
                 .position = point_position,
@@ -64,6 +66,7 @@ static vector<relative_point> extract_point_data(const Image& image,
     });
 }
 
+//TODO document numerical integration here
 #define INTEGRAL_SCALER 1.69260614115415
 
 void sum_pyramids(const model_ptr& model,
@@ -79,17 +82,18 @@ void sum_pyramids(const model_ptr& model,
     const auto rcs_colors = color_values(rcs, map_turbo);
     for (size_t i = 0; i < 1; i++) {
         auto image = images[i];
-        auto rcs_value = rcs[i];
         auto points = get_points(*model);
         auto relevant_points = extract_point_data(image, points);
 
         for (const auto& point : relevant_points) {
-            if (point.horizontal_angle <= 45 && point.vertical_angle <= 15) {
+            if (point.horizontal_angle <= 45.f/2 && point.vertical_angle <= 15.f) {
                 scored_point sp = scored_point(point.position, point.id);
                 sp.increment_score(1);
                 scored_points.push_back(sp);
 
                 model->Point3D(point.id).Color() = rcs_colors[0];
+            } else {
+                model->Point3D(point.id).Color().setZero();
             }
         }
     }
