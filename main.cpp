@@ -4,8 +4,8 @@
 #include "mat_reader.h"
 
 #undef FILTER_POINTS
-#define DRAW_LINES
-#define SLICE_POINTS
+#undef DRAW_LINES
+#undef SLICE_POINTS
 #define SUM_PYRAMIDS
 
 void color_slices(const shared_ptr<colmap::Reconstruction>& model,
@@ -15,10 +15,12 @@ void color_slices(const shared_ptr<colmap::Reconstruction>& model,
 
 void draw_lines(const model_ptr& model,
                 const vector<double>& rcs,
+                const string& input_path,
                 const string& output_path);
 
 void sum_pyramids(const model_ptr& model,
                   const vector<double>& rcs,
+                  const string& input_path,
                   const string& output_path);
 
 int main() {
@@ -35,16 +37,17 @@ int main() {
     const auto rcs_file = rcs_data(input_path + path_separator + "rcs.mat");
     const auto rcs = rcs_file.rcs();
 
+    const auto input_image_path = input_path + path_separator + "audi_40";
+
 #ifdef SLICE_POINTS
-    color_slices(model, rcs,
-                 input_path + path_separator + "audi_40",
+    color_slices(model, rcs, input_image_path,
                  output_path + path_separator + "colored_slices");
 #endif
 #ifdef DRAW_LINES
-    draw_lines(model, rcs, output_path + path_separator + "rcs_lines");
+    draw_lines(model, rcs, input_image_path, output_path + path_separator + "rcs_lines");
 #endif
 #ifdef SUM_PYRAMIDS
-    sum_pyramids(model, rcs, output_path + path_separator + "rcs_sums");
+    sum_pyramids(model, rcs, input_image_path, output_path + path_separator + "rcs_sums");
 #endif
     return EXIT_SUCCESS;
 }

@@ -120,7 +120,7 @@ void render_images(const model_ptr& model,
     }
 
     auto image_count = model->NumImages();
-    for (size_t image_id = 1; image_id <= image_count; image_id++) {
+    for (size_t image_id = 1; image_id <= 1; image_id++) {
         auto image = model->Image(image_id);
         auto camera_id = image.CameraId();
         auto camera = model->Camera(camera_id);

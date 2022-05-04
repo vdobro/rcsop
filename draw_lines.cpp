@@ -5,6 +5,7 @@
 
 void draw_lines(const model_ptr& model,
                 const vector<double>& rcs,
+                const string& input_path,
                 const string& output_path) {
     auto images = get_images(*model);
     auto image_count = images.size();

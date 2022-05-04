@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "utils.h"
 
 class scored_point {
@@ -12,7 +14,10 @@ private:
 
 public:
     explicit scored_point() = default;
+
     explicit scored_point(const point_pair& base);
+
+    explicit scored_point(Vector3d position, ulong id) : _point_id(id), _position(std::move(position)) {}
 
     void increment_score(double value);
 
