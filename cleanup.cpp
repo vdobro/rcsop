@@ -1,13 +1,5 @@
 #include "cleanup.h"
 
-#include "colmap/base/image.h"
-
-#include "types.h"
-#include "utils.h"
-
-using colmap::Image;
-using colmap::Reconstruction;
-
 static double distance_from_origin(const Vector3d& point) {
     return point.norm();
 }

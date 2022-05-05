@@ -1,5 +1,4 @@
 #include "scored_point.h"
-
 #include "utils.h"
 
 scored_point::scored_point(const point_pair& base) {

@@ -1,16 +1,4 @@
-#include "utils.h"
-#include "scored_point.h"
-#include "colors.h"
-#include "render_points.h"
-
-using std::vector;
-
-using Eigen::Vector2d;
-using Eigen::Vector3d;
-using Eigen::Vector3ub;
-
-using colmap::Image;
-using colmap::Reconstruction;
+#include "slices.h"
 
 static inline double get_sign(const Vector2d& p1,
                               const Vector2d& p2,

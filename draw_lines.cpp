@@ -1,7 +1,4 @@
-#include <Eigen/Geometry>
-
-#include "utils.h"
-#include "colors.h"
+#include "draw_lines.h"
 
 void draw_lines(const model_ptr& model,
                 const vector<double>& rcs,

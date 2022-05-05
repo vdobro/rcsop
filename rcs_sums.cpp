@@ -1,5 +1,4 @@
-#include "utils.h"
-#include "render_points.h"
+#include "rcs_sums.h"
 
 typedef Eigen::Hyperplane<double, 3> plane;
 

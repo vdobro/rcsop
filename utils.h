@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <filesystem>
+
 #include "colmap/base/reconstruction.h"
 #include "types.h"
 #include "scored_point.h"

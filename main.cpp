@@ -1,27 +1,16 @@
 #include <string>
 
 #include "utils.h"
+#include "cleanup.h"
 #include "mat_reader.h"
+#include "draw_lines.h"
+#include "rcs_sums.h"
+#include "slices.h"
 
 #undef FILTER_POINTS
 #undef DRAW_LINES
 #undef SLICE_POINTS
 #define SUM_PYRAMIDS
-
-void color_slices(const shared_ptr<colmap::Reconstruction>& model,
-                  const vector<double>& rcs,
-                  const string& input_path,
-                  const string& output_path);
-
-void draw_lines(const model_ptr& model,
-                const vector<double>& rcs,
-                const string& input_path,
-                const string& output_path);
-
-void sum_pyramids(const model_ptr& model,
-                  const vector<double>& rcs,
-                  const string& input_path,
-                  const string& output_path);
 
 int main() {
     const string data_root_path = "data";

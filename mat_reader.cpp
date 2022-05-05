@@ -1,14 +1,5 @@
 #include "mat_reader.h"
 
-#include <stdexcept>
-#include <cmath>
-#include <matio.h>
-
-#include "utils.h"
-
-using std::runtime_error;
-using std::invalid_argument;
-
 static matvar_t* get_table(mat_t* file) {
     matvar_t* matvar = Mat_VarReadInfo(file, "result");
     if (nullptr == matvar) {

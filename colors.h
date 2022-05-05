@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "types.h"
 #include "utils.h"
 

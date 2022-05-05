@@ -37,6 +37,8 @@ target_include_directories(sfm_colors PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/matlab)
 
+set_target_properties(sfm_colors PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
+
 target_link_libraries(sfm_colors PRIVATE
         ${COLMAP_LIBRARIES}
         ${MATIO_LIBRARIES}

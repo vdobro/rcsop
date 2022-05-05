@@ -1,13 +1,5 @@
 #include "render_points.h"
 
-#include <utility>
-#include <filesystem>
-
-#include <SFML/Graphics.hpp>
-#include "colmap/util/types.h"
-
-#include "colors.h"
-
 class image_point {
 private:
     Vector2d _coordinates = Vector2d::Zero();

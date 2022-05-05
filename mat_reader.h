@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <matio.h>
 
-using std::string;
-using std::vector;
+#include "utils.h"
+
+using std::runtime_error;
+using std::invalid_argument;
 
 class rcs_data{
 private:

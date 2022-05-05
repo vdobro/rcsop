@@ -1,20 +1,11 @@
 #include "utils.h"
 
-#include <algorithm>
-#include <filesystem>
-
 using std::make_shared;
 using std::sort;
 using std::vector;
 
 using std::filesystem::create_directories;
 using std::filesystem::remove_all;
-
-using colmap::Image;
-using colmap::Point3D;
-using colmap::Reconstruction;
-using Eigen::Vector2d;
-using Eigen::Vector3d;
 
 shared_ptr<Reconstruction> read_model(const string& path) {
     auto model = make_shared<Reconstruction>();

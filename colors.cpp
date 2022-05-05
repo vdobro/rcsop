@@ -1,9 +1,5 @@
 #include "colors.h"
 
-#include <cmath>
-
-#include "types.h"
-
 // Copyright 2019 Google LLC.
 // SPDX-License-Identifier: Apache-2.0
 
