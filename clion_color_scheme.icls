@@ -1,0 +1,46 @@
+<scheme name="Farbig" version="142" parent_scheme="Darcula">
+  <metaInfo>
+    <property name="created">2022-05-05T10:28:39</property>
+    <property name="ide">CLion</property>
+    <property name="ideVersion">2022.1.0.0</property>
+    <property name="modified">2022-05-05T10:29:25</property>
+    <property name="originalScheme">Farbig</property>
+  </metaInfo>
+  <attributes>
+    <option name="DEFAULT_CLASS_NAME">
+      <value>
+        <option name="FOREGROUND" value="3770dc" />
+      </value>
+    </option>
+    <option name="DEFAULT_FUNCTION_CALL">
+      <value>
+        <option name="FOREGROUND" value="c7335b" />
+      </value>
+    </option>
+    <option name="DEFAULT_GLOBAL_VARIABLE">
+      <value>
+        <option name="FOREGROUND" value="d51717" />
+      </value>
+    </option>
+    <option name="DEFAULT_LOCAL_VARIABLE">
+      <value>
+        <option name="FOREGROUND" value="a9b7c6" />
+      </value>
+    </option>
+    <option name="DEFAULT_PARAMETER">
+      <value>
+        <option name="FOREGROUND" value="1e9f8f" />
+      </value>
+    </option>
+    <option name="OC.NAMESPACE_LIKE">
+      <value>
+        <option name="FOREGROUND" value="8137dc" />
+      </value>
+    </option>
+    <option name="OC.STRUCT_LIKE">
+      <value>
+        <option name="FOREGROUND" value="3770dc" />
+      </value>
+    </option>
+  </attributes>
+</scheme>

@@ -10,7 +10,9 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-.idea
+.idea/*
+!.idea/codeStyles
+
 cmake-build-release
 cmake-build-debug
 
