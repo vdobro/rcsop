@@ -161,3 +161,17 @@ void render_images(const model_ptr& model,
         output_image.saveToFile(output_file_path);
     }
 }
+
+void render_images(const model_ptr& model,
+                   const string& input_path,
+                   const string& output_path,
+                   const map<point_id_t, scored_point>& points) {
+    vector<scored_point> point_list;
+    point_list.resize(points.size());
+
+    for (const auto& item: points) {
+        point_list.push_back(item.second);
+    }
+
+    render_images(model, input_path, output_path, point_list);
+}

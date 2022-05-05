@@ -2,13 +2,9 @@
 
 #include "colmap/base/reconstruction.h"
 #include "types.h"
+#include "scored_point.h"
 
-using colmap::Reconstruction;
-using colmap::Image;
-using colmap::Point3D;
-
-using std::pair;
-typedef pair<unsigned long, Point3D> point_pair;
+typedef map<point_id_t, scored_point> scored_point_map;
 
 shared_ptr<Reconstruction> read_model(const string& path);
 
@@ -17,6 +13,8 @@ void write_model(const model_ptr& model, const string& output_path);
 vector<Image> get_images(const Reconstruction& model);
 
 vector<point_pair> get_points(const Reconstruction& model);
+
+scored_point_map get_scored_points(const Reconstruction& model);
 
 Vector3d transform_to_world(const Image& image, const Vector3d& image_xyz);
 

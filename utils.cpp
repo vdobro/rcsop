@@ -71,3 +71,14 @@ Vector2d flat_down_from_above(const Vector3d& point) {
     res.y() = point.z();
     return res;
 }
+
+scored_point_map get_scored_points(const Reconstruction& model) {
+    auto model_points = get_points(model);
+    map<point_id_t, scored_point> result;
+    for (const auto& point_pair: model_points) {
+        auto point_id = point_pair.first;
+        auto point = point_pair.second;
+        result.insert(pair<point_id_t, scored_point>(point_id, scored_point(point.XYZ(), point_id)));
+    }
+    return result;
+}

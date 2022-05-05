@@ -2,12 +2,12 @@
 
 #include <utility>
 
-#include "utils.h"
+#include "types.h"
 
 class scored_point {
 
 private:
-    ulong _point_id = -1;
+    point_id_t _point_id = -1;
     Vector3d _position = Vector3d::Zero();
     Vector3ub _color = Vector3ub::Zero();
     double _score = 0;
@@ -29,5 +29,5 @@ public:
 
     [[nodiscard]] double score() const;
 
-    [[nodiscard]] ulong id() const;
+    [[nodiscard]] point_id_t id() const;
 };
