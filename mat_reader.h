@@ -1,7 +1,6 @@
 #pragma once
 
-#include <matio.h>
-
+#include "matio.h"
 #include "utils.h"
 
 using std::runtime_error;
