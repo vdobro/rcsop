@@ -1,7 +1,16 @@
 #include "mat_reader.h"
 
+static const auto RCS_TABLE_NAME = "result";
+static const auto RCS_COLUMN_HEIGHT = "height";
+static const auto RCS_COLUMN_RCS = "rcs";
+static const auto RCS_COLUMN_RCS_DB = "rcs_dB";
+static const auto RCS_COLUMN_RANGE = "range";
+static const auto RCS_COLUMN_ANGLE = "angle";
+static const auto RCS_COLUMN_AZIMUTH = "AzimuthLeistung";
+static const auto RCS_COLUMN_AZIMUTH_DB = "AzimuthLeistung_dB";
+
 static matvar_t* get_table(mat_t* file) {
-    matvar_t* matvar = Mat_VarReadInfo(file, "result");
+    matvar_t* matvar = Mat_VarReadInfo(file, RCS_TABLE_NAME);
     if (nullptr == matvar) {
         throw runtime_error("Could not read variable 'result'");
     }
@@ -9,30 +18,30 @@ static matvar_t* get_table(mat_t* file) {
     return matvar;
 }
 
-static matvar_t* get_variable(unsigned int index,
+static matvar_t* get_variable(size_t index,
                               const char* variable,
                               matvar_t* table) {
     auto var = Mat_VarGetStructFieldByName(table, variable, index);
     return var;
 }
 
-static unsigned int get_row_index_for_height(unsigned int height, matvar_t* table) {
+static map<long, size_t> get_heights(matvar_t* table) {
+    map<long, size_t> result;
     auto index = 0;
-    const auto name = "height";
+    auto name = RCS_COLUMN_HEIGHT;
 
     matvar_t* cell = get_variable(index, name, table);
     while (nullptr != cell) {
-        auto content = *reinterpret_cast<double*>(cell->data);
-        if (content == height) {
-            return index;
-        }
+        auto height_raw = *reinterpret_cast<double*>(cell->data);
+        auto height = lround(height_raw);
+        result.insert(std::make_pair(height, index));
+
         cell = get_variable(++index, name, table);
     }
-
-    throw invalid_argument(name);
+    return result;
 }
 
-static vector<double> get_raw_values(unsigned int row_index,
+static vector<double> get_raw_values(size_t row_index,
                                      const char* name,
                                      matvar_t* table) {
     auto rcs = get_variable(row_index, name, table);
@@ -47,16 +56,16 @@ static vector<double> get_raw_values(unsigned int row_index,
     return raw_values;
 }
 
-static vector<double> get_rcs(unsigned int index, matvar_t* table) {
-    return get_raw_values(index, "rcs", table);
+static vector<double> get_rcs(size_t index, matvar_t* table) {
+    return get_raw_values(index, RCS_COLUMN_RCS, table);
 }
 
-static vector<double> get_rcs_db(unsigned int index, matvar_t* table) {
-    return get_raw_values(index, "rcs_dB", table);
+static vector<double> get_rcs_db(size_t index, matvar_t* table) {
+    return get_raw_values(index, RCS_COLUMN_RCS_DB, table);
 }
 
-static vector<long> get_angles(unsigned int index, matvar_t* table) {
-    auto raw_values = get_raw_values(index, "angle", table);
+static vector<long> get_angles(size_t index, matvar_t* table) {
+    auto raw_values = get_raw_values(index, RCS_COLUMN_ANGLE, table);
     return map_vec<double, long>(raw_values, [](double angle) {
         return static_cast<long>(angle);
     });
@@ -65,15 +74,15 @@ static vector<long> get_angles(unsigned int index, matvar_t* table) {
 /**
  * get measurement ranges in centimeters
  */
-static vector<long> get_ranges(unsigned int index, matvar_t* table) {
-    auto raw_values = get_raw_values(index, "range", table);
+static vector<long> get_ranges(size_t index, matvar_t* table) {
+    auto raw_values = get_raw_values(index, RCS_COLUMN_RANGE, table);
 
     return map_vec<double, long>(raw_values, [](double range) {
         return std::lround(range * 100);
     });
 }
 
-map<long, vector<double>> rcs_data::reconstruct_azimuth_table(const vector<double>& raw_values) {
+map<long, vector<double>> rcs_data_row::reconstruct_azimuth_table(const vector<double>& raw_values) {
     map<long, vector<double>> result;
 
     auto angles = _angles.size();
@@ -87,19 +96,40 @@ map<long, vector<double>> rcs_data::reconstruct_azimuth_table(const vector<doubl
         for (size_t i = 0; i < ranges; i++) {
             values[i] = raw_values[angle_i * ranges + i];
         }
-        result.insert(std::pair<long, vector<double>>(angle, values));
+        result.insert(std::make_pair(angle, values));
     }
     return result;
 }
 
-map<long, vector<double>> rcs_data::get_azimuth(unsigned int index, matvar_t* table) {
-    auto raw_values = get_raw_values(index, "AzimuthLeistung", table);
+map<long, vector<double>> rcs_data_row::get_azimuth(size_t index, matvar_t* table) {
+    auto raw_values = get_raw_values(index, RCS_COLUMN_AZIMUTH, table);
     return reconstruct_azimuth_table(raw_values);
 }
 
-map<long, vector<double>> rcs_data::get_azimuth_db(unsigned int index, matvar_t* table) {
-    auto raw_values = get_raw_values(index, "AzimuthLeistung_dB", table);
+map<long, vector<double>> rcs_data_row::get_azimuth_db(size_t index, matvar_t* table) {
+    auto raw_values = get_raw_values(index, RCS_COLUMN_AZIMUTH_DB, table);
     return reconstruct_azimuth_table(raw_values);
+}
+
+rcs_data_row::rcs_data_row(size_t row_index, matvar_t* table) {
+    _rcs = get_rcs(row_index, table);
+    _rcs_dbs = get_rcs_db(row_index, table);
+    _angles = get_angles(row_index, table);
+    _ranges = get_ranges(row_index, table);
+    _azimuth = get_azimuth(row_index, table);
+    _azimuth_db = get_azimuth_db(row_index, table);
+}
+
+vector<double> rcs_data_row::rcs() const {
+    return _rcs_dbs;
+}
+
+map<long, vector<double>> rcs_data_row::azimuth() const {
+    return _azimuth_db;
+}
+
+vector<long> rcs_data_row::ranges() const {
+    return _ranges;
 }
 
 rcs_data::rcs_data(const string& path) {
@@ -109,14 +139,28 @@ rcs_data::rcs_data(const string& path) {
     }
 
     auto table = get_table(mat_file_handle);
-    auto row_index = get_row_index_for_height(40, table);
+    auto height_row_indices = get_heights(table);
 
-    _rcs = get_rcs(row_index, table);
-    _rcs_dbs = get_rcs_db(row_index, table);
-    _angles = get_angles(row_index, table);
-    _ranges = get_ranges(row_index, table);
-    _azimuth = get_azimuth(row_index, table);
-    _azimuth_db = get_azimuth_db(row_index, table);
+    for (auto& height_row_index: height_row_indices) {
+        auto height = height_row_index.first;
+        auto index = height_row_index.second;
+
+        auto rcs = std::make_shared<rcs_data_row>(rcs_data_row(index, table));
+        this->_rows.insert(std::make_pair(height, rcs));
+    }
 
     Mat_Close(mat_file_handle);
+}
+
+shared_ptr<rcs_data_row> rcs_data::at_height(long height) const {
+    return _rows.at(height);
+}
+
+vector<long> rcs_data::available_heights() const {
+    vector<long> heights;
+    for (auto& row: _rows) {
+        heights.push_back(row.first);
+    }
+    std::sort(heights.begin(), heights.end());
+    return heights;
 }

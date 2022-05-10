@@ -79,6 +79,7 @@ static void render_point(
     quad[1].color = quad_corner_color;
     quad[2].color = quad_corner_color;
     quad[3].color = quad_corner_color;
+    quad[0].
 
     const auto r = static_cast<float>(point.color.x()) / RGB,
             g = static_cast<float>(point.color.y()) / RGB,

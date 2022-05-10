@@ -11,7 +11,8 @@
 #undef FILTER_POINTS
 #undef DRAW_LINES
 #undef SLICE_POINTS
-#define SUM_PYRAMIDS
+#define SUM_RCS
+#undef SUM_AZIMUTH
 
 int main() {
     const string data_root_path = "data";
@@ -25,7 +26,7 @@ int main() {
 #endif
 
     const auto rcs_file = rcs_data(input_path + path_separator + "rcs.mat");
-    const auto rcs = rcs_file.rcs();
+    const auto rcs = rcs_file.at_height(40)->rcs();
 
     const auto input_image_path = input_path + path_separator + "audi_40";
 
@@ -36,8 +37,11 @@ int main() {
 #ifdef DRAW_LINES
     draw_lines(model, rcs, input_image_path, output_path + path_separator + "rcs_lines");
 #endif
-#ifdef SUM_PYRAMIDS
-    sum_pyramids(model, rcs, input_image_path, output_path + path_separator + "rcs_sums");
+#ifdef SUM_RCS
+    accumulate_rcs(model, rcs_file, input_image_path, output_path + path_separator + "rcs_sums");
+#endif
+#ifdef SUM_AZIMUTH
+    accumulate_azimuth(model, rcs_file, input_image_path, output_path + path_separator + "azimuth_sums");
 #endif
     return EXIT_SUCCESS;
 }

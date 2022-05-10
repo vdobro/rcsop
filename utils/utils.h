@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <execution>
 
 #include "colmap/base/reconstruction.h"
 #include "types.h"
@@ -24,6 +25,8 @@ Vector3d transform_to_world(const Image& image, const Vector3d& image_xyz);
 Vector3d get_image_position(const Image& image);
 
 Vector2d flat_down_from_above(const Vector3d& point);
+
+double get_world_scale(double camera_distance_to_origin, const Reconstruction& model);
 
 template<typename Source, typename Target, typename MapFunction>
 vector<Target> map_vec(const vector<Source>& vec,
