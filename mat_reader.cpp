@@ -16,7 +16,7 @@ static matvar_t* get_variable(unsigned int index,
     return var;
 }
 
-static unsigned int get_row_for_height(unsigned int height, matvar_t* table) {
+static unsigned int get_row_index_for_height(unsigned int height, matvar_t* table) {
     auto index = 0;
     const auto name = "height";
 
@@ -32,10 +32,10 @@ static unsigned int get_row_for_height(unsigned int height, matvar_t* table) {
     throw invalid_argument(name);
 }
 
-static vector<double> get_raw_values(unsigned int index,
+static vector<double> get_raw_values(unsigned int row_index,
                                      const char* name,
                                      matvar_t* table) {
-    auto rcs = get_variable(index, name, table);
+    auto rcs = get_variable(row_index, name, table);
 
     auto rcs_doubles = reinterpret_cast<double*>(rcs->data);
 
@@ -73,6 +73,35 @@ static vector<long> get_ranges(unsigned int index, matvar_t* table) {
     });
 }
 
+map<long, vector<double>> rcs_data::reconstruct_azimuth_table(const vector<double>& raw_values) {
+    map<long, vector<double>> result;
+
+    auto angles = _angles.size();
+    auto ranges = _ranges.size();
+
+    for (auto angle_i = 0; angle_i < angles; angle_i++) {
+        const auto angle = _angles[angle_i];
+
+        vector<double> values;
+        values.resize(ranges);
+        for (int i = 0; i < ranges; i++) {
+            values[i] = raw_values[angle_i * ranges + i];
+        }
+        result.insert(std::pair<long, vector<double>>(angle, values));
+    }
+    return result;
+}
+
+map<long, vector<double>> rcs_data::get_azimuth(unsigned int index, matvar_t* table) {
+    auto raw_values = get_raw_values(index, "AzimuthLeistung", table);
+    return reconstruct_azimuth_table(raw_values);
+}
+
+map<long, vector<double>> rcs_data::get_azimuth_db(unsigned int index, matvar_t* table) {
+    auto raw_values = get_raw_values(index, "AzimuthLeistung_dB", table);
+    return reconstruct_azimuth_table(raw_values);
+}
+
 rcs_data::rcs_data(const string& path) {
     mat_t* mat_file_handle = Mat_Open(path.c_str(), MAT_ACC_RDONLY);
     if (nullptr == mat_file_handle) {
@@ -80,12 +109,14 @@ rcs_data::rcs_data(const string& path) {
     }
 
     auto table = get_table(mat_file_handle);
-    auto index = get_row_for_height(40, table);
+    auto row_index = get_row_index_for_height(40, table);
 
-    _rcs = get_rcs(index, table);
-    _rcs_dbs = get_rcs_db(index, table);
-    _angles = get_angles(index, table);
-    _ranges = get_ranges(index, table);
+    _rcs = get_rcs(row_index, table);
+    _rcs_dbs = get_rcs_db(row_index, table);
+    _angles = get_angles(row_index, table);
+    _ranges = get_ranges(row_index, table);
+    _azimuth = get_azimuth(row_index, table);
+    _azimuth_db = get_azimuth_db(row_index, table);
 
     Mat_Close(mat_file_handle);
 }

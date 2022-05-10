@@ -9,13 +9,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
 endif()
 
+add_subdirectory(deps)
+
 find_package(Eigen3 3.4 REQUIRED)
-
-add_subdirectory(deps/matio)
-target_include_directories(matio PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/deps/matio/src
-        ${CMAKE_CURRENT_BINARY_DIR}/deps/matio/src)
-
 find_package(COLMAP 3.8 CONFIG REQUIRED)
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
