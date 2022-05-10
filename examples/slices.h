@@ -1,9 +1,9 @@
 #pragma once
 
 #include "scored_point.h"
-#include "utils.h"
-#include "colors.h"
-#include "render_points.h"
+#include "utils/utils.h"
+#include "rendering/colors.h"
+#include "rendering/render_points.h"
 
 void color_slices(const shared_ptr<colmap::Reconstruction>& model,
                   const vector<double>& rcs,

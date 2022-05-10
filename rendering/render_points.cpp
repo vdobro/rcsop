@@ -74,10 +74,11 @@ static void render_point(
     quad[2].position = sf::Vector2f(x_end, y_end);
     quad[3].position = sf::Vector2f(x_begin, y_end);
 
-    quad[0].color = sf::Color::Transparent;
-    quad[1].color = sf::Color::Transparent;
-    quad[2].color = sf::Color::Transparent;
-    quad[3].color = sf::Color::Transparent;
+    const auto quad_corner_color = sf::Color::Transparent;
+    quad[0].color = quad_corner_color;
+    quad[1].color = quad_corner_color;
+    quad[2].color = quad_corner_color;
+    quad[3].color = quad_corner_color;
 
     const auto r = static_cast<float>(point.color.x()) / RGB,
             g = static_cast<float>(point.color.y()) / RGB,
@@ -106,7 +107,7 @@ void render_images(const model_ptr& model,
         exit(1);
     }
     sf::Shader shader;
-    if (!shader.loadFromFile("gradient.frag", sf::Shader::Fragment)) {
+    if (!shader.loadFromFile("rendering/gradient.frag", sf::Shader::Fragment)) {
         std::cout << "Could not load required shader." << std::endl;
         exit(1);
     }

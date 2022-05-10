@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "types.h"
-#include "utils.h"
+#include "utils/types.h"
+#include "utils/utils.h"
 
 typedef const std::function<Vector3ub(double v, double vmin, double vmax)>& colormap_func;
 

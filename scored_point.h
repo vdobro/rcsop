@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "types.h"
+#include "utils/types.h"
 
 class scored_point {
 

@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "types.h"
+#include "utils/types.h"
 #include "scored_point.h"
 #include "colors.h"
 

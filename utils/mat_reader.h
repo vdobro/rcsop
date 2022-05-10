@@ -1,7 +1,7 @@
 #pragma once
 
 #include "matio.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 using std::runtime_error;
 using std::invalid_argument;

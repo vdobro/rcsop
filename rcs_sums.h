@@ -1,7 +1,7 @@
 #pragma once
 
-#include "utils.h"
-#include "render_points.h"
+#include "utils/utils.h"
+#include "rendering/render_points.h"
 
 void sum_pyramids(const model_ptr& model,
                   const vector<double>& rcs,

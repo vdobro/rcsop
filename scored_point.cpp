@@ -1,5 +1,5 @@
 #include "scored_point.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 scored_point::scored_point(const point_pair& base) {
     this->_point_id = base.first;

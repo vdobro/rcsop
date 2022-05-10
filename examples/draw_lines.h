@@ -1,9 +1,9 @@
 #pragma once
 #include <Eigen/Geometry>
 
-#include "colors.h"
-#include "utils.h"
-#include "types.h"
+#include "rendering/colors.h"
+#include "utils/utils.h"
+#include "utils/types.h"
 
 void draw_lines(const model_ptr& model,
                 const vector<double>& rcs,

@@ -19,15 +19,15 @@ link_directories(${COLMAP_LINK_DIRS})
 
 add_executable(sfm_colors
         main.cpp
-        utils.cpp
-        cleanup.cpp
-        slices.cpp
-        scored_point.cpp
-        mat_reader.cpp
-        colors.cpp
-        draw_lines.cpp
         rcs_sums.cpp
-        render_points.cpp)
+        scored_point.cpp
+        utils/utils.cpp
+        utils/cleanup.cpp
+        utils/mat_reader.cpp
+        rendering/colors.cpp
+        rendering/render_points.cpp
+        examples/draw_lines.cpp
+        examples/slices.cpp)
 
 target_include_directories(sfm_colors PRIVATE
         ${COLMAP_INCLUDE_DIRS}

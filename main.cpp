@@ -1,11 +1,12 @@
 #include <string>
 
-#include "utils.h"
-#include "cleanup.h"
-#include "mat_reader.h"
-#include "draw_lines.h"
+#include "utils/utils.h"
+#include "utils/cleanup.h"
+#include "utils/mat_reader.h"
+#include "examples/draw_lines.h"
+#include "examples/slices.h"
+
 #include "rcs_sums.h"
-#include "slices.h"
 
 #undef FILTER_POINTS
 #undef DRAW_LINES
