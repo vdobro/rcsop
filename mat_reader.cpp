@@ -79,12 +79,12 @@ map<long, vector<double>> rcs_data::reconstruct_azimuth_table(const vector<doubl
     auto angles = _angles.size();
     auto ranges = _ranges.size();
 
-    for (auto angle_i = 0; angle_i < angles; angle_i++) {
+    for (size_t angle_i = 0; angle_i < angles; angle_i++) {
         const auto angle = _angles[angle_i];
 
         vector<double> values;
         values.resize(ranges);
-        for (int i = 0; i < ranges; i++) {
+        for (size_t i = 0; i < ranges; i++) {
             values[i] = raw_values[angle_i * ranges + i];
         }
         result.insert(std::pair<long, vector<double>>(angle, values));
