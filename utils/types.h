@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <vector>
 #include <map>
+#include <cmath>
 
 #include "colmap/base/reconstruction.h"
 #include "colmap/util/types.h"

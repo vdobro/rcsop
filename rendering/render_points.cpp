@@ -57,11 +57,6 @@ static vector<rendered_point> project_in_camera_with_color(const vector<image_po
     });
 }
 
-#define RGB 256.f
-#define RADIUS 25.f
-#define CENTER_ALPHA 0.2f
-#define GRADIENT_STRENGTH 3.f
-
 static void render_point(
         const rendered_point& point,
         sf::RenderTarget& render_target,
@@ -129,7 +124,7 @@ void render_images(const model_ptr& model,
             return project_to_image(image, image_position, point);
         });
 
-        //std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
+        std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
         auto rendered_points = project_in_camera_with_color(img_points, camera, map_turbo);
 
         auto input_file_path = input_path + path_separator + image.Name();
@@ -170,7 +165,6 @@ void render_images(const model_ptr& model,
                    const string& output_path,
                    const map<point_id_t, scored_point>& points) {
     vector<scored_point> point_list;
-    point_list.resize(points.size());
 
     for (const auto& item: points) {
         point_list.push_back(item.second);
