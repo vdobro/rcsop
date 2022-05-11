@@ -3,15 +3,20 @@
 class image_point {
 private:
     Vector2d _coordinates = Vector2d::Zero();
+    double _distance = 0;
     double _score = 0;
 public:
     explicit image_point() = default;
 
-    explicit image_point(Vector2d coordinates, double score)
-            : _coordinates(std::move(coordinates)), _score(score) {};
+    explicit image_point(Vector2d coordinates, double distance, double score)
+            : _coordinates(std::move(coordinates)), _distance(distance), _score(score) {};
 
     [[nodiscard]] double score() const {
         return _score;
+    }
+
+    [[nodiscard]] double distance() const {
+        return _distance;
     }
 
     [[nodiscard]] Vector2d coords() const {
@@ -20,14 +25,16 @@ public:
 };
 
 static image_point project_to_image(const Image& image,
+                                    const Vector3d& image_position,
                                     const scored_point& point) {
-    const auto position_normalized = (image.ProjectionMatrix() * point.position().homogeneous()).hnormalized();
-    return image_point(position_normalized, point.score());
+    auto position_normalized = (image.ProjectionMatrix() * point.position().homogeneous()).hnormalized();
+    double distance_to_camera = (image_position - point.position()).norm();
+    return image_point(position_normalized, distance_to_camera, point.score());
 }
 
 struct rendered_point {
-    Vector2d coordinates;
-    Vector3ub color;
+    Vector2d coordinates = Vector2d::Zero();
+    Vector3ub color = Vector3ub::Zero();
 };
 
 static vector<rendered_point> project_in_camera_with_color(const vector<image_point>& points,
@@ -117,9 +124,12 @@ void render_images(const model_ptr& model,
         auto image = model->Image(image_id);
         auto camera_id = image.CameraId();
         auto camera = model->Camera(camera_id);
-        auto img_points = map_vec<scored_point, image_point>(points, [image](const scored_point& point) {
-            return project_to_image(image, point);
+        auto image_position = get_image_position(image);
+        auto img_points = map_vec<scored_point, image_point>(points, [image, image_position](const scored_point& point) {
+            return project_to_image(image, image_position, point);
         });
+
+        //std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
         auto rendered_points = project_in_camera_with_color(img_points, camera, map_turbo);
 
         auto input_file_path = input_path + path_separator + image.Name();

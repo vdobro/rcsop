@@ -11,8 +11,9 @@
 #undef FILTER_POINTS
 #undef DRAW_LINES
 #undef SLICE_POINTS
+
 #define SUM_RCS
-#undef SUM_AZIMUTH
+#define SUM_AZIMUTH
 
 int main() {
     const string data_root_path = "data";

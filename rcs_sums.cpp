@@ -69,11 +69,23 @@ static vector<relative_point> get_point_angles(const Image& image,
 
 #define HORIZONTAL_SPREAD (45.0 / 2.0)
 #define VERTICAL_SPREAD (15.0 / 2.0)
-#define PARAM_SCALE 3
+
+#ifdef LEGACY_GAUSS
+#define GAUSS_SIGMA_2 (3 * 3)
+#define LEGACY_GAUSS_INTEGRAL_FACTOR 1.69260614115415
+
+static double calc_gauss(double horizontal, double vertical) {
+    const auto exp_arg = -1 * GAUSS_SIGMA_2 * horizontal * horizontal / HORIZONTAL_SPREAD;
+    const auto result = exp(exp_arg) * LEGACY_GAUSS_INTEGRAL_FACTOR / HORIZONTAL_SPREAD;
+    return result;
+}
+#else
+
+#define PARAM_SCALE 2.25
 
 //TODO numeric integration on the fly
 //(numeric) sum of Riemann integral of 1 / (exp (-((2.25x)^2 + (2.25y)^2)) from -1 to +1
-#define GAUSS_INTEGRAL_FACTOR 2.864915549072742 // 1.616168333405228 for 2.25
+#define GAUSS_INTEGRAL_FACTOR 1.616168333405228 // 1.616168333405228 for 2.25, 2.864915549072742 for 3.0
 
 static double calc_gauss(double horizontal, double vertical) {
     const auto x_power = PARAM_SCALE * horizontal / HORIZONTAL_SPREAD;
@@ -82,6 +94,7 @@ static double calc_gauss(double horizontal, double vertical) {
     const auto result = exp(exp_arg) * GAUSS_INTEGRAL_FACTOR / (HORIZONTAL_SPREAD * VERTICAL_SPREAD);
     return result;
 }
+#endif
 
 static double rcs_gaussian(const relative_point& point) {
     if (point.vertical_angle > VERTICAL_SPREAD || point.horizontal_angle > HORIZONTAL_SPREAD) {
@@ -135,6 +148,21 @@ void accumulate_rcs(const model_ptr& model,
     }, input_path, output_path);
 }
 
+static const double RANGE_EPSILON = 0.03;
+
+static double find_azimuth(double real_distance,
+                           const vector<double>& azimuth_values,
+                           const vector<long>& ranges) {
+    for (int i = 0; i < ranges.size(); i++) {
+        auto range = static_cast<double>(ranges[i]);
+        if (abs(range - real_distance) < RANGE_EPSILON) {
+            auto azimuth = azimuth_values[i];
+            return azimuth;
+        }
+    }
+    return 0;
+}
+
 void accumulate_azimuth(const model_ptr& model,
                         const rcs_data& rcs_data,
                         const string& input_path,
@@ -142,10 +170,11 @@ void accumulate_azimuth(const model_ptr& model,
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
     rcs_sums(model, rcs_data,
              [rcs_data, world_scale](rcs_height_t height, size_t image_index, const relative_point& point) {
-                 //auto azimuth_data = rcs_data.at_height(height)->azimuth().at(static_cast<long>(image_index));
-                 //auto distance = point.distance / world_scale;
-                 //TODO
-
-                 return 0.0;
+                 auto rcs_row = rcs_data.at_height(height);
+                 auto ranges = rcs_row->ranges();
+                 //TODO: infer range from image_index?
+                 auto azimuth_values = rcs_row->azimuth()[5 * (static_cast<long>(image_index) + 1)];
+                 auto azimuth_data = find_azimuth(point.distance / world_scale, azimuth_values, ranges);
+                 return azimuth_data;
              }, input_path, output_path);
 }
