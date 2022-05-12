@@ -121,15 +121,19 @@ rcs_data_row::rcs_data_row(size_t row_index, matvar_t* table) {
 }
 
 vector<double> rcs_data_row::rcs() const {
-    return _rcs_dbs;
+    return _rcs;
 }
 
 map<long, vector<double>> rcs_data_row::azimuth() const {
-    return _azimuth_db;
+    return _azimuth;
 }
 
 vector<long> rcs_data_row::ranges() const {
     return _ranges;
+}
+
+vector<long> rcs_data_row::angles() const {
+    return this->_angles;
 }
 
 rcs_data::rcs_data(const string& path) {

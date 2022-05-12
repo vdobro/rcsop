@@ -1,35 +1,13 @@
 #include "render_points.h"
 
-class image_point {
-private:
-    Vector2d _coordinates = Vector2d::Zero();
-    double _distance = 0;
-    double _score = 0;
-public:
-    explicit image_point() = default;
-
-    explicit image_point(Vector2d coordinates, double distance, double score)
-            : _coordinates(std::move(coordinates)), _distance(distance), _score(score) {};
-
-    [[nodiscard]] double score() const {
-        return _score;
-    }
-
-    [[nodiscard]] double distance() const {
-        return _distance;
-    }
-
-    [[nodiscard]] Vector2d coords() const {
-        return _coordinates;
-    }
-};
+using std::string;
 
 static image_point project_to_image(const Image& image,
                                     const Vector3d& image_position,
                                     const scored_point& point) {
     auto position_normalized = (image.ProjectionMatrix() * point.position().homogeneous()).hnormalized();
     double distance_to_camera = (image_position - point.position()).norm();
-    return image_point(position_normalized, distance_to_camera, point.score());
+    return image_point(position_normalized, distance_to_camera, point.score_to_dB());
 }
 
 struct rendered_point {
@@ -98,6 +76,15 @@ static void render_point(
     render_target.draw(quad, &shader);
 }
 
+static string get_log_prefix(size_t current, size_t last) {
+    int width = ceil(log10(static_cast<double>(last)));
+    std::stringstream ss;
+    ss << "(" << std::setw(width) << std::to_string(current)
+       << "/" << std::setw(width) << std::to_string(last)
+       << ")\t ";
+    return ss.str();
+}
+
 void render_images(const model_ptr& model,
                    const string& input_path,
                    const string& output_path,
@@ -114,31 +101,33 @@ void render_images(const model_ptr& model,
         exit(1);
     }
 
-    auto image_count = model->NumImages();
-    for (size_t image_id = 1; image_id <= image_count; image_id++) {
+#ifdef SINGLE_IMAGE
+    size_t first_image = DEFAULT_IMAGE_ID;
+    size_t last_image = first_image;
+#else
+    size_t first_image = 1;
+    size_t last_image = model->NumImages();
+#endif
+    for (size_t image_id = first_image; image_id <= last_image; image_id++) {
         auto image = model->Image(image_id);
+        auto log_prefix = get_log_prefix(image_id, last_image);
+
         auto camera_id = image.CameraId();
         auto camera = model->Camera(camera_id);
-        auto image_position = get_image_position(image);
-        auto img_points = map_vec<scored_point, image_point>(points, [image, image_position](const scored_point& point) {
-            return project_to_image(image, image_position, point);
-        });
-
-        std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
-        auto rendered_points = project_in_camera_with_color(img_points, camera, map_turbo);
 
         auto input_file_path = input_path + path_separator + image.Name();
         auto output_file_path = output_path + path_separator + image.Name();
 
+        auto time_measure = start_time();
         sf::RenderTexture render_target;
         if (!render_target.create(camera.Width(), camera.Height())) {
-            std::cout << "Could not create render texture." << std::endl;
+            std::cerr << "Could not create render texture." << std::endl;
             exit(2);
         }
 
         sf::Texture background;
         if (!background.loadFromFile(input_file_path)) {
-            std::cout << "Could not load texture " << image.Name() << std::endl;
+            std::cerr << "Could not load texture " << image.Name() << std::endl;
             exit(3);
         }
 
@@ -147,28 +136,32 @@ void render_images(const model_ptr& model,
 
         render_target.clear(sf::Color::Black);
         render_target.draw(background_sprite);
+        time_measure = log_and_start_next(time_measure,
+                                          log_prefix + "Setting up rendering pipeline for image " + image.Name());
 
+        auto image_position = get_image_position(image);
+        auto img_points = map_vec<scored_point, image_point>(
+                points,
+                [image, image_position](const scored_point& point) {
+                    return project_to_image(image, image_position, point);
+                });
+
+        std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
+        auto rendered_points = project_in_camera_with_color(img_points, camera, COLOR_MAP);
+
+        time_measure = log_and_start_next(time_measure, log_prefix + "\tPreparing coloring and projection");
         for (const auto& point: rendered_points) {
             render_point(point, render_target, shader);
         }
 
         render_target.display();
+        time_measure = log_and_start_next(time_measure, log_prefix + "\tRendering image");
 
         const auto output_texture = render_target.getTexture();
         auto output_image = output_texture.copyToImage();
+        time_measure = log_and_start_next(time_measure, log_prefix + "\tRetrieving image from the GPU");
+
         output_image.saveToFile(output_file_path);
+        log_and_start_next(time_measure, log_prefix + "\tSaving image " + image.Name());
     }
-}
-
-void render_images(const model_ptr& model,
-                   const string& input_path,
-                   const string& output_path,
-                   const map<point_id_t, scored_point>& points) {
-    vector<scored_point> point_list;
-
-    for (const auto& item: points) {
-        point_list.push_back(item.second);
-    }
-
-    render_images(model, input_path, output_path, point_list);
 }

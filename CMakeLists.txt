@@ -21,13 +21,14 @@ add_executable(sfm_colors
         main.cpp
         rcs_sums.cpp
         scored_point.cpp
-        utils/utils.cpp
         utils/cleanup.cpp
         utils/mat_reader.cpp
+        utils/model.cpp
+        utils/projection.cpp
         rendering/colors.cpp
         rendering/render_points.cpp
         examples/draw_lines.cpp
-        examples/slices.cpp)
+        examples/slices.cpp utils/utils.cpp rendering/image_point.cpp rendering/image_point.h)
 
 target_include_directories(sfm_colors PRIVATE
         ${COLMAP_INCLUDE_DIRS}

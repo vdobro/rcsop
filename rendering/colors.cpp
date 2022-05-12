@@ -27,7 +27,7 @@ Vector3ub map_turbo(double v, double vmin, double vmax) {
     }
     auto range = vmax - vmin;
     auto pos = v - vmin;
-    auto step_size = range / 256;
+    auto step_size = range / 255;
     auto steps = std::lround(pos / step_size);
     return to_vec(*(turbo_srgb_bytes + steps));
 }
@@ -70,6 +70,28 @@ Vector3ub map_jet(double v, double vmin, double vmax) {
     color.x() = std::lround(r * 255.0);
     color.y() = std::lround(g * 255.0);
     color.z() = std::lround(b * 255.0);
+    return color;
+}
+
+Vector3ub map_red(double v, double vmin, double vmax) {
+    double r = 1.0, g = 0.0, b = 0.0; // red
+
+    if (v < vmin) {
+        v = vmin;
+    }
+    if (v > vmax) {
+        v = vmax;
+    }
+
+    auto range = vmax - vmin;
+    auto pos = v - vmin;
+    auto step_size = range / 255;
+    auto steps = pos / step_size;
+
+    Vector3ub color;
+    color.x() = std::lround(r * steps);
+    color.y() = std::lround(g * steps);
+    color.z() = std::lround(b * steps);
     return color;
 }
 

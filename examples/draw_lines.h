@@ -1,8 +1,10 @@
 #pragma once
+
 #include <Eigen/Geometry>
 
 #include "rendering/colors.h"
-#include "utils/utils.h"
+#include "utils/model.h"
+#include "utils/projection.h"
 #include "utils/types.h"
 
 void draw_lines(const model_ptr& model,

@@ -1,8 +1,9 @@
 #include <string>
 
+#include "utils/mat_reader.h"
 #include "utils/utils.h"
 #include "utils/cleanup.h"
-#include "utils/mat_reader.h"
+
 #include "examples/draw_lines.h"
 #include "examples/slices.h"
 
@@ -32,11 +33,11 @@ int main() {
     const auto input_image_path = input_path + path_separator + "audi_40";
 
 #ifdef SLICE_POINTS
-    color_slices(model, rcs, input_image_path,
-                 output_path + path_separator + "colored_slices");
+    color_slices(model, rcs, input_image_path, output_path + path_separator + "colored_slices");
 #endif
 #ifdef DRAW_LINES
     draw_lines(model, rcs, input_image_path, output_path + path_separator + "rcs_lines");
+    model = read_model(input_path + path_separator + "model");
 #endif
 #ifdef SUM_RCS
     accumulate_rcs(model, rcs_file, input_image_path, output_path + path_separator + "rcs_sums");

@@ -1,5 +1,12 @@
 #include "slices.h"
 
+static inline Vector2d flat_down_from_above(const Vector3d& point) {
+    auto res = Vector2d();
+    res.x() = point.x();
+    res.y() = point.z();
+    return res;
+}
+
 static inline double get_sign(const Vector2d& p1,
                               const Vector2d& p2,
                               const Vector2d& p3) {
@@ -24,7 +31,7 @@ void color_slices(const model_ptr& model,
     auto image_count = images.size();
     auto image_positions = map_vec<Image, Vector3d>(images, get_image_position);
 
-    vector<scored_point> points = map_vec<point_pair, scored_point>(get_points(*model), [](point_pair pair) {
+    vector<scored_point> points = map_vec<point_pair, scored_point>(get_points(*model), [](const point_pair& pair) {
         return scored_point(pair);
     });
 
@@ -34,7 +41,7 @@ void color_slices(const model_ptr& model,
     const auto rcs_colors = color_values(rcs, map_turbo);
 
     for (auto& point: points) {
-        auto flat_point = point.flat_down();
+        auto flat_point = flat_down_from_above(point.position());
 
         for (size_t image_id = 0; image_id < image_count; image_id++) {
             auto previous_camera_id = image_id == 0 ? image_count - 1 : (image_id - 1);

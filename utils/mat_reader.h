@@ -1,8 +1,17 @@
 #pragma once
 
+#include <map>
+#include <stdexcept>
+#include <memory>
+#include <string>
+#include <cmath>
+
 #include "matio.h"
 #include "utils/utils.h"
 
+using std::map;
+using std::shared_ptr;
+using std::string;
 using std::runtime_error;
 using std::invalid_argument;
 
@@ -31,6 +40,8 @@ public:
     [[nodiscard]] map<long, vector<double>> azimuth() const;
 
     [[nodiscard]] vector<long> ranges() const;
+
+    [[nodiscard]] vector<long> angles() const;
 };
 
 class rcs_data {

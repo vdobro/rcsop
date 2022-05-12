@@ -1,5 +1,7 @@
 #include "rcs_sums.h"
 
+using std::string;
+
 typedef Eigen::Hyperplane<double, 3> plane;
 
 static Vector3d get_right(const Image& image) {
@@ -75,7 +77,7 @@ typedef struct {
 } gauss_options;
 
 static double get_gauss_integral_factor(const double& sigma) {
-    auto erf_part = erf(1 / (sigma * sqrt(M_PI)));
+    auto erf_part = erf(1 / (sigma * M_SQRT2));
     auto integral = sigma * M_SQRT2 * sqrt(M_PI) * erf_part * erf_part;
     return 1 / integral;
 }
@@ -83,7 +85,7 @@ static double get_gauss_integral_factor(const double& sigma) {
 static double raw_gauss(const double& x,
                         const double& y,
                         const double& sigma) {
-    return M_SQRT1_2 * exp(-(x * x + y * y) / (2 * sigma * sigma)) / (sigma * sqrt(M_PI));
+    return M_SQRT1_2 * exp(-1 * (x * x + y * y) / (2 * sigma * sigma)) / (sigma * sqrt(M_PI));
 }
 
 static double calc_gauss(const relative_point& point,
@@ -95,16 +97,22 @@ static double calc_gauss(const relative_point& point,
            / (distribution_options.x_scale * distribution_options.y_scale);
 }
 
-#define HORIZONTAL_SPREAD (HORIZONTAL_ANGLE / 2.0)
-#define VERTICAL_SPREAD (VERTICAL_ANGLE / 2.0)
+static bool is_inside_ellipse(const relative_point& point, const gauss_options& distribution_options) {
+    auto x = point.horizontal_angle / distribution_options.x_scale;
+    auto y = point.vertical_angle / distribution_options.y_scale;
+    return x * x + y * y <= 1;
+}
 
 static double rcs_gaussian(const relative_point& point, const gauss_options& distribution_options) {
-    if (point.vertical_angle > VERTICAL_SPREAD || point.horizontal_angle > HORIZONTAL_SPREAD) {
+    if (!is_inside_ellipse(point, distribution_options)) {
         return 0;
     }
 
     return calc_gauss(point, distribution_options);
 }
+
+#define HORIZONTAL_SPREAD (HORIZONTAL_ANGLE / 2.0)
+#define VERTICAL_SPREAD (VERTICAL_ANGLE / 2.0)
 
 static void rcs_sums(const model_ptr& model,
                      const rcs_data& rcs_data,
@@ -114,12 +122,12 @@ static void rcs_sums(const model_ptr& model,
 
     auto images = get_images(*model);
 #ifdef SINGLE_PROJECTION
-    auto first_image = DEFAULT_CAMERA;
-    auto image_count = DEFAULT_CAMERA + 1;
-    auto heights = vector<long> { DEFAULT_HEIGHT };
+    size_t first_image = DEFAULT_CAMERA;
+    size_t image_count = DEFAULT_CAMERA + 1;
+    auto heights = vector<long>{DEFAULT_HEIGHT};
 #else
-    auto first_image = 0;
-    auto image_count = images.size();
+    size_t first_image = 0;
+    size_t image_count = images.size();
     auto heights = rcs_data.available_heights();
 #endif
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
@@ -132,32 +140,49 @@ static void rcs_sums(const model_ptr& model,
             .x_scale = HORIZONTAL_SPREAD,
             .y_scale = VERTICAL_SPREAD,
     };
+    auto time_measure = start_time();
     for (size_t image_index = first_image; image_index < image_count; image_index++) {
         auto image = images[image_index];
 
         for (auto& height: heights) {
             auto height_offset = static_cast<double>(height - DEFAULT_HEIGHT) * world_scale;
             auto relevant_points = get_point_angles(image, height_offset, scored_points);
-            for (const auto& point: relevant_points) {
+
+            std::for_each(std::execution::par, relevant_points.begin(), relevant_points.end(),
+                          [&](auto& point) {
                 double rcs_value = rcs_mapper(height, image_index, point);
                 auto& scored_point = scored_points[point.id];
                 double gaussian = rcs_gaussian(point, distribution_options);
                 if (gaussian > 0 && !std::isnan(rcs_value)) {
                     auto rcs_distributed = gaussian * rcs_value;
                     scored_point.increment_score(rcs_distributed);
-                    touched_points.insert(point.id);
+                    //touched_points.insert(point.id);
                 }
-            }
+            });
+
         }
     }
-    scored_point_map filtered_points;
-    for (auto& point_id: touched_points) {
-        filtered_points.insert(std::make_pair(point_id, scored_points.at(point_id)));
+    time_measure = log_and_start_next(time_measure,
+                                      "Scoring of " + std::to_string(scored_points.size()) + " points for "
+                                      + std::to_string(image_count) + " images");
+
+    vector<scored_point> filtered_points;
+    for (const auto& iter: scored_points) {
+        auto old_point = iter.second;
+        if (old_point.score() <= 0) {
+            continue;
+        }
+        filtered_points.push_back(old_point);
     }
+    time_measure = log_and_start_next(time_measure, "Filtered " + std::to_string(filtered_points.size())
+                                                    + " from a total of " + std::to_string(scored_points.size())
+                                                    + " points");
 
     auto render_path = output_path + path_separator + "render";
     std::filesystem::remove_all(render_path);
     render_images(model, input_path, render_path, filtered_points);
+
+    log_and_start_next(time_measure, "(Total) rendering done.");
 }
 
 void accumulate_rcs(const model_ptr& model,
@@ -173,30 +198,61 @@ static const double RANGE_EPSILON = 3;
 
 static double find_azimuth(double real_distance,
                            const vector<double>& azimuth_values,
-                           const vector<long>& ranges) {
-    for (int i = 0; i < ranges.size(); i++) {
+                           const double first) {
+    auto index = lround((real_distance - first) / (2 * RANGE_EPSILON));
+    return azimuth_values[index];
+/*
+    size_t first_range = 0;
+    size_t last_range = ranges.size() - 1;
+    for (auto i = first_range; i <= last_range; i++) {
         auto range = static_cast<double>(ranges[i]);
         if (abs(range - real_distance) <= RANGE_EPSILON) {
             auto azimuth = azimuth_values[i];
             return azimuth;
         }
     }
-    return NAN;
+    return NAN;*/
 }
+
+using std::make_pair;
 
 void accumulate_azimuth(const model_ptr& model,
                         const rcs_data& rcs_data,
                         const string& input_path,
                         const string& output_path) {
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
+    auto time_measure = start_time();
+    map<rcs_height_t, map<size_t, long>> height_to_image_to_angle;
+    for (auto height: rcs_data.available_heights()) {
+        auto row = rcs_data.at_height(height);
+        map<size_t, long> image_to_angle;
+        auto angles = row->angles();
+        for (size_t i = 0; i < angles.size(); i++) {
+            auto angle = angles[i];
+            image_to_angle.insert(make_pair(i, angle));
+        }
+        height_to_image_to_angle.insert(make_pair(height, image_to_angle));
+    }
+    log_and_start_next(time_measure, "Constructing map of heights to images to azimuth angles");
+
+    auto ranges = rcs_data.at_height(DEFAULT_HEIGHT)->ranges();
+    auto first_range = static_cast<double>(ranges[0]);
+    auto last_range = static_cast<double>(ranges[ranges.size() - 1]);
+
     rcs_sums(model, rcs_data,
-             [rcs_data, world_scale](rcs_height_t height, size_t image_index, const relative_point& point) {
+             [rcs_data, height_to_image_to_angle, world_scale, first_range, last_range]
+                     (const rcs_height_t height,
+                      const size_t image_index,
+                      const relative_point& point) {
+                 auto azimuth_for_image = height_to_image_to_angle.at(height).at(image_index);
+
                  auto rcs_row = rcs_data.at_height(height);
-                 auto ranges = rcs_row->ranges();
-                 //TODO: infer range from image_index?
-                 auto azimuth_values = rcs_row->azimuth()[5 * (static_cast<long>(image_index) + 1)];
+                 auto azimuth_values = rcs_row->azimuth()[azimuth_for_image];
                  auto point_distance = point.distance / world_scale;
-                 auto azimuth_data = find_azimuth(point_distance, azimuth_values, ranges);
+                 if (point_distance > last_range + RANGE_EPSILON || point_distance < first_range - RANGE_EPSILON) {
+                     return std::nan("0");
+                 }
+                 auto azimuth_data = find_azimuth(point_distance, azimuth_values, first_range);
                  return azimuth_data;
              }, input_path, output_path);
 }
