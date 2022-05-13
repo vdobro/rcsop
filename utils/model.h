@@ -15,6 +15,4 @@ vector<Image> get_images(const Reconstruction& model);
 
 vector<point_pair> get_points(const Reconstruction& model);
 
-double get_world_scale(double camera_distance_to_origin, const Reconstruction& model);
-
 scored_point_map get_scored_points(const Reconstruction& model);

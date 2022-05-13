@@ -1,7 +1,6 @@
 #include <string>
 
 #include "utils/mat_reader.h"
-#include "utils/utils.h"
 #include "utils/cleanup.h"
 
 #include "examples/draw_lines.h"
