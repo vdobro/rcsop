@@ -7,7 +7,7 @@
 #include <cmath>
 
 #include "matio.h"
-#include "utils/utils.h"
+#include "utils.h"
 
 using std::map;
 using std::shared_ptr;

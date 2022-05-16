@@ -46,16 +46,16 @@ static vector<relative_point> get_point_angles(const Image& image,
         auto point = point_pair.second;
         Vector3d point_position = point.position();
 
-        auto line_to_vertical_plane = model_line(point_position, vertical_plane.normal());
-        auto line_to_horizontal_plane = model_line(point_position, horizontal_plane.normal());
-
         auto distance_to_vertical_plane = vertical_plane.absDistance(point_position);
         auto distance_to_horizontal_plane = horizontal_plane.absDistance(point_position);
 
         auto distance_to_camera = (point_position - image_pos).norm();
 
-        auto horizontal_angle = ARC_SIN(distance_to_vertical_plane / distance_to_camera);
-        auto vertical_angle = ARC_SIN(distance_to_horizontal_plane / distance_to_camera);
+        auto is_to_the_right = (point_position - image_pos).dot(right) > 0;
+        auto is_up_above = (point_position - image_pos).dot(up) > 0;
+
+        auto horizontal_angle = (is_to_the_right ? 1 : -1 ) * ARC_SIN(distance_to_vertical_plane / distance_to_camera);
+        auto vertical_angle = (is_up_above ? 1 : -1 ) * ARC_SIN(distance_to_horizontal_plane / distance_to_camera);
 
         relative_point point_info = {
                 .position = point.position(),

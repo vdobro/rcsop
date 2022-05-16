@@ -15,27 +15,31 @@ find_package(Eigen3 3.4 REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 
+include_directories(${COLMAP_INCLUDE_DIRS})
 link_directories(${COLMAP_LINK_DIRS})
 
 add_executable(sfm_colors
         main.cpp
         rcs_sums.cpp
         scored_point.cpp
+        utils/az_data.cpp
         utils/cleanup.cpp
         utils/mat_reader.cpp
         utils/model.cpp
         utils/projection.cpp
+        utils/utils.cpp
         rendering/colors.cpp
         rendering/render_points.cpp
+        rendering/image_point.cpp
         examples/draw_lines.cpp
-        examples/slices.cpp utils/utils.cpp rendering/image_point.cpp rendering/image_point.h)
+        examples/slices.cpp)
 
 target_include_directories(sfm_colors PRIVATE
-        ${COLMAP_INCLUDE_DIRS}
         ${EIGEN3_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR})
 
-set_target_properties(sfm_colors PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
+set_target_properties(sfm_colors PROPERTIES LINK_FLAGS_RELEASE
+        "${LINK_FLAGS_RELEASE} -s")
 
 target_link_libraries(sfm_colors PRIVATE
         ${COLMAP_LIBRARIES}
