@@ -22,6 +22,7 @@ add_executable(sfm_colors
         main.cpp
         rcs_sums.cpp
         scored_point.cpp
+        azimuth_angles.cpp
         utils/az_data.cpp
         utils/cleanup.cpp
         utils/mat_reader.cpp

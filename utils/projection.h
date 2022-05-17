@@ -1,8 +1,8 @@
 #pragma once
 
-#include "utils.h"
-#include "types.h"
-#include "model.h"
+#include "utils/utils.h"
+#include "utils/types.h"
+#include "utils/model.h"
 
 Vector3d transform_to_world(const Image& image, const Vector3d& image_xyz);
 

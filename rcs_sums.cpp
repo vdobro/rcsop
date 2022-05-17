@@ -201,13 +201,8 @@ static double find_azimuth(double real_distance,
 
 using std::make_pair;
 
-void accumulate_azimuth(const model_ptr& model,
-                        const rcs_data& rcs_data,
-                        const string& input_path,
-                        const string& output_path) {
-    auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
-    auto time_measure = start_time();
-    map<rcs_height_t, map<size_t, long>> height_to_image_to_angle;
+static map<rcs_height_t, map<size_t, long>> get_height_map(const rcs_data& rcs_data) {
+    map<rcs_height_t, map<size_t, long>> result;
     for (auto height: rcs_data.available_heights()) {
         auto row = rcs_data.at_height(height);
         map<size_t, long> image_to_angle;
@@ -216,8 +211,18 @@ void accumulate_azimuth(const model_ptr& model,
             auto angle = angles[i];
             image_to_angle.insert(make_pair(i, angle));
         }
-        height_to_image_to_angle.insert(make_pair(height, image_to_angle));
+        result.insert(make_pair(height, image_to_angle));
     }
+    return result;
+}
+
+void accumulate_azimuth(const model_ptr& model,
+                        const rcs_data& rcs_data,
+                        const string& input_path,
+                        const string& output_path) {
+    auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
+    auto time_measure = start_time();
+    auto height_to_image_to_angle = get_height_map(rcs_data);
     log_and_start_next(time_measure, "Constructing map of heights to images to azimuth angles");
 
     auto ranges = rcs_data.at_height(DEFAULT_HEIGHT)->ranges();

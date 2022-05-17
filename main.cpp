@@ -1,4 +1,6 @@
 #include <string>
+#include <filesystem>
+using std::filesystem::path;
 
 #include "utils/mat_reader.h"
 #include "utils/cleanup.h"
@@ -7,13 +9,16 @@
 #include "examples/slices.h"
 
 #include "rcs_sums.h"
+#include "azimuth_angles.h"
 
 #undef FILTER_POINTS
 #undef DRAW_LINES
 #undef SLICE_POINTS
 
-#define SUM_RCS
-#define SUM_AZIMUTH
+#undef SUM_RCS
+#undef SUM_AZIMUTH
+#define AZIMUTH_ANGLES
+
 
 int main() {
     const string data_root_path = "data";
@@ -43,6 +48,16 @@ int main() {
 #endif
 #ifdef SUM_AZIMUTH
     accumulate_azimuth(model, rcs_file, input_image_path, output_path + path_separator + "azimuth_sums");
+#endif
+#ifdef AZIMUTH_ANGLES
+    const path input_path_root{input_path};
+    const path output_path_root{output_path};
+
+    const path image_path{input_path_root/"audi_40"};
+    const path data_path{input_path_root/"AudiAuswertung"};
+    const path output_path_azimuth{output_path_root/"azimuth_angles"};
+
+    display_azimuth(model, image_path, data_path, output_path_azimuth);
 #endif
     return EXIT_SUCCESS;
 }

@@ -28,7 +28,7 @@ static vector<double> get_raw_values(const char* name,
     return raw_values;
 }
 
-map<double, vector<double>> az_data::reconstruct_azimuth_table(const vector<double>& raw_values) {
+map<double, vector<double>> az_data::reconstruct_value_table(const vector<double>& raw_values) {
     map<double, vector<double>> result;
 
     auto angles = _angles.size();
@@ -42,12 +42,15 @@ map<double, vector<double>> az_data::reconstruct_azimuth_table(const vector<doub
         for (size_t i = 0; i < ranges; i++) {
             range_values[i] = raw_values[angle_i * ranges + i];
         }
+        range_values.erase(range_values.begin()); // first value is NaN because of the range = 0
         result.insert(std::make_pair(angle, range_values));
     }
     return result;
 }
 
-az_data::az_data(const std::string& filename) {
+az_data::az_data(const std::string& filename, const data_eval_position& position) {
+    this->_position = position;
+
     mat_t* mat_file_handle = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
     if (nullptr == mat_file_handle) {
         throw runtime_error("Could not open .mat file");
@@ -56,11 +59,16 @@ az_data::az_data(const std::string& filename) {
     _ranges = get_raw_values("vRangeExt", table);
     _angles = get_raw_values("vAngDeg", table);
     auto raw_azimuth = get_raw_values("JOpt_RCS", table);
-    _angle_to_rcs_values = reconstruct_azimuth_table(raw_azimuth);
-
+    _angle_to_rcs_values = reconstruct_value_table(raw_azimuth);
     Mat_Close(mat_file_handle);
+
+    _ranges.erase(_ranges.begin());
 }
 
 map<double, vector<double>> az_data::get_rcs() const {
     return this->_angle_to_rcs_values;
+}
+
+data_eval_position az_data::get_position() const {
+    return this->_position;
 }
