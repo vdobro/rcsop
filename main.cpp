@@ -15,10 +15,9 @@ using std::filesystem::path;
 #undef DRAW_LINES
 #undef SLICE_POINTS
 
-#undef SUM_RCS
-#undef SUM_AZIMUTH
+#define SUM_RCS
+#define SUM_AZIMUTH
 #define AZIMUTH_ANGLES
-
 
 int main() {
     const string data_root_path = "data";

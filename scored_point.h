@@ -16,9 +16,9 @@ public:
 
     explicit scored_point(const point_pair& base);
 
-    explicit scored_point(Vector3d position, ulong id) : _point_id(id), _position(std::move(position)) {}
+    explicit scored_point(Vector3d position, ulong id);
 
-    explicit scored_point(Vector3d position, ulong id, double score) : _point_id(id), _position(std::move(position)), _score(score) {}
+    explicit scored_point(Vector3d position, ulong id, double score);
 
     void increment_score(double value);
 
@@ -30,3 +30,5 @@ public:
 
     [[nodiscard]] double score_to_dB() const;
 };
+
+typedef map<point_id_t, scored_point> scored_point_map;

@@ -1,5 +1,11 @@
 #include "scored_point.h"
 
+scored_point::scored_point(Vector3d position, ulong id)
+        : _point_id(id), _position(std::move(position)) {}
+
+scored_point::scored_point(Vector3d position, ulong id, double score)
+        : _point_id(id), _position(std::move(position)), _score(score) {}
+
 scored_point::scored_point(const point_pair& base) {
     this->_point_id = base.first;
     this->_position = base.second.XYZ();
@@ -22,4 +28,3 @@ double scored_point::score_to_dB() const {
 void scored_point::increment_score(double value) {
     this->_score += value;
 }
-

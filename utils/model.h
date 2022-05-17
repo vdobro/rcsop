@@ -5,8 +5,6 @@
 #include "types.h"
 #include "scored_point.h"
 
-typedef map<point_id_t, scored_point> scored_point_map;
-
 shared_ptr<Reconstruction> read_model(const string& path);
 
 void write_model(const model_ptr& model, const string& output_path);

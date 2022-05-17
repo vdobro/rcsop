@@ -102,9 +102,13 @@ void display_azimuth(const model_ptr& model,
     auto images = get_images(*model);
     auto heights = get_heights(data_path);
     auto data_by_image = get_image_data_map(images, data_path, heights);
+    auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
+    auto scored_points = get_scored_points(*model);
 
     for (const auto & image: images) {
         auto data = data_by_image.at(image.ImageId());
-        //TODO
+        for(const auto& scored_point : scored_points) {
+
+        }
     }
 }

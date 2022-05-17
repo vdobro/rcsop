@@ -28,6 +28,7 @@ add_executable(sfm_colors
         utils/mat_reader.cpp
         utils/model.cpp
         utils/projection.cpp
+        utils/relative_points.cpp
         utils/utils.cpp
         rendering/colors.cpp
         rendering/render_points.cpp

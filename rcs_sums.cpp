@@ -1,75 +1,18 @@
 #include "rcs_sums.h"
 
+#define HORIZONTAL_ANGLE 25
+#define VERTICAL_ANGLE 15
+#define STANDARD_DEVIATION 0.2
+
+#define HORIZONTAL_SPREAD (HORIZONTAL_ANGLE / 2.0)
+#define VERTICAL_SPREAD (VERTICAL_ANGLE / 2.0)
+
+static const double RANGE_EPSILON = 3;
+
 using std::string;
+using std::make_pair;
 
-typedef Eigen::Hyperplane<double, 3> plane;
-
-static Vector3d get_right(const Image& image) {
-    Vector3d local_right;
-    local_right.setZero();
-    local_right.x() = 1;
-    auto direction = transform_to_world(image, local_right) - get_image_position(image);
-    return direction.normalized();
-}
-
-static Vector3d get_up(const Image& image) {
-    Vector3d local_up;
-    local_up.setZero();
-    local_up.y() = -1;
-    auto direction = transform_to_world(image, local_up) - get_image_position(image);
-    return direction.normalized();
-}
-
-struct relative_point {
-    Vector3d position;
-    point_id_t id = 0;
-    double distance = 0;
-    double vertical_angle = 0;
-    double horizontal_angle = 0;
-};
-
-#define ARC_SIN(X) (asin(X) * 180.f / M_PI)
-
-static vector<relative_point> get_point_angles(const Image& image,
-                                               double height_offset,
-                                               const scored_point_map& points) {
-    auto right = get_right(image);
-    auto up = get_up(image);
-    Vector3d image_pos = get_image_position(image) + (height_offset * up);
-
-    const plane vertical_plane = plane(right, image_pos);
-    const plane horizontal_plane = plane(up, image_pos);
-
-    vector<relative_point> result;
-    for (const auto& point_pair: points) {
-        auto id = point_pair.first;
-        auto point = point_pair.second;
-        Vector3d point_position = point.position();
-
-        auto distance_to_vertical_plane = vertical_plane.absDistance(point_position);
-        auto distance_to_horizontal_plane = horizontal_plane.absDistance(point_position);
-
-        auto distance_to_camera = (point_position - image_pos).norm();
-
-        auto is_to_the_right = (point_position - image_pos).dot(right) > 0;
-        auto is_up_above = (point_position - image_pos).dot(up) > 0;
-
-        auto horizontal_angle = (is_to_the_right ? 1 : -1 ) * ARC_SIN(distance_to_vertical_plane / distance_to_camera);
-        auto vertical_angle = (is_up_above ? 1 : -1 ) * ARC_SIN(distance_to_horizontal_plane / distance_to_camera);
-
-        relative_point point_info = {
-                .position = point.position(),
-                .id = id,
-                .distance = distance_to_camera,
-                .vertical_angle = vertical_angle,
-                .horizontal_angle = horizontal_angle,
-        };
-        result.push_back(point_info);
-    }
-    return result;
-}
-
-typedef struct {
+typedef struct gauss_options {
     double sigma;
     double integral_factor;
     double x_scale;
@@ -112,9 +55,6 @@ static double rcs_gaussian(const relative_point& point,
     return calc_gauss(point, options) / point.distance;
 }
 
-#define HORIZONTAL_SPREAD (HORIZONTAL_ANGLE / 2.0)
-#define VERTICAL_SPREAD (VERTICAL_ANGLE / 2.0)
-
 static void rcs_sums(const model_ptr& model,
                      const rcs_data& rcs_data,
                      const std::function<double(rcs_height_t, size_t, const relative_point&)>& rcs_mapper,
@@ -133,7 +73,6 @@ static void rcs_sums(const model_ptr& model,
 #endif
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
     auto scored_points = get_scored_points(*model);
-    std::unordered_set<point_id_t> touched_points;
 
     const gauss_options distribution_options = {
             .sigma = STANDARD_DEVIATION,
@@ -190,16 +129,11 @@ void accumulate_rcs(const model_ptr& model,
     }, input_path, output_path);
 }
 
-static const double RANGE_EPSILON = 3;
-
 static double find_azimuth(double real_distance,
                            const vector<double>& azimuth_values,
                            const double first) {
-    auto index = lround((real_distance - first) / (2 * RANGE_EPSILON));
-    return azimuth_values[index];
+    return find_interval_match(real_distance, azimuth_values, first, RANGE_EPSILON);
 }
-
-using std::make_pair;
 
 static map<rcs_height_t, map<size_t, long>> get_height_map(const rcs_data& rcs_data) {
     map<rcs_height_t, map<size_t, long>> result;
