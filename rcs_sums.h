@@ -1,6 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <execution>
+using std::filesystem::path;
 
 #include "utils/projection.h"
 #include "utils/mat_reader.h"

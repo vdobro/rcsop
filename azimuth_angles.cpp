@@ -100,15 +100,80 @@ void display_azimuth(const model_ptr& model,
                      const path& data_path,
                      const path& output_path) {
     auto images = get_images(*model);
+
+    //TODO: clarify calibration/normalization across multiple files
     auto heights = get_heights(data_path);
+
     auto data_by_image = get_image_data_map(images, data_path, heights);
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
     auto scored_points = get_scored_points(*model);
 
-    for (const auto & image: images) {
-        auto data = data_by_image.at(image.ImageId());
-        for(const auto& scored_point : scored_points) {
+    auto render_path = path{output_path / "render"};
+    std::filesystem::remove_all(render_path);
+    create_directories(render_path);
 
+    auto shader = initialize_renderer();
+
+    auto time_measure = start_time();
+    vector<scored_point> all_points; // ONLY for colormap calibration, TODO check if needed
+    map<image_t, vector<scored_point>> image_to_points;
+    for (const auto& image: images) {
+        auto log_prefix = get_log_prefix(image.ImageId(), images.size());
+        map<height_t, shared_ptr<az_data>> height_to_data = data_by_image.at(image.ImageId());
+        for (auto& height: heights) {
+            shared_ptr<az_data> data = height_to_data.at(height);
+            auto height_offset = static_cast<double>(height - DEFAULT_HEIGHT) * world_scale;
+            auto relative_points = get_point_angles(image, height_offset, scored_points);
+            for (const auto& point: relative_points) {
+                if (point.horizontal_angle > 5) {
+                    //TODO fix for more than +-one additional height
+                //if (point.distance_to_horizontal_plane > fabs(height_offset / 2.0)) {
+                    continue;
+                }
+                auto point_distance = point.distance / world_scale;
+                auto value = data->find_nearest(point_distance, point.horizontal_angle);
+                if (!std::isnan(value)) {
+                    scored_points.at(point.id).increment_score(value);
+                }
+            }
         }
+        time_measure = log_and_start_next(time_measure,
+                                          "Scoring of " + std::to_string(scored_points.size()) + " points for "
+                                          + std::to_string(images.size()) + " images");
+        vector<scored_point> filtered_points;
+        for (const auto& point: scored_points) {
+            auto old_point = point.second;
+            if (old_point.score() <= 1E-20) {
+                //TODO WHY DOES THIS SOMETIMES GET TO ~1E-309 DESPITE ASSIGNED VALUE ?!?!?!
+                continue;
+            }
+            filtered_points.push_back(old_point);
+            all_points.push_back(old_point);
+        }
+        time_measure = log_and_start_next(time_measure,
+                                          log_prefix + "\tFiltered " + std::to_string(filtered_points.size())
+                                          + " from a total of " + std::to_string(scored_points.size())
+                                          + " points");
+        image_to_points.insert(make_pair(image.ImageId(), filtered_points));
+
+#ifdef COLORMAP_PER_IMAGE
+        const auto colormap = get_colormap(filtered_points, COLOR_MAP);
+        render_image(model, image, shader,
+                     image_path.string(), render_path.string(),
+                     filtered_points, colormap, log_prefix);
+#endif
     }
+
+#ifndef COLORMAP_PER_IMAGE
+    const auto colormap = get_colormap(all_points, COLOR_MAP);
+    for(const auto& image : images) {
+        auto log_prefix = get_log_prefix(image.ImageId(), images.size());
+        auto points = image_to_points.at(image.ImageId());
+        render_image(model, image, shader,
+                     image_path.string(), render_path.string(),
+                     points, colormap, log_prefix);
+    }
+#endif
+
+    log_and_start_next(time_measure, "(Total) rendering done.");
 }

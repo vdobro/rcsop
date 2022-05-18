@@ -64,5 +64,7 @@ void color_slices(const model_ptr& model,
 
     auto render_path = output_path + path_separator + "render";
     std::filesystem::remove_all(render_path);
-    render_images(model, input_path, render_path, points);
+
+    auto colormap = get_colormap(points, COLOR_MAP);
+    render_images(model, input_path, render_path, points, colormap);
 }

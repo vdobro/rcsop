@@ -9,7 +9,7 @@ static matvar_t* get_all_variables(mat_t* file) {
     return matvar;
 }
 
-static matvar_t * get_table_field(const char* name, matvar_t* table) {
+static matvar_t* get_table_field(const char* name, matvar_t* table) {
     auto var = Mat_VarGetStructFieldByName(table, name, 0);
     return var;
 }
@@ -48,6 +48,23 @@ map<double, vector<double>> az_data::reconstruct_value_table(const vector<double
     return result;
 }
 
+void az_data::determine_step_sizes() {
+    vector<long> range_steps;
+    for(size_t i = 1; i < _ranges.size(); i++) {
+        range_steps.push_back(_ranges[i] - _ranges[i- 1]);
+    }
+    _range_step = std::reduce(range_steps.begin(), range_steps.end())
+                  / static_cast<long>(range_steps.size());
+
+    vector<double> angle_steps;
+    for(size_t i = 1; i < _angles.size(); i++) {
+        angle_steps.push_back(_angles[i] - _angles[i- 1]);
+    }
+    _angle_step = std::reduce(angle_steps.begin(), angle_steps.end())
+                  / static_cast<double>(angle_steps.size());
+
+}
+
 az_data::az_data(const std::string& filename, const data_eval_position& position) {
     this->_position = position;
 
@@ -56,13 +73,17 @@ az_data::az_data(const std::string& filename, const data_eval_position& position
         throw runtime_error("Could not open .mat file");
     }
     auto table = get_all_variables(mat_file_handle);
-    _ranges = get_raw_values("vRangeExt", table);
+    _ranges = map_vec<double, long>(get_raw_values("vRangeExt", table), [](double range) {
+        return std::lround(range * 100);
+    });
+
     _angles = get_raw_values("vAngDeg", table);
     auto raw_azimuth = get_raw_values("JOpt_RCS", table);
     _angle_to_rcs_values = reconstruct_value_table(raw_azimuth);
     Mat_Close(mat_file_handle);
 
     _ranges.erase(_ranges.begin());
+    determine_step_sizes();
 }
 
 map<double, vector<double>> az_data::get_rcs() const {
@@ -71,4 +92,12 @@ map<double, vector<double>> az_data::get_rcs() const {
 
 data_eval_position az_data::get_position() const {
     return this->_position;
+}
+
+double az_data::find_nearest(double range_distance, double angle) const {
+    auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
+
+    auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
+
+    return _angle_to_rcs_values.at(nearest_angle)[nearest_range_index];
 }

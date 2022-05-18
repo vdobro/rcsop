@@ -15,8 +15,8 @@ using std::filesystem::path;
 #undef DRAW_LINES
 #undef SLICE_POINTS
 
-#define SUM_RCS
-#define SUM_AZIMUTH
+#undef SUM_RCS
+#undef SUM_AZIMUTH
 #define AZIMUTH_ANGLES
 
 int main() {

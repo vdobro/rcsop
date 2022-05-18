@@ -81,7 +81,9 @@ static void rcs_sums(const model_ptr& model,
             .y_scale = VERTICAL_SPREAD,
     };
     auto time_measure = start_time();
-    for (size_t image_index = first_image; image_index < last_image_plus_one; image_index++) {
+    for (size_t image_index = first_image;
+         image_index < last_image_plus_one;
+         image_index++) {
         auto image = images[image_index];
 
         for (auto& height: heights) {
@@ -90,11 +92,11 @@ static void rcs_sums(const model_ptr& model,
 
             std::for_each(std::execution::par_unseq, relevant_points.begin(), relevant_points.end(),
                           [&](relative_point& point) {
-                auto rcs_value = rcs_mapper(height, image_index, point);
-                auto gaussian = rcs_gaussian(point, distribution_options);
-                auto rcs_distributed = gaussian * rcs_value;
-                scored_points[point.id].increment_score(rcs_distributed);
-            });
+                              auto rcs_value = rcs_mapper(height, image_index, point);
+                              auto gaussian = rcs_gaussian(point, distribution_options);
+                              auto rcs_distributed = gaussian * rcs_value;
+                              scored_points[point.id].increment_score(rcs_distributed);
+                          });
         }
     }
     time_measure = log_and_start_next(time_measure,
@@ -115,7 +117,9 @@ static void rcs_sums(const model_ptr& model,
 
     auto render_path = output_path + path_separator + "render";
     std::filesystem::remove_all(render_path);
-    render_images(model, input_path, render_path, filtered_points);
+
+    auto colormap = get_colormap(filtered_points, COLOR_MAP);
+    render_images(model, input_path, render_path, filtered_points, colormap);
 
     log_and_start_next(time_measure, "(Total) rendering done.");
 }

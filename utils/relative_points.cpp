@@ -49,6 +49,7 @@ vector<relative_point> get_point_angles(const Image& image,
 
         relative_point point_info = {
                 .position = point.position(),
+                .distance_to_horizontal_plane = distance_to_horizontal_plane,
                 .id = id,
                 .distance = distance_to_camera,
                 .vertical_angle = vertical_angle,
@@ -57,12 +58,4 @@ vector<relative_point> get_point_angles(const Image& image,
         result.push_back(point_info);
     }
     return result;
-}
-
-double find_interval_match(double search_value,
-                           const vector<double>& mapped_values,
-                           const double first_range,
-                           const double range_epsilon) {
-    auto index = lround((search_value - first_range) / (2 * range_epsilon));
-    return mapped_values[index];
 }
