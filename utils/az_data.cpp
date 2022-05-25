@@ -99,5 +99,9 @@ double az_data::find_nearest(double range_distance, double angle) const {
 
     auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
 
-    return _angle_to_rcs_values.at(nearest_angle)[nearest_range_index];
+    auto range_to_values = _angle_to_rcs_values.at(nearest_angle);
+    if (nearest_range_index >= range_to_values.size()) {
+        return 0;
+    }
+    return range_to_values.at(nearest_range_index);
 }

@@ -1,6 +1,5 @@
 #include <string>
-#include <filesystem>
-using std::filesystem::path;
+#include "utils/types.h"
 
 #include "utils/mat_reader.h"
 #include "utils/cleanup.h"
@@ -11,52 +10,56 @@ using std::filesystem::path;
 #include "rcs_sums.h"
 #include "azimuth_angles.h"
 
-#undef FILTER_POINTS
-#undef DRAW_LINES
-#undef SLICE_POINTS
+#define FILTER_POINTS
+#define DRAW_LINES
+#define SLICE_POINTS
 
-#undef SUM_RCS
-#undef SUM_AZIMUTH
+#define SUM_RCS
+#define SUM_AZIMUTH
 #define AZIMUTH_ANGLES
 
 int main() {
-    const string data_root_path = "data";
-    const auto input_path = data_root_path + path_separator + "input";
-    const auto output_path = data_root_path + path_separator + "output";
+    const path data_root_path{"data"};
+    const path input_path{data_root_path / "input"};
+    const path input_image_path{input_path / "audi_40"};
 
-    auto model = read_model(input_path + path_separator + "model");
+    const path output_path{data_root_path / "output"};
+
+    const path model_path{input_path / "model"};
+    auto model = read_model(model_path);
 
 #ifdef FILTER_POINTS
-    filter_points(model, input_path + path_separator + "model");
+    const path filtered_model_path{input_path / "filtered_model"};
+    filter_points(model, filtered_model_path);
 #endif
 
-    const auto rcs_file = rcs_data(input_path + path_separator + "rcs.mat");
+    const path rcs_file_path{input_path / "rcs.mat"};
+    const auto rcs_file = rcs_data(rcs_file_path);
     const auto rcs = rcs_file.at_height(40)->rcs();
 
-    const auto input_image_path = input_path + path_separator + "audi_40";
-
 #ifdef SLICE_POINTS
-    color_slices(model, rcs, input_image_path, output_path + path_separator + "colored_slices");
+    const path slice_output_path{output_path / "colored_slices"};
+    color_slices(model, rcs, input_image_path, slice_output_path);
 #endif
 #ifdef DRAW_LINES
-    draw_lines(model, rcs, input_image_path, output_path + path_separator + "rcs_lines");
-    model = read_model(input_path + path_separator + "model");
+    const path line_output_path{output_path / "rcs_lines"};
+    draw_lines(model, rcs, input_image_path, line_output_path);
+    model = read_model(model_path);
 #endif
 #ifdef SUM_RCS
-    accumulate_rcs(model, rcs_file, input_image_path, output_path + path_separator + "rcs_sums");
+    const path accumulated_rcs_output_path{output_path / "rcs_sums"};
+    accumulate_rcs(model, rcs_file, input_image_path, accumulated_rcs_output_path);
 #endif
 #ifdef SUM_AZIMUTH
-    accumulate_azimuth(model, rcs_file, input_image_path, output_path + path_separator + "azimuth_sums");
+    const path accumulated_azimuth_output_path{output_path / "azimuth_sums"};
+    accumulate_azimuth(model, rcs_file, input_image_path, accumulated_azimuth_output_path);
 #endif
 #ifdef AZIMUTH_ANGLES
-    const path input_path_root{input_path};
-    const path output_path_root{output_path};
+    const path azimuth_angle_data_path{input_path / "AudiAuswertung"};
+    const path output_path_azimuth{output_path / "azimuth_angles"};
 
-    const path image_path{input_path_root/"audi_40"};
-    const path data_path{input_path_root/"AudiAuswertung"};
-    const path output_path_azimuth{output_path_root/"azimuth_angles"};
-
-    display_azimuth(model, image_path, data_path, output_path_azimuth);
+    auto azimuthdata = display_azimuth(model, input_image_path, azimuth_angle_data_path, output_path_azimuth);
+    render_to_files(*azimuthdata, output_path_azimuth);
 #endif
     return EXIT_SUCCESS;
 }

@@ -5,14 +5,14 @@ using std::make_pair;
 using std::filesystem::create_directories;
 using std::filesystem::remove_all;
 
-shared_ptr<Reconstruction> read_model(const string& path) {
+shared_ptr<Reconstruction> read_model(const path& path) {
     auto model = make_shared<Reconstruction>();
     model->Read(path);
 
     return model;
 }
 
-void write_model(const model_ptr& model, const string& output_path) {
+void write_model(const model_ptr& model, const path& output_path) {
     remove_all(output_path);
     create_directories(output_path);
 

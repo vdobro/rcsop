@@ -36,5 +36,5 @@ typedef ulong point_id_t;
 typedef pair<point_id_t, Point3D> point_pair;
 typedef long rcs_height_t;
 
+using std::filesystem::path;
 using std::filesystem::create_directories;
-static const auto path_separator = std::filesystem::path::preferred_separator;

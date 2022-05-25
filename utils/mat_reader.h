@@ -7,7 +7,9 @@
 #include <cmath>
 
 #include "matio.h"
-#include "utils.h"
+
+#include "utils/types.h"
+#include "utils/utils.h"
 
 using std::map;
 using std::shared_ptr;
@@ -48,7 +50,7 @@ class rcs_data {
 private:
     map<long, shared_ptr<rcs_data_row>> _rows;
 public:
-    explicit rcs_data(const string& path);
+    explicit rcs_data(const path& path);
 
     [[nodiscard]] shared_ptr<rcs_data_row> at_height(long height) const;
 

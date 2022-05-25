@@ -5,4 +5,4 @@
 #include "utils/projection.h"
 
 void filter_points(const model_ptr& model,
-                   const string& output_path);
+                   const path& output_path);

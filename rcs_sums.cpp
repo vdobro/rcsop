@@ -58,8 +58,8 @@ static double rcs_gaussian(const relative_point& point,
 static void rcs_sums(const model_ptr& model,
                      const rcs_data& rcs_data,
                      const std::function<double(rcs_height_t, size_t, const relative_point&)>& rcs_mapper,
-                     const string& input_path,
-                     const string& output_path) {
+                     const path& input_path,
+                     const path& output_path) {
 
     auto images = get_images(*model);
 #ifdef SINGLE_PROJECTION
@@ -115,7 +115,7 @@ static void rcs_sums(const model_ptr& model,
                                                     + " from a total of " + std::to_string(scored_points.size())
                                                     + " points");
 
-    auto render_path = output_path + path_separator + "render";
+    const path render_path{output_path / "render"};
     std::filesystem::remove_all(render_path);
 
     auto colormap = get_colormap(filtered_points, COLOR_MAP);
@@ -126,8 +126,8 @@ static void rcs_sums(const model_ptr& model,
 
 void accumulate_rcs(const model_ptr& model,
                     const rcs_data& rcs_data,
-                    const string& input_path,
-                    const string& output_path) {
+                    const path& input_path,
+                    const path& output_path) {
     rcs_sums(model, rcs_data, [rcs_data](rcs_height_t height, size_t image_index, const relative_point& point) {
         return rcs_data.at_height(height)->rcs()[image_index];
     }, input_path, output_path);
@@ -156,8 +156,8 @@ static map<rcs_height_t, map<size_t, long>> get_height_map(const rcs_data& rcs_d
 
 void accumulate_azimuth(const model_ptr& model,
                         const rcs_data& rcs_data,
-                        const string& input_path,
-                        const string& output_path) {
+                        const path& input_path,
+                        const path& output_path) {
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
     auto time_measure = start_time();
     auto height_to_image_to_angle = get_height_map(rcs_data);

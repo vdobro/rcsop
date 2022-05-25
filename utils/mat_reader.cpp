@@ -136,7 +136,7 @@ vector<long> rcs_data_row::angles() const {
     return this->_angles;
 }
 
-rcs_data::rcs_data(const string& path) {
+rcs_data::rcs_data(const path& path) {
     mat_t* mat_file_handle = Mat_Open(path.c_str(), MAT_ACC_RDONLY);
     if (nullptr == mat_file_handle) {
         throw runtime_error("Could not open .mat file");

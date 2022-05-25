@@ -20,8 +20,8 @@ vector<relative_point> get_point_angles(const Image& image,
 
 template<typename InputValueType, typename SearchValue>
 size_t find_interval_match_index(InputValueType search_value,
-                                SearchValue first_range,
-                                SearchValue range_epsilon) {
+                                 SearchValue first_range,
+                                 SearchValue range_epsilon) {
     return lround((static_cast<SearchValue>(search_value) - first_range) / (2 * range_epsilon));
 }
 
@@ -31,5 +31,5 @@ MappedValue find_interval_match(InputValueType search_value,
                                 SearchValue first_range,
                                 SearchValue range_epsilon) {
     size_t index = find_interval_match_index(search_value, first_range, range_epsilon);
-    return mapped_values[index];
+    return mapped_values.at(index);
 }

@@ -25,8 +25,8 @@ static bool inline is_in_triangle(const Vector2d& point,
 
 void color_slices(const model_ptr& model,
                   const vector<double>& rcs,
-                  const string& input_path,
-                  const string& output_path) {
+                  const path& input_path,
+                  const path& output_path) {
     auto images = get_images(*model);
     auto image_count = images.size();
     auto image_positions = map_vec<Image, Vector3d>(images, get_image_position);
@@ -62,7 +62,7 @@ void color_slices(const model_ptr& model,
 
     write_model(model, output_path);
 
-    auto render_path = output_path + path_separator + "render";
+    const path render_path{output_path / "render"};
     std::filesystem::remove_all(render_path);
 
     auto colormap = get_colormap(points, COLOR_MAP);

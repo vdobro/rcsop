@@ -1,7 +1,7 @@
 #pragma once
 
 #define CAMERA_DISTANCE 750.0
-#define COLOR_MAP map_turbo
+#define COLOR_MAP map_jet
 
 // options for debugging
 #undef SINGLE_PROJECTION
@@ -11,5 +11,3 @@
 #undef RANGE_CONSTRAINT
 #define FIRST_RANGE 45
 #define LAST_RANGE 49
-
-#define COLORMAP_PER_IMAGE

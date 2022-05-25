@@ -11,7 +11,7 @@ static double min_distance(const vector<Image>& images) {
 }
 
 void filter_points(const shared_ptr<Reconstruction>& model,
-                   const string& output_path) {
+                   const path& output_path) {
     auto points = model->Points3D();
     vector<Image> images = get_images(*model);
 

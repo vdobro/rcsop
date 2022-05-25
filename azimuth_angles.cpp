@@ -27,7 +27,7 @@ static long get_image_azimuth(const Image& image) {
     return stoi(sm[1]);
 }
 
-static vector<height_t> get_heights(const path& data_path) {
+static vector<height_t> parse_available_heights(const path& data_path) {
     vector<height_t> result;
     for (auto const& dir_entry: directory_iterator{data_path}) {
         smatch sm;
@@ -42,7 +42,7 @@ static vector<height_t> get_heights(const path& data_path) {
     return result;
 }
 
-static map<azimuth_t, shared_ptr<az_data>> get_azimuth_to_data_mapping(height_t height, const path& data_path) {
+static map<azimuth_t, shared_ptr<az_data>> map_azimuth_angles_to_data(height_t height, const path& data_path) {
     auto folder_name = std::to_string(height) + "cm";
     const path height_path{data_path / folder_name};
     map<azimuth_t, shared_ptr<az_data>> azimuth_to_data;
@@ -69,14 +69,14 @@ static map<height_t, map<azimuth_t, shared_ptr<az_data>>> collect_all_heights(co
     auto start = start_time();
     map<height_t, map<azimuth_t, shared_ptr<az_data>>> result;
     for (auto height: heights) {
-        map<azimuth_t, shared_ptr<az_data>> angle_mapping = get_azimuth_to_data_mapping(height, data_path);
+        map<azimuth_t, shared_ptr<az_data>> angle_mapping = map_azimuth_angles_to_data(height, data_path);
         result.insert(make_pair(height, angle_mapping));
     }
     log_and_start_next(start, "Reading .mat files finished");
     return result;
 }
 
-static map<image_t, map<height_t, shared_ptr<az_data>>> get_image_data_map(
+static map<image_t, map<height_t, shared_ptr<az_data>>> map_images_to_azimuth_data(
         const vector<Image>& images,
         const path& data_path,
         const vector<height_t>& heights) {
@@ -95,16 +95,14 @@ static map<image_t, map<height_t, shared_ptr<az_data>>> get_image_data_map(
     return image_to_height_to_data;
 }
 
-void display_azimuth(const model_ptr& model,
-                     const path& image_path,
-                     const path& data_path,
-                     const path& output_path) {
+shared_ptr<point_display_payload> display_azimuth(const model_ptr& model,
+                                                  const path& image_path,
+                                                  const path& data_path,
+                                                  const path& output_path) {
     auto images = get_images(*model);
+    auto heights = parse_available_heights(data_path);
 
-    //TODO: clarify calibration/normalization across multiple files
-    auto heights = get_heights(data_path);
-
-    auto data_by_image = get_image_data_map(images, data_path, heights);
+    auto data_by_image = map_images_to_azimuth_data(images, data_path, heights);
     auto world_scale = get_world_scale(CAMERA_DISTANCE, *model);
     auto scored_points = get_scored_points(*model);
 
@@ -112,10 +110,8 @@ void display_azimuth(const model_ptr& model,
     std::filesystem::remove_all(render_path);
     create_directories(render_path);
 
-    auto shader = initialize_renderer();
-
     auto time_measure = start_time();
-    vector<scored_point> all_points; // ONLY for colormap calibration, TODO check if needed
+    vector<scored_point> all_points; // ONLY use for colormap calibration
     map<image_t, vector<scored_point>> image_to_points;
     for (const auto& image: images) {
         auto log_prefix = get_log_prefix(image.ImageId(), images.size());
@@ -127,7 +123,7 @@ void display_azimuth(const model_ptr& model,
             for (const auto& point: relative_points) {
                 if (point.horizontal_angle > 5) {
                     //TODO fix for more than +-one additional height
-                //if (point.distance_to_horizontal_plane > fabs(height_offset / 2.0)) {
+                    //if (point.distance_to_horizontal_plane > fabs(height_offset / 2.0)) {
                     continue;
                 }
                 auto point_distance = point.distance / world_scale;
@@ -143,8 +139,7 @@ void display_azimuth(const model_ptr& model,
         vector<scored_point> filtered_points;
         for (const auto& point: scored_points) {
             auto old_point = point.second;
-            if (old_point.score() <= 1E-20) {
-                //TODO WHY DOES THIS SOMETIMES GET TO ~1E-309 DESPITE ASSIGNED VALUE ?!?!?!
+            if (old_point.score_to_dB() < -20) {
                 continue;
             }
             filtered_points.push_back(old_point);
@@ -155,25 +150,33 @@ void display_azimuth(const model_ptr& model,
                                           + " from a total of " + std::to_string(scored_points.size())
                                           + " points");
         image_to_points.insert(make_pair(image.ImageId(), filtered_points));
-
-#ifdef COLORMAP_PER_IMAGE
-        const auto colormap = get_colormap(filtered_points, COLOR_MAP);
-        render_image(model, image, shader,
-                     image_path.string(), render_path.string(),
-                     filtered_points, colormap, log_prefix);
-#endif
     }
+    auto scores = map_vec<scored_point, double>(all_points, [](const scored_point& point) {
+        return point.score_to_dB();
+    });
 
-#ifndef COLORMAP_PER_IMAGE
-    const auto colormap = get_colormap(all_points, COLOR_MAP);
-    for(const auto& image : images) {
+    return make_shared<point_display_payload>(point_display_payload{
+            .min_value = *std::min_element(scores.begin(), scores.end()),
+            .max_value = *std::max_element(scores.begin(), scores.end()),
+            .points = image_to_points,
+            .model = model,
+            .image_path = image_path,
+    });
+}
+
+void render_to_files(const point_display_payload& point_payload,
+                     const path& output_path) {
+    const auto colormap = construct_colormap_function(COLOR_MAP, point_payload.min_value, point_payload.max_value);
+    auto model = point_payload.model;
+    auto images = get_images(*model);
+    auto image_path = point_payload.image_path;
+
+    auto shader = initialize_renderer();
+    for (const auto& image: images) {
         auto log_prefix = get_log_prefix(image.ImageId(), images.size());
-        auto points = image_to_points.at(image.ImageId());
+        auto points = point_payload.points.at(image.ImageId());
         render_image(model, image, shader,
-                     image_path.string(), render_path.string(),
+                     image_path, output_path,
                      points, colormap, log_prefix);
     }
-#endif
-
-    log_and_start_next(time_measure, "(Total) rendering done.");
 }

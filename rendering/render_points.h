@@ -2,7 +2,6 @@
 
 #include <utility>
 #include <algorithm>
-#include <filesystem>
 
 #include <SFML/Graphics.hpp>
 
@@ -22,6 +21,15 @@
 #undef SINGLE_IMAGE
 #define DEFAULT_IMAGE_ID 1
 
+using colmap::image_t;
+struct point_display_payload {
+    double min_value{};
+    double max_value{};
+    map<image_t, vector<scored_point>> points;
+    model_ptr model;
+    path image_path;
+};
+
 string get_log_prefix(size_t current, size_t last);
 
 shared_ptr<sf::Shader> initialize_renderer();
@@ -32,15 +40,15 @@ global_colormap_func get_colormap(const vector<scored_point>& points,
 void render_image(
         const model_ptr& model,
         const Image& image,
-        shared_ptr<sf::Shader>& point_shader,
-        const string& input_path,
-        const string& output_path,
+        const shared_ptr<sf::Shader>& point_shader,
+        const path& input_path,
+        const path& output_path,
         const vector<scored_point>& points,
         const global_colormap_func& colormap,
         const string& log_prefix);
 
 void render_images(const model_ptr& model,
-                   const string& input_path,
-                   const string& output_path,
+                   const path& input_path,
+                   const path& output_path,
                    const vector<scored_point>& points,
                    const global_colormap_func& colormap);

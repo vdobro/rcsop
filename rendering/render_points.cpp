@@ -20,6 +20,10 @@ static vector<rendered_point> project_in_camera_with_color(const vector<image_po
                                                            const global_colormap_func& colormap) {
     return map_vec<image_point, rendered_point>(points, [camera, colormap](const image_point& point) {
         auto camera_coordinates = camera.WorldToImage(point.coords());
+        auto score = point.score();
+        if (std::isnan(score)) {
+            throw std::invalid_argument("score");
+        }
         auto color = colormap(point.score());
         return rendered_point{
                 .coordinates = camera_coordinates,
@@ -93,7 +97,7 @@ shared_ptr<sf::Shader> initialize_renderer() {
 
 static void draw_background(
         sf::RenderTarget& render_target,
-        const string& input_file_path) {
+        const path& input_file_path) {
     sf::Texture background;
     if (!background.loadFromFile(input_file_path)) {
         std::cerr << "Could not load texture " << input_file_path << std::endl;
@@ -127,14 +131,14 @@ static vector<rendered_point> project_points(const Image& image,
 void render_image(
         const model_ptr& model,
         const Image& image,
-        shared_ptr<sf::Shader>& point_shader,
-        const string& input_path,
-        const string& output_path,
+        const shared_ptr<sf::Shader>& point_shader,
+        const path& input_path,
+        const path& output_path,
         const vector<scored_point>& points,
         const global_colormap_func& colormap,
         const string& log_prefix) {
-    auto input_file_path = input_path + path_separator + image.Name();
-    auto output_file_path = output_path + path_separator + image.Name();
+    const path input_file_path{input_path / image.Name()};
+    const path output_file_path{output_path / image.Name()};
 
     auto camera_id = image.CameraId();
     auto camera = model->Camera(camera_id);
@@ -149,7 +153,8 @@ void render_image(
 
     draw_background(render_target, input_file_path);
     time_measure = log_and_start_next(time_measure,
-                                      log_prefix + "\tSetting up rendering pipeline for image " + input_file_path);
+                                      log_prefix + "\tSetting up rendering pipeline for image " +
+                                      input_file_path.string());
     vector<rendered_point> rendered_points = project_points(image, camera, points, colormap);
 
     time_measure = log_and_start_next(time_measure,
@@ -170,8 +175,8 @@ void render_image(
 }
 
 void render_images(const model_ptr& model,
-                   const string& input_path,
-                   const string& output_path,
+                   const path& input_path,
+                   const path& output_path,
                    const vector<scored_point>& points,
                    const global_colormap_func& colormap) {
     auto shader = initialize_renderer();
