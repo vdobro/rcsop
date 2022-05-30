@@ -24,6 +24,9 @@ void sparse_cloud::reload() {
 }
 
 void sparse_cloud::save(const path& output_path) {
+    if (!exists(output_path)) {
+        create_directories(output_path);
+    }
     path cameras_path{output_path / "cameras.bin"};
     path images_path{output_path / "images_path.bin"};
     path points_path{output_path / "points3D.bin"};

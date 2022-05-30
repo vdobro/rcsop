@@ -17,7 +17,7 @@
 #define CENTER_ALPHA 0.2f
 #define GRADIENT_STRENGTH 3.f
 
-#define SINGLE_IMAGE
+#undef SINGLE_IMAGE
 #define DEFAULT_IMAGE_ID 1
 
 namespace sfm::rendering {

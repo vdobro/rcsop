@@ -15,7 +15,7 @@ int main() {
     const auto rcs_file = rcs_data(rcs_file_path);
     const auto rcs = rcs_file.at_height(40)->rcs();
 
-    const path line_output_path{output_path / "rcs_lines"};
+    const path line_output_path{output_path / "camera_lines"};
     draw_lines(*model, rcs, input_image_path, line_output_path);
 
     return EXIT_SUCCESS;
