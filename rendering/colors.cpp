@@ -1,5 +1,7 @@
 #include "colors.h"
 
+#include <cmath>
+
 // Copyright 2019 Google LLC.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -519,28 +521,29 @@ const unsigned char turbo_srgb_bytes[256][3] = {{48,  18,  59},
                                                 {126, 5,   2},
                                                 {122, 4,   3}};
 
-static Vector3ub to_vec(const unsigned char* color) {
-    Vector3ub vec;
-    vec.setZero();
-    vec.x() = color[0];
-    vec.y() = color[1];
-    vec.z() = color[2];
-    return vec;
-}
+namespace sfm::rendering {
+    static Vector3ub to_vec(const unsigned char* color) {
+        Vector3ub vec;
+        vec.setZero();
+        vec.x() = color[0];
+        vec.y() = color[1];
+        vec.z() = color[2];
+        return vec;
+    }
 
-Vector3ub map_turbo(double v, double vmin, double vmax) {
-    if (v <= vmin) {
-        return to_vec(*(turbo_srgb_bytes + 0));
+    Vector3ub map_turbo(double v, double vmin, double vmax) {
+        if (v <= vmin) {
+            return to_vec(*(turbo_srgb_bytes + 0));
+        }
+        if (v >= vmax) {
+            return to_vec(*(turbo_srgb_bytes + 255));
+        }
+        auto range = vmax - vmin;
+        auto pos = v - vmin;
+        auto step_size = range / 255;
+        auto steps = std::lround(pos / step_size);
+        return to_vec(*(turbo_srgb_bytes + steps));
     }
-    if (v >= vmax) {
-        return to_vec(*(turbo_srgb_bytes + 255));
-    }
-    auto range = vmax - vmin;
-    auto pos = v - vmin;
-    auto step_size = range / 255;
-    auto steps = std::lround(pos / step_size);
-    return to_vec(*(turbo_srgb_bytes + steps));
-}
 
 /*
  * Source: http://paulbourke.net/miscellaneous/colourspace/
@@ -551,74 +554,84 @@ Vector3ub map_turbo(double v, double vmin, double vmax) {
  * The colour is clipped at the end of the scales if v is outside
  * the range [vmin,vmax]
 */
-Vector3ub map_jet(double v, double vmin, double vmax) {
-    double r = 1.0, g = 1.0, b = 1.0; // white
-    double dv = vmax - vmin;
+    Vector3ub map_jet(double v, double vmin, double vmax) {
+        double r = 1.0, g = 1.0, b = 1.0; // white
+        double dv = vmax - vmin;
 
-    if (v < vmin) {
-        v = vmin;
-    }
-    if (v > vmax) {
-        v = vmax;
-    }
+        if (v < vmin) {
+            v = vmin;
+        }
+        if (v > vmax) {
+            v = vmax;
+        }
 
-    if (v < (vmin + 0.25 * dv)) {
-        r = 0;
-        g = 4 * (v - vmin) / dv;
-    } else if (v < (vmin + 0.5 * dv)) {
-        r = 0;
-        b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
-    } else if (v < (vmin + 0.75 * dv)) {
-        r = 4 * (v - vmin - 0.5 * dv) / dv;
-        b = 0;
-    } else {
-        g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
-        b = 0;
-    }
+        if (v < (vmin + 0.25 * dv)) {
+            r = 0;
+            g = 4 * (v - vmin) / dv;
+        } else if (v < (vmin + 0.5 * dv)) {
+            r = 0;
+            b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
+        } else if (v < (vmin + 0.75 * dv)) {
+            r = 4 * (v - vmin - 0.5 * dv) / dv;
+            b = 0;
+        } else {
+            g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+            b = 0;
+        }
 
-    Vector3ub color;
-    color.x() = std::lround(r * 255.0);
-    color.y() = std::lround(g * 255.0);
-    color.z() = std::lround(b * 255.0);
-    return color;
-}
-
-Vector3ub map_red(double v, double vmin, double vmax) {
-    double r = 1.0, g = 0.0, b = 0.0; // red
-
-    if (v < vmin) {
-        v = vmin;
-    }
-    if (v > vmax) {
-        v = vmax;
+        Vector3ub color;
+        color.x() = std::lround(r * 255.0);
+        color.y() = std::lround(g * 255.0);
+        color.z() = std::lround(b * 255.0);
+        return color;
     }
 
-    auto range = vmax - vmin;
-    auto pos = v - vmin;
-    auto step_size = range / 255;
-    auto steps = pos / step_size;
+    Vector3ub map_red(double v, double vmin, double vmax) {
+        double r = 1.0, g = 0.0, b = 0.0; // red
 
-    Vector3ub color;
-    color.x() = std::lround(r * steps);
-    color.y() = std::lround(g * steps);
-    color.z() = std::lround(b * steps);
-    return color;
-}
+        if (v < vmin) {
+            v = vmin;
+        }
+        if (v > vmax) {
+            v = vmax;
+        }
 
-global_colormap_func construct_colormap_function(const local_colormap_func& colormap,
-                                                 double min_value,
-                                                 double max_value) {
-    return [min_value, max_value, colormap](double value) {
-        return colormap(value, min_value, max_value);
-    };
-}
+        auto range = vmax - vmin;
+        auto pos = v - vmin;
+        auto step_size = range / 255;
+        auto steps = pos / step_size;
 
-vector<Vector3ub> color_values(const vector<double>& values,
-                               const local_colormap_func& colormap) {
-    auto min_value = *std::min_element(values.begin(), values.end());
-    auto max_value = *std::max_element(values.begin(), values.end());
+        Vector3ub color;
+        color.x() = std::lround(r * steps);
+        color.y() = std::lround(g * steps);
+        color.z() = std::lround(b * steps);
+        return color;
+    }
 
-    return map_vec<double, Vector3ub>(values, [min_value, max_value](double value) {
-        return map_turbo(value, min_value, max_value);
-    });
+    global_colormap_func construct_colormap_function(const local_colormap_func& colormap,
+                                                     double min_value,
+                                                     double max_value) {
+        return [min_value, max_value, colormap](double value) {
+            return colormap(value, min_value, max_value);
+        };
+    }
+
+    global_colormap_func construct_colormap_function(const local_colormap_func& colormap,
+                                                     const vector<double>& values) {
+        auto min_value = *std::min_element(values.begin(), values.end());
+        auto max_value = *std::max_element(values.begin(), values.end());
+
+        return construct_colormap_function(colormap, min_value, max_value);
+    }
+
+    vector<Vector3ub> color_values(const vector<double>& values,
+                                   const local_colormap_func& colormap) {
+        auto min_value = *std::min_element(values.begin(), values.end());
+        auto max_value = *std::max_element(values.begin(), values.end());
+
+        return map_vec<double, Vector3ub>(values, [colormap, min_value, max_value](double value) {
+            return colormap(value, min_value, max_value);
+        });
+    }
+
 }

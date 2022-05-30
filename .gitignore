@@ -16,5 +16,5 @@ _deps
 cmake-build-release
 cmake-build-debug
 
-data/
+/datasets/
 build/

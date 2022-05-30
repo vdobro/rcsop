@@ -1,25 +1,23 @@
 #include "render_points.h"
 
+#include "../common/utils/vector.h"
+#include "../common/utils/chronometer.h"
+
 using std::string;
 
-static image_point project_to_image(const Image& image,
-                                    const Vector3d& image_position,
-                                    const scored_point& point) {
-    auto position_normalized = (image.ProjectionMatrix() * point.position().homogeneous()).hnormalized();
-    double distance_to_camera = (image_position - point.position()).norm();
-    return image_point(position_normalized, distance_to_camera, point.score_to_dB());
-}
+namespace sfm::rendering {
 
 typedef struct rendered_point {
     Vector2d coordinates = Vector2d::Zero();
     Vector3ub color = Vector3ub::Zero();
 } rendered_point;
 
-static vector<rendered_point> project_in_camera_with_color(const vector<image_point>& points,
-                                                           const Camera& camera,
-                                                           const global_colormap_func& colormap) {
+static vector<rendered_point> project_in_camera_with_color(
+        const vector<image_point>& points,
+        const camera& camera,
+        const global_colormap_func& colormap) {
     return map_vec<image_point, rendered_point>(points, [camera, colormap](const image_point& point) {
-        auto camera_coordinates = camera.WorldToImage(point.coords());
+        auto camera_coordinates = camera.project_from_image(point.coords());
         auto score = point.score();
         if (std::isnan(score)) {
             throw std::invalid_argument("score");
@@ -111,17 +109,10 @@ static void draw_background(
     render_target.draw(background_sprite);
 }
 
-static vector<rendered_point> project_points(const Image& image,
-                                             const Camera& camera,
+static vector<rendered_point> project_points(const camera& camera,
                                              const vector<scored_point>& points,
                                              const global_colormap_func& colormap) {
-
-    auto image_position = get_image_position(image);
-    auto img_points = map_vec<scored_point, image_point>(
-            points,
-            [image, image_position](const scored_point& point) {
-                return project_to_image(image, image_position, point);
-            });
+    auto img_points = camera.project_to_image(points);
 
     std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
     auto rendered_points = project_in_camera_with_color(img_points, camera, colormap);
@@ -129,24 +120,21 @@ static vector<rendered_point> project_points(const Image& image,
 }
 
 void render_image(
-        const model_ptr& model,
-        const Image& image,
+        const sparse_cloud& model,
+        const camera& camera,
         const shared_ptr<sf::Shader>& point_shader,
         const path& input_path,
         const path& output_path,
         const vector<scored_point>& points,
         const global_colormap_func& colormap,
         const string& log_prefix) {
-    const path input_file_path{input_path / image.Name()};
-    const path output_file_path{output_path / image.Name()};
-
-    auto camera_id = image.CameraId();
-    auto camera = model->Camera(camera_id);
+    const path input_file_path{input_path / camera.get_name()};
+    const path output_file_path{output_path / camera.get_name()};
 
     auto time_measure = start_time();
 
     sf::RenderTexture render_target;
-    if (!render_target.create(camera.Width(), camera.Height())) {
+    if (!render_target.create(camera.width(), camera.height())) {
         std::cerr << "Could not create render texture." << std::endl;
         exit(2);
     }
@@ -155,7 +143,7 @@ void render_image(
     time_measure = log_and_start_next(time_measure,
                                       log_prefix + "\tSetting up rendering pipeline for image " +
                                       input_file_path.string());
-    vector<rendered_point> rendered_points = project_points(image, camera, points, colormap);
+    vector<rendered_point> rendered_points = project_points(camera, points, colormap);
 
     time_measure = log_and_start_next(time_measure,
                                       log_prefix + "\tPreparing coloring and projection");
@@ -171,10 +159,10 @@ void render_image(
     time_measure = log_and_start_next(time_measure, log_prefix + "\tRetrieving image from the GPU");
 
     output_image.saveToFile(output_file_path);
-    log_and_start_next(time_measure, log_prefix + "\tSaving image " + image.Name());
+    log_and_start_next(time_measure, log_prefix + "\tSaving image " + camera.get_name());
 }
 
-void render_images(const model_ptr& model,
+void render_images(const sparse_cloud& model,
                    const path& input_path,
                    const path& output_path,
                    const vector<scored_point>& points,
@@ -183,17 +171,17 @@ void render_images(const model_ptr& model,
 
     create_directories(output_path);
 #ifdef SINGLE_IMAGE
-    size_t first_image = DEFAULT_IMAGE_ID;
-    size_t last_image = first_image;
+    camera_id_t first_camera = DEFAULT_IMAGE_ID;
+    camera_id_t last_camera = first_camera;
 #else
-    size_t first_image = 1;
-    size_t last_image = model->NumImages();
+    camera_id_t first_camera = 1;
+    camera_id_t last_camera = model.get_cameras().size();
 #endif
-    for (size_t image_id = first_image; image_id <= last_image; image_id++) {
-        auto image = model->Image(image_id);
-        auto log_prefix = get_log_prefix(image_id, last_image);
+    for (camera_id_t camera_id = first_camera; camera_id <= last_camera; camera_id++) {
+        auto camera = model.find_camera(camera_id);
+        auto log_prefix = get_log_prefix(camera_id, last_camera);
 
-        render_image(model, image,
+        render_image(model, camera,
                      shader, input_path, output_path,
                      points, colormap, log_prefix);
 
@@ -210,4 +198,6 @@ global_colormap_func get_colormap(const vector<scored_point>& points,
     auto max_value = *std::max_element(scores.begin(), scores.end());
     std::cerr << "Min " << min_value << " Max " << max_value << std::endl;
     return construct_colormap_function(colormap, min_value, max_value);
+}
+
 }

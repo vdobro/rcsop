@@ -1,0 +1,5 @@
+add_subdirectory(azimuth-angles)
+add_subdirectory(camera-lines)
+add_subdirectory(rcs-slices)
+add_subdirectory(rcs-sums)
+add_subdirectory(sparse-filter)
