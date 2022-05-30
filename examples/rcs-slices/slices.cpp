@@ -1,9 +1,9 @@
 #include "slices.h"
 
-#include "../../rendering/colors.h"
-#include "../../rendering/render_points.h"
+#include "colors.h"
+#include "render_points.h"
 
-#include "../../options.h"
+#include "options.h"
 
 using namespace sfm::rendering;
 

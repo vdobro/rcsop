@@ -1,6 +1,6 @@
 #include "cleanup.h"
 
-#include "../../common/utils/vector.h"
+#include "utils/vector.h"
 
 static double distance_from_origin(const Vector3d& point) {
     return point.norm();

@@ -1,6 +1,3 @@
-#include "../../common/utils/types.h"
-#include "../../common/sparse_cloud.h"
-
 #include "rcs_data.h"
 #include "draw_lines.h"
 
@@ -20,4 +17,6 @@ int main() {
 
     const path line_output_path{output_path / "rcs_lines"};
     draw_lines(*model, rcs, input_image_path, line_output_path);
+
+    return EXIT_SUCCESS;
 }

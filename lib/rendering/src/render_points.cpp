@@ -1,7 +1,7 @@
 #include "render_points.h"
 
-#include "../common/utils/vector.h"
-#include "../common/utils/chronometer.h"
+#include "utils/vector.h"
+#include "utils/chronometer.h"
 
 using std::string;
 
@@ -80,13 +80,30 @@ string get_log_prefix(size_t current, size_t last) {
     return ss.str();
 }
 
+const char* FRAGMENT_SHADER =
+        "uniform vec2 screen_res; "
+        "uniform vec2 p_center; "
+        "uniform vec4 p_color; "
+        "uniform float p_radius; "
+        "uniform float degree; "
+        "float dist(vec2 a, vec2 b) { return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)); } "
+        "void main() {"
+        "vec2 center_coords = vec2(p_center.x, screen_res.y - p_center.y); "
+        "vec2 frag_coords = vec2(gl_FragCoord.x - 0.5, gl_FragCoord.y - 0.5); "
+        "float d = max(0.f, dist(frag_coords, center_coords) / p_radius); "
+        "vec4 center_color = p_color; "
+        "vec4 outside_color = vec4(center_color.rgb, 0.0); "
+        "float gradient = pow(d, 1.0/degree); "
+        "gl_FragColor = mix(center_color, outside_color, gradient); "
+        "}";
+
 shared_ptr<sf::Shader> initialize_renderer() {
     if (!sf::Shader::isAvailable()) {
         std::cout << "Shaders unsupported." << std::endl;
         exit(1);
     }
     shared_ptr<sf::Shader> shader = std::make_shared<sf::Shader>();
-    if (!shader->loadFromFile("rendering/gradient.frag", sf::Shader::Fragment)) {
+    if (!shader->loadFromMemory(FRAGMENT_SHADER, sf::Shader::Fragment)) {
         std::cout << "Could not load required shader." << std::endl;
         exit(1);
     }

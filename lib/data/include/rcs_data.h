@@ -8,7 +8,7 @@
 
 #include "matio.h"
 
-#include "../common/utils/types.h"
+#include "utils/types.h"
 
 using std::vector;
 

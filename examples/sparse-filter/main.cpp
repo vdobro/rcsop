@@ -1,5 +1,3 @@
-#include "../../common/sparse_cloud.h"
-
 #include "cleanup.h"
 
 int main() {

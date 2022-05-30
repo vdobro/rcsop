@@ -6,7 +6,7 @@ static Vector3d get_right(const camera& camera) {
     Vector3d camera_right;
     camera_right.setZero();
     camera_right.x() = 1;
-    auto direction = camera.transform_to_world(camera_right) - camera.get_position();
+    Vector3d direction = camera.transform_to_world(camera_right) - camera.get_position();
     return direction.normalized();
 }
 
@@ -14,7 +14,7 @@ static Vector3d get_up(const camera& camera) {
     Vector3d camera_up;
     camera_up.setZero();
     camera_up.y() = -1;
-    auto direction = camera.transform_to_world(camera_up) - camera.get_position();
+    Vector3d direction = camera.transform_to_world(camera_up) - camera.get_position();
     return direction.normalized();
 }
 

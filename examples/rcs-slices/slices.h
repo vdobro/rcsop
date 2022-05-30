@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../common/utils/types.h"
-#include "../../common/sparse_cloud.h"
+#include "utils/types.h"
+#include "sparse_cloud.h"
 
 void color_slices(sparse_cloud& model,
                   const vector<double>& rcs,

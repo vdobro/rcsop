@@ -1,6 +1,6 @@
 #include "rcs_sums.h"
 
-#include "../common/utils/chronometer.h"
+#include "utils/chronometer.h"
 
 #define HORIZONTAL_ANGLE 25
 #define VERTICAL_ANGLE 15

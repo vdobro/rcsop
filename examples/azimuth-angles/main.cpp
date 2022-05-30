@@ -1,6 +1,4 @@
-#include "../../data/rcs_data.h"
-
-#include "../../common/sparse_cloud.h"
+#include "rcs_data.h"
 
 #include "azimuth_angles.h"
 
@@ -21,8 +19,8 @@ int main() {
     const path azimuth_angle_data_path{input_path / "AudiAuswertung"};
     const path output_path_azimuth{output_path / "azimuth_angles"};
 
-    auto azimuthdata = display_azimuth(model, input_image_path, azimuth_angle_data_path, output_path_azimuth);
-    render_to_files(*azimuthdata, output_path_azimuth);
+    auto azimuth_data = display_azimuth(model, input_image_path, azimuth_angle_data_path, output_path_azimuth);
+    render_to_files(*azimuth_data, output_path_azimuth);
 
     return EXIT_SUCCESS;
 }

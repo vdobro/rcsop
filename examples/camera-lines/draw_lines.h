@@ -2,8 +2,8 @@
 
 #include <Eigen/Geometry>
 
-#include "../../common/utils/types.h"
-#include "../../common/sparse_cloud.h"
+#include "utils/types.h"
+#include "sparse_cloud.h"
 
 #include <vector>
 using std::vector;

@@ -5,14 +5,14 @@
 #include <exception>
 #include <filesystem>
 
-#include "../../data/az_data.h"
-#include "../../data/relative_points.h"
+#include "az_data.h"
+#include "relative_points.h"
 
-#include "../../rendering/render_points.h"
+#include "render_points.h"
 
-#include "../../options.h"
+#include "options.h"
 
-#include "../../common/utils/chronometer.h"
+#include "utils/chronometer.h"
 
 using std::make_pair;
 using std::make_shared;

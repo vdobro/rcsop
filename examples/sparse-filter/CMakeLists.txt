@@ -6,16 +6,15 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -Wall -Wpedantic"
 
 find_package(Eigen3 3.4 REQUIRED)
 
-find_package(COLMAP 3.8 CONFIG REQUIRED)
-link_directories(${COLMAP_LINK_DIRS})
-include_directories(${COLMAP_INCLUDE_DIRS})
+add_executable(sfm-sparse-filter
+        main.cpp
+        cleanup.cpp)
 
-file(GLOB SRC_FILES *.cpp)
-add_executable(sfm-sparse-filter ${SRC_FILES})
-
-target_include_directories(sfm-sparse-filter PRIVATE
-        ${EIGEN3_INCLUDE_DIR}
-        ${PROJECT_SOURCE_DIR})
-
+target_include_directories(sfm-sparse-filter PRIVATE ${PROJECT_SOURCE_DIR})
 set_target_properties(sfm-sparse-filter PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
+
 target_link_libraries(sfm-sparse-filter PRIVATE sfm-coloring-common)
+
+install(TARGETS sfm-sparse-filter sfm-coloring-common
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib)

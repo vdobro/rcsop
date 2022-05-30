@@ -1,6 +1,6 @@
 #include "draw_lines.h"
 
-#include "../../rendering/colors.h"
+#include "colors.h"
 
 typedef Eigen::ParametrizedLine<double, 3> model_line;
 

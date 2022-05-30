@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../common/utils/types.h"
-#include "../common/utils/colmap.h"
-#include "../common/utils/vector.h"
+#include "utils/types.h"
+#include "utils/colmap.h"
+#include "utils/vector.h"
 
 namespace sfm::rendering {
     typedef std::function<Vector3ub(double v, double vmin, double vmax)> local_colormap_func;

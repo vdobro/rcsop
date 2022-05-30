@@ -1,8 +1,4 @@
-
-#include "../../common/utils/types.h"
-#include "../../common/sparse_cloud.h"
-#include "../../data/rcs_data.h"
-
+#include "rcs_data.h"
 #include "slices.h"
 
 int main() {

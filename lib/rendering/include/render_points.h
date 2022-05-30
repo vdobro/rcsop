@@ -5,10 +5,10 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../common/utils/types.h"
-#include "../common/image_point.h"
-#include "../common/sparse_cloud.h"
-#include "../common/scored_point.h"
+#include "utils/types.h"
+#include "image_point.h"
+#include "sparse_cloud.h"
+#include "scored_point.h"
 
 #include "colors.h"
 

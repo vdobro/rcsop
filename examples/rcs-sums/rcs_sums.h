@@ -2,13 +2,13 @@
 
 #include <execution>
 
-#include "../../common/utils/types.h"
-#include "../../data/rcs_data.h"
-#include "../../data/relative_points.h"
+#include "utils/types.h"
+#include "rcs_data.h"
+#include "relative_points.h"
 
-#include "../../rendering/render_points.h"
+#include "render_points.h"
 
-#include "../../options.h"
+#include "options.h"
 
 void accumulate_rcs(const sparse_cloud& model,
                     const rcs_data& rcs_data,

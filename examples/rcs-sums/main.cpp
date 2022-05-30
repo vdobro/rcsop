@@ -1,6 +1,8 @@
-#include "../../data/rcs_data.h"
+#include "rcs_data.h"
+#include "rcs_sums.h"
 
-#include "../../common/sparse_cloud.h"
+#define SUM_RCS
+#define SUM_AZIMUTH
 
 int main() {
     const path data_root_path{"datasets"};
@@ -20,4 +22,9 @@ int main() {
     const path accumulated_rcs_output_path{output_path / "rcs_sums"};
     accumulate_rcs(*model, rcs_file, input_image_path, accumulated_rcs_output_path);
 #endif
+#ifdef SUM_AZIMUTH
+    const path accumulated_azimuth_output_path{output_path / "azimuth_sums"};
+    accumulate_azimuth(*model, rcs_file, input_image_path, accumulated_azimuth_output_path);
+#endif
+    return EXIT_SUCCESS;
 }

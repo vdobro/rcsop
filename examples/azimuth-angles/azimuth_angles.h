@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../common/utils/types.h"
-#include "../../common/sparse_cloud.h"
+#include "utils/types.h"
+#include "sparse_cloud.h"
 
-#include "../../rendering/render_points.h"
+#include "render_points.h"
 
 using sfm::rendering::point_display_payload;
 

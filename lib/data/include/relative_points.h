@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../common/utils/types.h"
-#include "../common/utils/vector.h"
+#include "utils/types.h"
+#include "utils/vector.h"
 
-#include "../common/scored_point.h"
-#include "../common/camera.h"
+#include "scored_point.h"
+#include "camera.h"
 
 typedef struct relative_point {
     Vector3d position;

@@ -1,6 +1,6 @@
 #include "rcs_data.h"
 
-#include "../common/utils/vector.h"
+#include "utils/vector.h"
 
 static const auto RCS_TABLE_NAME = "result";
 static const auto RCS_COLUMN_HEIGHT = "height";
