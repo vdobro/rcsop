@@ -11,6 +11,9 @@ FetchContent_Declare(matio
         GIT_TAG f87216a4f33c658400f25f7306cba483ce3bac1c)
 FetchContent_MakeAvailable(matio)
 
+find_package(Eigen3 3.4 REQUIRED)
+find_package(PCL 1.3 REQUIRED COMPONENTS common io)
+
 include(GenerateExportHeader)
 add_library(sfm-coloring-data SHARED
         $<INSTALL_INTERFACE:include>

@@ -1,0 +1,23 @@
+[submodule "deps/eigen"]
+	path = deps/eigen
+	url = https://gitlab.com/libeigen/eigen.git
+	branch = 3.4.0
+[submodule "deps/flann"]
+	path = deps/flann
+	url = https://github.com/flann-lib/flann
+	branch = master
+[submodule "deps/pcl"]
+	path = deps/pcl
+	url = https://github.com/PointCloudLibrary/pcl
+	branch = master
+[submodule "deps/cgal"]
+	path = deps/cgal
+	url = https://github.com/CGAL/cgal
+[submodule "deps/ceres"]
+	path = deps/ceres
+	url = https://ceres-solver.googlesource.com/ceres-solver
+	branch = 2.1.0
+[submodule "deps/colmap"]
+	path = deps/colmap
+	url = https://github.com/colmap/colmap.git
+	branch = dev
