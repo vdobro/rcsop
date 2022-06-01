@@ -1,17 +1,30 @@
 #include "cleanup.h"
 
-int main() {
-    const path data_root_path{"data"};
-    const path input_path{data_root_path / "input"};
-    const path input_image_path{input_path / "audi_40"};
+#include "boost/program_options.hpp"
 
-    const path output_path{data_root_path / "output"};
+namespace po = boost::program_options;
 
-    const path model_path{input_path / "model"};
-    auto model = std::make_shared<sparse_cloud>(model_path);
+const char* PARAM_INPUT_PATH = "input-path";
+const char* PARAM_OUTPUT_PATH = "output-path";
 
-    const path filtered_model_path{input_path / "filtered_model"};
-    filter_points(*model, filtered_model_path);
+int main(int argc, char *argv[]) {
+    po::options_description desc("Allowed options");
+    desc.add_options()
+            ("input-path,I", po::value<string>(), "path with the COLMAP model to be trimmed")
+            ("output-path,O", po::value<string>(), "output path");
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+    if (!vm.count(PARAM_INPUT_PATH) || !vm.count(PARAM_OUTPUT_PATH)) {
+        std::cout << desc;
+        exit(1);
+    }
+
+    const path input_path{vm.at(PARAM_INPUT_PATH).as<string>()};
+    auto model = std::make_shared<sparse_cloud>(input_path);
+
+    const path output_path{vm.at(PARAM_OUTPUT_PATH).as<string>()};
+    filter_points(*model, output_path);
 
     return EXIT_SUCCESS;
 }
