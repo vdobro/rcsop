@@ -20,3 +20,5 @@ cmake-build-debug
 /data/
 build/
 /deps/cmake_build/
+
+.venv/

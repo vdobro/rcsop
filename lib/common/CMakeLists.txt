@@ -27,7 +27,6 @@ target_include_directories(sfm-coloring-common
         PUBLIC
             ${PROJECT_SOURCE_DIR}/include
             ${COLMAP_INCLUDE_DIRS}
-            ${EIGEN3_INCLUDE_DIR}
         PRIVATE
             ${PROJECT_SOURCE_DIR}/include)
 
@@ -39,6 +38,7 @@ set_target_properties(sfm-coloring-common PROPERTIES LINK_FLAGS_RELEASE "${LINK_
 target_link_libraries(sfm-coloring-common
         PUBLIC
             ${COLMAP_LIBRARIES}
+            Eigen3::Eigen
 )
 
 install(TARGETS sfm-coloring-common

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euox pipefail
+set -euo pipefail
 
 CPU_CORES=$(nproc)
 
@@ -37,6 +37,7 @@ FLANN_BUILD_DIR="$BUILD_DIR/flann"
 mkdir -p "$FLANN_BUILD_DIR"
 cd "$FLANN_BUILD_DIR"
 cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
+    -DCMAKE_BUILD_TYPE="Release" \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_TESTS=OFF \
     -DBUILD_DOC=OFF \
@@ -52,20 +53,12 @@ cd "$FLANN_SOURCE_DIR"
 git reset --hard
 rm -f src/cpp/empty.cpp
 
-# pcl
-PCL_BUILD_DIR="$BUILD_DIR/pcl"
-mkdir -p "$PCL_BUILD_DIR"
-cd "$PCL_BUILD_DIR"
-cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
-    "$pwd/cgal"
-make -j "$CPU_CORES"
-make install
-
 # ceres
 CERES_BUILD_DIR="$BUILD_DIR/ceres"
 mkdir -p "$CERES_BUILD_DIR"
 cd "$CERES_BUILD_DIR"
-cmake -DBUILD_TESTING=OFF \
+cmake -DCMAKE_BUILD_TYPE="Release" \
+    -DBUILD_TESTING=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
@@ -81,13 +74,25 @@ rm -f "cmake/FindEigen3.cmake"
 COLMAP_BUILD_DIR="$BUILD_DIR/colmap"
 mkdir -p "$COLMAP_BUILD_DIR"
 cd "$COLMAP_BUILD_DIR"
-cmake -DCUDA_NVCC_FLAGS="--std c++14" \
-    -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" -DGUI_ENABLED=ON \
+cmake -DCMAKE_BUILD_TYPE="Release" \
+    -DCUDA_NVCC_FLAGS="--std c++14" \
+    -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
+    -DGUI_ENABLED=ON \
     "$COLMAP_SRC_DIR"
 make -j "$CPU_CORES"
 make install
 
 cd "$COLMAP_SRC_DIR"
 git reset --hard
+
+# pcl
+PCL_BUILD_DIR="$BUILD_DIR/pcl"
+mkdir -p "$PCL_BUILD_DIR"
+cd "$PCL_BUILD_DIR"
+cmake -DCMAKE_BUILD_TYPE="Release" \
+    -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
+    "$pwd/pcl"
+make -j 4
+make install
 
 cd "$pwd"

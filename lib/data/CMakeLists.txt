@@ -12,7 +12,6 @@ FetchContent_Declare(matio
 FetchContent_MakeAvailable(matio)
 
 find_package(Eigen3 3.4 REQUIRED)
-find_package(PCL 1.3 REQUIRED COMPONENTS common io)
 
 include(GenerateExportHeader)
 add_library(sfm-coloring-data SHARED

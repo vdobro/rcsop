@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+
 using std::vector;
 
 template<typename Source, typename Target, typename MapFunction>
