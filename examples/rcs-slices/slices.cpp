@@ -30,7 +30,7 @@ static bool inline is_in_triangle(const Vector2d& point,
     return (b1 == b2) && (b2 == b3);
 }
 
-void color_slices(sparse_cloud& model,
+void color_slices(SparseCloud& model,
                   const vector<double>& rcs,
                   const path& input_path,
                   const path& output_path) {

@@ -137,7 +137,7 @@ static vector<rendered_point> project_points(const camera& camera,
 }
 
 void render_image(
-        const sparse_cloud& model,
+        const SparseCloud& model,
         const camera& camera,
         const shared_ptr<sf::Shader>& point_shader,
         const path& input_path,
@@ -179,7 +179,7 @@ void render_image(
     log_and_start_next(time_measure, log_prefix + "\tSaving image " + camera.get_name());
 }
 
-void render_images(const sparse_cloud& model,
+void render_images(const SparseCloud& model,
                    const path& input_path,
                    const path& output_path,
                    const vector<scored_point>& points,

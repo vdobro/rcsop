@@ -7,12 +7,10 @@
 
 #include "az_data.h"
 #include "relative_points.h"
-
 #include "render_points.h"
 
-#include "options.h"
-
 #include "utils/chronometer.h"
+#include "options.h"
 
 using std::make_pair;
 using std::make_shared;
@@ -110,17 +108,25 @@ static map<camera_id_t, map<height_t, shared_ptr<az_data>>> map_cameras_to_azimu
     return camera_to_height_to_data;
 }
 
-shared_ptr<point_display_payload> display_azimuth(const shared_ptr<sparse_cloud>& model,
+shared_ptr<point_display_payload> display_azimuth(const shared_ptr<SparseCloud>& model,
+                                                  const shared_ptr<DenseCloud>& dense_model,
                                                   const path& image_path,
                                                   const path& data_path,
                                                   const path& output_path) {
     auto cameras = model->get_cameras();
     auto camera_count = cameras.size();
-    auto heights = parse_available_heights(data_path);
-
+    vector<long> heights = parse_available_heights(data_path);
+    heights.clear(); //TODO WIP
+    heights.push_back(40); //TODO height data should not be summed at all
     auto data_by_camera = map_cameras_to_azimuth_data(cameras, data_path, heights);
     auto world_scale = model->get_world_scale(CAMERA_DISTANCE);
-    auto scored_points = model->get_scored_points();
+    map<point_id_t, scored_point> scored_points = model->get_scored_points();
+    auto dense_points = dense_model->points();
+    point_id_t dense_point_id = 500000;
+    for (const auto& dense_point: dense_points) {
+        auto point_id = dense_point_id++;
+        scored_points.insert(make_pair(point_id, scored_point(dense_point, point_id, 0)));
+    }
 
     auto render_path = path{output_path / "render"};
     std::filesystem::remove_all(render_path);
@@ -131,11 +137,12 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<sparse_cloud>
     map<camera_id_t, vector<scored_point>> camera_to_points;
     for (const camera& camera: cameras) {
         auto log_prefix = get_log_prefix(camera.id(), camera_count);
+        map<point_id_t, scored_point> camera_points(scored_points);
         map<height_t, shared_ptr<az_data>> height_to_data = data_by_camera.at(camera.id());
         for (auto& height: heights) {
             shared_ptr<az_data> data = height_to_data.at(height);
             auto height_offset = static_cast<double>(height - DEFAULT_HEIGHT) * world_scale;
-            auto relative_points = get_point_angles(camera, height_offset, scored_points);
+            auto relative_points = get_point_angles(camera, height_offset, camera_points);
             for (const auto& point: relative_points) {
                 if (point.horizontal_angle > 5) {
                     //TODO fix for more than +-one additional height
@@ -145,7 +152,7 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<sparse_cloud>
                 auto point_distance = point.distance / world_scale;
                 auto value = data->find_nearest(point_distance, point.horizontal_angle);
                 if (!std::isnan(value)) {
-                    scored_points.at(point.id).increment_score(value);
+                    camera_points.at(point.id).increment_score(value);
                 }
             }
         }
@@ -153,9 +160,9 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<sparse_cloud>
                                           "Scoring of " + std::to_string(scored_points.size()) + " points for "
                                           + std::to_string(camera_count) + " images");
         vector<scored_point> filtered_points;
-        for (const auto& point: scored_points) {
+        for (const auto& point: camera_points) {
             auto old_point = point.second;
-            if (old_point.score_to_dB() < -20) {
+            if (old_point.score_to_dB() < -20 || old_point.score_to_dB() > 5) {
                 continue;
             }
             filtered_points.push_back(old_point);
@@ -171,9 +178,11 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<sparse_cloud>
         return point.score_to_dB();
     });
 
+    auto min_score = *std::min_element(scores.begin(), scores.end());
+    auto max_score = *std::max_element(scores.begin(), scores.end());
     return make_shared<point_display_payload>(point_display_payload{
-            .min_value = *std::min_element(scores.begin(), scores.end()),
-            .max_value = *std::max_element(scores.begin(), scores.end()),
+            .min_value = min_score,
+            .max_value = max_score,
             .points = camera_to_points,
             .model = model,
             .image_path = image_path,

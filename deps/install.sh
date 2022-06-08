@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+git submodule update --init --recursive -q
+
 CPU_CORES=$(nproc)
 
 pwd=$(pwd)

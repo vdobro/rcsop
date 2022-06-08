@@ -3,7 +3,7 @@
 #include "utils/colmap.h"
 #include "utils/vector.h"
 
-sparse_cloud::sparse_cloud(const path& model_path) {
+SparseCloud::SparseCloud(const path& model_path) {
     this->model_path = model_path;
     reload();
 
@@ -18,12 +18,12 @@ sparse_cloud::sparse_cloud(const path& model_path) {
     }
 }
 
-void sparse_cloud::reload() {
+void SparseCloud::reload() {
     this->reconstruction = std::make_unique<Reconstruction>();
     this->reconstruction->Read(model_path);
 }
 
-void sparse_cloud::save(const path& output_path) {
+void SparseCloud::save(const path& output_path) {
     if (!exists(output_path)) {
         create_directories(output_path);
     }
@@ -37,7 +37,7 @@ void sparse_cloud::save(const path& output_path) {
     reconstruction->Write(output_path);
 }
 
-double sparse_cloud::get_world_scale(double camera_distance_to_origin) const {
+double SparseCloud::get_world_scale(double camera_distance_to_origin) const {
     auto camera_positions = get_camera_positions();
 
     auto camera_count = cameras.size();
@@ -56,11 +56,11 @@ double sparse_cloud::get_world_scale(double camera_distance_to_origin) const {
     return (average / 2) / camera_distance_to_origin;
 }
 
-std::vector<camera> sparse_cloud::get_cameras() const {
+std::vector<camera> SparseCloud::get_cameras() const {
     return this->cameras;
 }
 
-std::vector<point_pair> sparse_cloud::get_point_pairs() const {
+std::vector<point_pair> SparseCloud::get_point_pairs() const {
     auto point_map = reconstruction->Points3D();
 
     vector<point_pair> point_pairs;
@@ -74,7 +74,7 @@ std::vector<point_pair> sparse_cloud::get_point_pairs() const {
     return point_pairs;
 }
 
-scored_point_map sparse_cloud::get_scored_points() const {
+scored_point_map SparseCloud::get_scored_points() const {
     auto model_points = get_point_pairs();
     map<point_id_t, scored_point> result;
     for (const auto& point_pair: model_points) {
@@ -85,7 +85,7 @@ scored_point_map sparse_cloud::get_scored_points() const {
     return result;
 }
 
-void sparse_cloud::filter_points(const std::function<bool(const Vector3d&)>& predicate_to_keep) {
+void SparseCloud::filter_points(const std::function<bool(const Vector3d&)>& predicate_to_keep) {
     auto points = reconstruction->Points3D();
 
     for (const auto& point_with_id: points) {
@@ -97,20 +97,20 @@ void sparse_cloud::filter_points(const std::function<bool(const Vector3d&)>& pre
     }
 }
 
-std::vector<Vector3d> sparse_cloud::get_camera_positions() const {
+std::vector<Vector3d> SparseCloud::get_camera_positions() const {
     return map_vec<camera, Vector3d>(get_cameras(), [](const camera& camera) {
         return camera.get_position();
     });
 }
 
-void sparse_cloud::add_point(const Vector3d& point, const Vector3ub& color) {
+void SparseCloud::add_point(const Vector3d& point, const Vector3ub& color) {
     reconstruction->AddPoint3D(point, colmap::Track(), color);
 }
 
-void sparse_cloud::set_point_color(point_id_t point_id, const Vector3ub& color) {
+void SparseCloud::set_point_color(point_id_t point_id, const Vector3ub& color) {
     reconstruction->Point3D(point_id).Color() = color;
 }
 
-camera sparse_cloud::find_camera(camera_id_t camera_id) const {
+camera SparseCloud::find_camera(camera_id_t camera_id) const {
     return camera_map.at(camera_id);
 }

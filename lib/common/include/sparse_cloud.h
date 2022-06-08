@@ -9,16 +9,18 @@
 #include "camera.h"
 #include "scored_point.h"
 
-class sparse_cloud {
+using std::filesystem::path;
+
+class SparseCloud {
 private:
-    std::filesystem::path model_path;
+    path model_path;
     std::unique_ptr<colmap::Reconstruction> reconstruction;
 
     std::vector<camera> cameras;
     map<camera_id_t, camera> camera_map;
 
 public:
-    explicit sparse_cloud(const std::filesystem::path& model_path);
+    explicit SparseCloud(const path& model_path);
 
     [[nodiscard]] double get_world_scale(double camera_distance_to_origin) const;
     [[nodiscard]] std::vector<camera> get_cameras() const;
@@ -29,7 +31,7 @@ public:
     [[nodiscard]] scored_point_map get_scored_points() const;
 
     void reload();
-    void save(const std::filesystem::path& output_path);
+    void save(const path& output_path);
 
     void filter_points(const std::function<bool(const Vector3d&)>& predicate_to_keep);
     void add_point(const Eigen::Vector3d& point, const Eigen::Vector3ub& color);

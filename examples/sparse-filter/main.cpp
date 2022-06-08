@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     }
 
     const path input_path{vm.at(PARAM_INPUT_PATH).as<string>()};
-    auto model = std::make_shared<sparse_cloud>(input_path);
+    auto model = std::make_shared<SparseCloud>(input_path);
 
     const path output_path{vm.at(PARAM_OUTPUT_PATH).as<string>()};
     filter_points(*model, output_path);

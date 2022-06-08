@@ -59,7 +59,7 @@ static double rcs_gaussian(const relative_point& point,
     return calc_gauss(point, options) / point.distance;
 }
 
-static void rcs_sums(const sparse_cloud& model,
+static void rcs_sums(const SparseCloud& model,
                      const rcs_data& rcs_data,
                      const std::function<double(rcs_height_t, size_t, const relative_point&)>& rcs_mapper,
                      const path& input_path,
@@ -128,7 +128,7 @@ static void rcs_sums(const sparse_cloud& model,
     log_and_start_next(time_measure, "(Total) rendering done.");
 }
 
-void accumulate_rcs(const sparse_cloud& model,
+void accumulate_rcs(const SparseCloud& model,
                     const rcs_data& rcs_data,
                     const path& input_path,
                     const path& output_path) {
@@ -158,7 +158,7 @@ static map<rcs_height_t, map<size_t, long>> get_height_map(const rcs_data& rcs_d
     return result;
 }
 
-void accumulate_azimuth(const sparse_cloud& model,
+void accumulate_azimuth(const SparseCloud& model,
                         const rcs_data& rcs_data,
                         const path& input_path,
                         const path& output_path) {

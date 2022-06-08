@@ -33,7 +33,7 @@ private:
 
     void determine_step_sizes();
 public:
-    explicit az_data(const string& range,
+    explicit az_data(const string& filename,
                      const data_eval_position& position);
 
     [[nodiscard]] map<double, vector<double>> get_rcs() const;

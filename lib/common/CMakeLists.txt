@@ -10,6 +10,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 find_package(Eigen3 3.4 REQUIRED)
+find_package(CGAL REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
 
 include(GenerateExportHeader)
@@ -19,6 +20,7 @@ add_library(sfm-coloring-common SHARED
         src/image_point.cpp
         src/scored_point.cpp
         src/sparse_cloud.cpp
+        src/dense_cloud.cpp
         src/chronometer.cpp)
 
 generate_export_header(sfm-coloring-common)
@@ -39,6 +41,7 @@ target_link_libraries(sfm-coloring-common
         PUBLIC
             ${COLMAP_LIBRARIES}
             Eigen3::Eigen
+            CGAL::CGAL
 )
 
 install(TARGETS sfm-coloring-common

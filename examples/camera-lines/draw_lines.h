@@ -8,7 +8,7 @@
 #include <vector>
 using std::vector;
 
-void draw_lines(sparse_cloud& model,
+void draw_lines(SparseCloud& model,
                 const vector<double>& rcs,
                 const path& input_path,
                 const path& output_path);

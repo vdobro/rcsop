@@ -26,7 +26,7 @@ struct point_display_payload {
     double min_value{};
     double max_value{};
     map<camera_id_t, vector<scored_point>> points;
-    shared_ptr<sparse_cloud> model;
+    shared_ptr<SparseCloud> model;
     path image_path;
 };
 
@@ -38,7 +38,7 @@ global_colormap_func get_colormap(const vector<scored_point>& points,
                                   const local_colormap_func& colormap);
 
 void render_image(
-        const sparse_cloud& model,
+        const SparseCloud& model,
         const camera& camera,
         const shared_ptr<sf::Shader>& point_shader,
         const path& input_path,
@@ -47,7 +47,7 @@ void render_image(
         const global_colormap_func& colormap,
         const string& log_prefix);
 
-void render_images(const sparse_cloud& model,
+void render_images(const SparseCloud& model,
                    const path& input_path,
                    const path& output_path,
                    const vector<scored_point>& points,

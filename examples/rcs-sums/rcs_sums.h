@@ -10,12 +10,12 @@
 
 #include "options.h"
 
-void accumulate_rcs(const sparse_cloud& model,
+void accumulate_rcs(const SparseCloud& model,
                     const rcs_data& rcs_data,
                     const path& input_path,
                     const path& output_path);
 
-void accumulate_azimuth(const sparse_cloud& model,
+void accumulate_azimuth(const SparseCloud& model,
                         const rcs_data& rcs_data,
                         const path& input_path,
                         const path& output_path);

@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -Wall -Wpedantic"
 
 find_package(Eigen3 3.4 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(PCL 1.3 REQUIRED COMPONENTS common io segmentation reconstruction)
+find_package(PCL 1.3 REQUIRED COMPONENTS common io segmentation)
 
 add_executable(sfm-dense-filter
         main.cpp

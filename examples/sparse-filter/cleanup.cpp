@@ -6,7 +6,7 @@ static double distance_from_origin(const Vector3d& point) {
     return point.norm();
 }
 
-static double max_camera_distance(const sparse_cloud& model) {
+static double max_camera_distance(const SparseCloud& model) {
     auto image_positions = map_vec<camera, Vector3d>(model.get_cameras(), [](const camera& camera) {
         return camera.get_position();
     });
@@ -14,7 +14,7 @@ static double max_camera_distance(const sparse_cloud& model) {
     return *std::max_element(distances.begin(), distances.end());
 }
 
-void filter_points(sparse_cloud& model,
+void filter_points(SparseCloud& model,
                    const path& output_path) {
     auto distance_threshold = max_camera_distance(model);
 
