@@ -13,8 +13,9 @@ void dummy_task(const InputDataCollector& inputs,
     }
 
     clog << "RCS azimuth data heights: " << endl;
-    for (const auto& height_data : inputs.rcs_azimuth_data()) {
-        clog << height_data.first << endl;
+    shared_ptr<AzimuthRcsMap> data = inputs.data<AZIMUTH_RCS_MAT>(false);
+    for (const auto& height_data : data->heights()) {
+        clog << height_data << endl;
     }
 
     clog << "Test task done" << endl;

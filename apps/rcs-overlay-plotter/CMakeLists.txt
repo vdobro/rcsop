@@ -10,7 +10,8 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 add_executable(rcs-overlay-plotter
         main.cpp
         input_data_collector.cpp
-        test_task.cpp)
+        test_task.cpp
+        azimuth_rcs_map.cpp)
 
 target_include_directories(rcs-overlay-plotter PRIVATE ${PROJECT_SOURCE_DIR})
 set_target_properties(rcs-overlay-plotter PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")

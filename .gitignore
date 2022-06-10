@@ -22,3 +22,5 @@ build/
 /deps/cmake_build/
 
 .venv/
+
+*.log
