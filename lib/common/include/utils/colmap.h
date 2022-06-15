@@ -1,5 +1,5 @@
-#ifndef SFM_COLORING_COMMON_COLMAP_H
-#define SFM_COLORING_COMMON_COLMAP_H
+#ifndef RCSOP_COMMON_COLMAP_H
+#define RCSOP_COMMON_COLMAP_H
 
 #include "colmap/base/reconstruction.h"
 #include "colmap/util/types.h"
@@ -16,4 +16,4 @@ using colmap::Point3D;
 
 using Eigen::Vector3ub;
 
-#endif //SFM_COLORING_COMMON_COLMAP_H
+#endif //RCSOP_COMMON_COLMAP_H

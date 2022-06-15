@@ -1,5 +1,5 @@
-#ifndef SFM_COLORING_OBSERVED_POINT_H
-#define SFM_COLORING_OBSERVED_POINT_H
+#ifndef RCSOP_COMMON_OBSERVED_POINT_H
+#define RCSOP_COMMON_OBSERVED_POINT_H
 
 #include <Eigen/Eigen>
 #include "utils/types.h"
@@ -12,4 +12,4 @@ struct observed_point {
     double horizontal_angle = 0;
 };
 
-#endif //SFM_COLORING_OBSERVED_POINT_H
+#endif //RCSOP_COMMON_OBSERVED_POINT_H

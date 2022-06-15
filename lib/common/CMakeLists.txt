@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SFM_COLORING_COMMON LANGUAGES CXX)
+project(RCSOP_COMMON LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wpedantic")
@@ -15,7 +15,7 @@ find_package(COLMAP 3.8 CONFIG REQUIRED)
 find_package(Boost REQUIRED)
 
 include(GenerateExportHeader)
-add_library(sfm-coloring-common SHARED
+add_library(rcsop-common SHARED
         $<INSTALL_INTERFACE:include>
         src/camera.cpp
         src/image_point.cpp
@@ -23,31 +23,28 @@ add_library(sfm-coloring-common SHARED
         src/sparse_cloud.cpp
         src/dense_cloud.cpp
         src/chronometer.cpp
-        src/observer.cpp)
+        src/observer.cpp
+        src/scored_cloud.cpp src/logging.cpp)
 
-generate_export_header(sfm-coloring-common)
+generate_export_header(rcsop-common)
 
-target_include_directories(sfm-coloring-common
+target_include_directories(rcsop-common
         PUBLIC
             ${PROJECT_SOURCE_DIR}/include
             ${COLMAP_INCLUDE_DIRS}
         PRIVATE
             ${PROJECT_SOURCE_DIR}/include)
-
-include_directories(${COLMAP_INCLUDE_DIRS})
-link_directories(${COLMAP_LINK_DIRS})
-
-target_link_directories(sfm-coloring-common
+target_link_directories(rcsop-common
         PUBLIC
             ${COLMAP_LINK_DIRS})
 
-set_target_properties(sfm-coloring-common PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
-target_link_libraries(sfm-coloring-common
+set_target_properties(rcsop-common PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
+target_link_libraries(rcsop-common
         PUBLIC
             ${COLMAP_LIBRARIES}
             Eigen3::Eigen
             CGAL::CGAL
 )
 
-install(TARGETS sfm-coloring-common
+install(TARGETS rcsop-common
         LIBRARY DESTINATION lib)

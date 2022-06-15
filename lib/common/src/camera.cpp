@@ -12,13 +12,13 @@ Vector3d camera::transform_to_world(const Vector3d& local_coordinates) const {
     return model_image.InverseProjectionMatrix() * local_coordinates.homogeneous();
 }
 
-Vector3d camera::get_position() const {
+Vector3d camera::position() const {
     Vector3d origin = Vector3d();
     origin.setZero();
     return transform_to_world(origin);
 }
 
-Vector3d camera::get_direction() const {
+Vector3d camera::direction() const {
     return model_image.ViewingDirection();
 }
 
@@ -43,7 +43,7 @@ string camera::get_name() const {
 }
 
 vector<image_point> camera::project_to_image(const vector<scored_point>& points) const {
-    const auto camera_position = this->get_position();
+    const auto camera_position = this->position();
     const auto image_projection_matrix = model_image.ProjectionMatrix();
 
     return map_vec<scored_point, image_point>(points, [camera_position, image_projection_matrix]

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RCSOP_DATA_RELATIVE_POINTS_H
+#define RCSOP_DATA_RELATIVE_POINTS_H
 
 #include "utils/types.h"
 #include "utils/vector.h"
@@ -26,3 +27,5 @@ MappedValue find_interval_match(InputValueType search_value,
     size_t index = find_interval_match_index(search_value, first_range, range_epsilon);
     return mapped_values.at(index);
 }
+
+#endif //RCSOP_DATA_RELATIVE_POINTS_H

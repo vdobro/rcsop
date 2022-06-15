@@ -1,5 +1,5 @@
-#ifndef SFM_COLORING_COMMON_SPARSE_CLOUD_H
-#define SFM_COLORING_COMMON_SPARSE_CLOUD_H
+#ifndef RCSOP_COMMON_SPARSE_CLOUD_H
+#define RCSOP_COMMON_SPARSE_CLOUD_H
 
 #include <filesystem>
 #include <vector>
@@ -38,4 +38,4 @@ public:
     void set_point_color(point_id_t point_id, const Eigen::Vector3ub& color);
 };
 
-#endif //SFM_COLORING_COMMON_SPARSE_CLOUD_H
+#endif //RCSOP_COMMON_SPARSE_CLOUD_H

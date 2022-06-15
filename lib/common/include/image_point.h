@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RCSOP_COMMON_IMAGE_POINT_H
+#define RCSOP_COMMON_IMAGE_POINT_H
 
 #include "utils/types.h"
 
@@ -18,3 +19,5 @@ public:
 
     [[nodiscard]] Vector2d coords() const;
 };
+
+#endif //RCSOP_COMMON_IMAGE_POINT_H

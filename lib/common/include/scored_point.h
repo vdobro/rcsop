@@ -1,9 +1,17 @@
-#ifndef SFM_COLORING_COMMON_SCORED_POINT_H
-#define SFM_COLORING_COMMON_SCORED_POINT_H
+#ifndef RCSOP_COMMON_SCORED_POINT_H
+#define RCSOP_COMMON_SCORED_POINT_H
+
+#include <vector>
+using std::vector;
 
 #include "utils/types.h"
 
 typedef std::pair<point_id_t, Vector3d> point_pair;
+
+struct ScoreRange {
+    double min;
+    double max;
+};
 
 class scored_point {
 
@@ -30,8 +38,11 @@ public:
     [[nodiscard]] point_id_t id() const;
 
     [[nodiscard]] double score_to_dB() const;
+
+    static ScoreRange get_score_range(const vector<scored_point>& points);
+
 };
 
 typedef map<point_id_t, scored_point> scored_point_map;
 
-#endif //SFM_COLORING_COMMON_SCORED_POINT_H
+#endif //RCSOP_COMMON_SCORED_POINT_H

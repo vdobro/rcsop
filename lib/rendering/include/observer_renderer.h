@@ -1,35 +1,40 @@
-#ifndef SFM_COLORING_OBSERVER_RENDERER_H
-#define SFM_COLORING_OBSERVER_RENDERER_H
+#ifndef RCSOP_RENDERING_OBSERVER_RENDERER_H
+#define RCSOP_RENDERING_OBSERVER_RENDERER_H
 
+#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 
 #include "observer.h"
-#include "render_points.h"
-using namespace sfm::rendering;
-
 #include "utils/chronometer.h"
+#include "colors.h"
+#include "scored_cloud.h"
+
+struct RenderedPoint {
+    Vector2d coordinates = Vector2d::Zero();
+    Vector3ub color = Vector3ub::Zero();
+};
 
 class ObserverRenderer {
 private:
-    const Observer& _observer;
+    const Observer _observer;
+    const vector<scored_point> _points;
+
     shared_ptr<sf::Shader> _shader;
 
     vector<RenderedPoint> project_points(const vector<scored_point>& points,
-                                         const global_colormap_func& colormap);
+                                         const sfm::rendering::global_colormap_func& colormap);
 
     void render_point(const RenderedPoint& point, sf::RenderTarget& render_target);
 
+    void initialize_renderer();
+
 public:
-    explicit ObserverRenderer(const Observer& observer) : _observer(observer) {
-        this->_shader = sfm::rendering::initialize_renderer();
-    }
+    explicit ObserverRenderer(const ScoredCloud& pointsWithObserver);
 
     void render(const path& output_path,
-                const vector<scored_point>& points,
-                const global_colormap_func& colormap,
+                const sfm::rendering::global_colormap_func& colormap,
                 const string& log_prefix);
 
 };
 
-
-#endif //SFM_COLORING_OBSERVER_RENDERER_H
+#endif //RCSOP_RENDERING_OBSERVER_RENDERER_H

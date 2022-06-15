@@ -1,5 +1,5 @@
-#ifndef SFM_COLORS_DENSE_CLOUD_H
-#define SFM_COLORS_DENSE_CLOUD_H
+#ifndef RCSOP_COMMON_DENSE_CLOUD_H
+#define RCSOP_COMMON_DENSE_CLOUD_H
 
 #include <filesystem>
 #include <memory>
@@ -36,4 +36,4 @@ private:
     shared_ptr<InsideTriangleMesh> inside;
 };
 
-#endif //SFM_COLORS_DENSE_CLOUD_H
+#endif //RCSOP_COMMON_DENSE_CLOUD_H

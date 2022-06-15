@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RCSOP_COMMON_TYPES_H
+#define RCSOP_COMMON_TYPES_H
 
 #include <string>
 #include <memory>
@@ -17,9 +18,10 @@ using std::pair;
 using Eigen::Vector2d;
 using Eigen::Vector3d;
 
-typedef long rcs_height_t;
 typedef ulong point_id_t;
 
 using std::filesystem::path;
 using std::filesystem::create_directories;
 using std::filesystem::remove;
+
+#endif //RCSOP_COMMON_TYPES_H

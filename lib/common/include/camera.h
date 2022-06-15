@@ -1,5 +1,5 @@
-#ifndef SFM_COLORING_COMMON_CAMERA_H
-#define SFM_COLORING_COMMON_CAMERA_H
+#ifndef RCSOP_COMMON_CAMERA_H
+#define RCSOP_COMMON_CAMERA_H
 
 #include "colmap/util/types.h"
 #include "colmap/base/reconstruction.h"
@@ -28,9 +28,9 @@ public:
      */
     [[nodiscard]] Vector3d transform_to_world(const Vector3d& local_coordinates) const;
 
-    [[nodiscard]] Vector3d get_position() const;
+    [[nodiscard]] Vector3d position() const;
 
-    [[nodiscard]] Vector3d get_direction() const;
+    [[nodiscard]] Vector3d direction() const;
 
     [[nodiscard]] Vector2d project_from_image(const Vector2d& point) const;
 
@@ -43,4 +43,4 @@ public:
     [[nodiscard]] vector<image_point> project_to_image(const vector<scored_point>& points) const;
 };
 
-#endif //SFM_COLORING_COMMON_CAMERA_H
+#endif //RCSOP_COMMON_CAMERA_H

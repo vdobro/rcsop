@@ -1,5 +1,5 @@
-#ifndef RCSO_DATA_AZIMUTH_RCS_MAP_H
-#define RCSO_DATA_AZIMUTH_RCS_MAP_H
+#ifndef RCSOP_DATA_AZIMUTH_RCS_MAP_H
+#define RCSOP_DATA_AZIMUTH_RCS_MAP_H
 
 #include "az_data.h"
 
@@ -19,4 +19,4 @@ public:
     [[nodiscard]] shared_ptr<az_data> at_position(const ObserverPosition& position) const;
 };
 
-#endif //RCSO_DATA_AZIMUTH_RCS_MAP_H
+#endif //RCSOP_DATA_AZIMUTH_RCS_MAP_H

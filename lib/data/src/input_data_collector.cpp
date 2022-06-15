@@ -16,14 +16,20 @@ InputDataCollector::InputDataCollector(const path& root_path) {
 }
 
 void InputDataCollector::collect_images() {
-    for (auto const& dir_entry: directory_iterator{_image_path}) {
-        const path& file_path = dir_entry.path();
-        const path file_name = file_path.filename();
-        if (file_name.extension().string() != ".png") {
+    for (auto const& image_dir_entry : directory_iterator{_image_path}) {
+        if (!image_dir_entry.is_directory()) {
             continue;
         }
-        const InputImage image(file_path);
-        this->_images.push_back(image);
+        const path& image_height_folder = image_dir_entry.path();
+        for (auto const& height_dir_entry: directory_iterator{image_height_folder}) {
+            const path& file_path = height_dir_entry.path();
+            const path file_name = file_path.filename();
+            if (file_name.extension().string() != ".png") {
+                continue;
+            }
+            const InputImage image(file_path);
+            this->_images.push_back(image);
+        }
     }
     std::sort(this->_images.begin(), this->_images.end(),
               [](const InputImage& a, const InputImage& b) -> bool {

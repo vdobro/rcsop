@@ -1,5 +1,5 @@
-#ifndef RCSO_DATA_INPUT_IMAGE_H
-#define RCSO_DATA_INPUT_IMAGE_H
+#ifndef RCSOP_DATA_INPUT_IMAGE_H
+#define RCSOP_DATA_INPUT_IMAGE_H
 
 #include <filesystem>
 using std::filesystem::path;
@@ -9,14 +9,14 @@ using std::filesystem::path;
 
 class InputImage {
 private:
-    ObserverPosition _camera_position;
     path _file_path;
+    ObserverPosition _camera_position;
 
 public:
     explicit InputImage(const path& path);
     [[nodiscard]] ObserverPosition position() const;
-    [[nodiscard]] azimuth_t azimuth() const;
+
     [[nodiscard]] path file_path() const;
 };
 
-#endif //RCSO_DATA_INPUT_IMAGE_H
+#endif //RCSOP_DATA_INPUT_IMAGE_H

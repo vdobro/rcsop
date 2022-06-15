@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RCSOP_DATA_AZ_DATA_H
+#define RCSOP_DATA_AZ_DATA_H
 
 #include <cmath>
 #include <stdexcept>
@@ -39,3 +40,5 @@ public:
 
     [[nodiscard]] double find_nearest(double range_distance, double angle) const;
 };
+
+#endif //RCSOP_DATA_AZ_DATA_H

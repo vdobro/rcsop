@@ -68,9 +68,8 @@ static vector<double> get_rcs_db(size_t index, matvar_t* table) {
 
 static vector<long> get_angles(size_t index, matvar_t* table) {
     auto raw_values = get_raw_values(index, RCS_COLUMN_ANGLE, table);
-    return map_vec<double, long>(raw_values, [](double angle) {
-        return static_cast<long>(angle);
-    });
+
+    return cast_vec<double, long>(raw_values);
 }
 
 /**
@@ -79,7 +78,7 @@ static vector<long> get_angles(size_t index, matvar_t* table) {
 static vector<long> get_ranges(size_t index, matvar_t* table) {
     auto raw_values = get_raw_values(index, RCS_COLUMN_RANGE, table);
 
-    return map_vec<double, long>(raw_values, [](double range) {
+    return map_vec<double, long>(raw_values, [](double range) -> long {
         return std::lround(range * 100);
     });
 }

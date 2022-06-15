@@ -18,18 +18,13 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input) {
         auto image_path = image.file_path();
         auto image_name = image_path.filename().string();
 
-        shared_ptr<camera> observer_camera = nullptr;
         for (const auto& camera: cameras) {
             if (image_name == camera.get_name()) {
-                *observer_camera = camera;
+                Observer observer(image.position(), camera, image_path, world_scale);
+                _observers.push_back(observer);
                 break;
             }
         }
-        if (observer_camera == nullptr) {
-            throw invalid_argument("Could not find a suitable camera for image " + image_name);
-        }
-        Observer observer(image.position(), observer_camera, image_path, world_scale);
-        _observers.push_back(observer);
     }
 }
 

@@ -1,5 +1,5 @@
-#ifndef RCSO_DATA_CAMERA_PROVIDER_H
-#define RCSO_DATA_CAMERA_PROVIDER_H
+#ifndef RCSOP_DATA_CAMERA_PROVIDER_H
+#define RCSOP_DATA_CAMERA_PROVIDER_H
 
 #include "input_data_collector.h"
 #include "observer.h"
@@ -14,5 +14,4 @@ public:
     [[nodiscard]] vector<Observer> observers() const;
 };
 
-
-#endif //RCSO_DATA_CAMERA_PROVIDER_H
+#endif //RCSOP_DATA_CAMERA_PROVIDER_H

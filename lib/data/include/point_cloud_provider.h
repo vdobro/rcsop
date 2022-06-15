@@ -1,5 +1,5 @@
-#ifndef RCSO_DATA_POINT_CLOUD_PROVIDER_H
-#define RCSO_DATA_POINT_CLOUD_PROVIDER_H
+#ifndef RCSOP_DATA_POINT_CLOUD_PROVIDER_H
+#define RCSOP_DATA_POINT_CLOUD_PROVIDER_H
 
 #include "input_data_collector.h"
 
@@ -18,7 +18,8 @@ public:
     [[nodiscard]] scored_point_map get_base_scored_points() const;
 
     [[nodiscard]] double get_world_scale() const;
+
+    [[nodiscard]] vector<scored_point> get_base_scored_point_list() const;
 };
 
-
-#endif //RCSO_DATA_POINT_CLOUD_PROVIDER_H
+#endif //RCSOP_DATA_POINT_CLOUD_PROVIDER_H

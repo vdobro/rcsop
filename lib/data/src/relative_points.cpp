@@ -6,7 +6,7 @@ static Vector3d get_right(const camera& camera) {
     Vector3d camera_right;
     camera_right.setZero();
     camera_right.x() = 1;
-    Vector3d direction = camera.transform_to_world(camera_right) - camera.get_position();
+    Vector3d direction = camera.transform_to_world(camera_right) - camera.position();
     return direction.normalized();
 }
 
@@ -14,7 +14,7 @@ static Vector3d get_up(const camera& camera) {
     Vector3d camera_up;
     camera_up.setZero();
     camera_up.y() = -1;
-    Vector3d direction = camera.transform_to_world(camera_up) - camera.get_position();
+    Vector3d direction = camera.transform_to_world(camera_up) - camera.position();
     return direction.normalized();
 }
 
@@ -26,7 +26,7 @@ vector<observed_point> get_point_angles(const camera& image,
                                         const scored_point_map& points) {
     auto right = get_right(image);
     auto up = get_up(image);
-    Vector3d image_pos = image.get_position() + (height_offset * up);
+    Vector3d image_pos = image.position() + (height_offset * up);
 
     const plane vertical_plane = plane(right, image_pos);
     const plane horizontal_plane = plane(up, image_pos);

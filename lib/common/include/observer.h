@@ -1,5 +1,5 @@
-#ifndef SFM_COLORING_OBSERVER_H
-#define SFM_COLORING_OBSERVER_H
+#ifndef RCSOP_COMMON_OBSERVER_H
+#define RCSOP_COMMON_OBSERVER_H
 
 #include "observer_position.h"
 #include "camera.h"
@@ -9,7 +9,7 @@ class Observer {
 private:
     const ObserverPosition _position;
     const path _source_filepath;
-    const shared_ptr<camera> _camera;
+    const camera _camera;
     const double _worldScale;
 
     [[nodiscard]] Vector3d get_right() const;
@@ -18,7 +18,7 @@ private:
 
 public:
     explicit Observer(const ObserverPosition& camera_position,
-                      shared_ptr<camera> camera,
+                      const camera& camera,
                       path filepath,
                       double world_scale);
 
@@ -26,10 +26,9 @@ public:
 
     [[nodiscard]] path source_image_path() const;
 
-    [[nodiscard]] shared_ptr<camera> native_camera() const;
+    [[nodiscard]] camera native_camera() const;
 
     [[nodiscard]] vector<observed_point> observe_points(const scored_point_map& camera_points) const;
 };
 
-
-#endif //SFM_COLORING_OBSERVER_H
+#endif //RCSOP_COMMON_OBSERVER_H

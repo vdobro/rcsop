@@ -9,6 +9,7 @@
 
 #include "tasks/test_task.h"
 #include "tasks/azimuth_rcs_plotter.h"
+#include "tasks/rcs_slices.h"
 
 namespace po = boost::program_options;
 
@@ -35,11 +36,13 @@ using std::chrono::system_clock;
 const char* PARAM_INPUT_PATH = "input-path";
 const char* PARAM_TASK = "task";
 const char* PARAM_OUTPUT_PATH = "output-path";
+const char* PARAM_OUTPUT_NAME_TIMESTAMP = "timestamp";
 
-const map<string, std::function<void(const InputDataCollector&,
+const map<string, std::function<void(const shared_ptr<InputDataCollector>,
                                      const path&)>> available_tasks = {
         {"test-task", dummy_task},
         {"azimuth-rcs", azimuth_rcs_plotter},
+        {"rcs-slices", rcs_slices},
 };
 
 string get_current_timestamp() {
@@ -73,6 +76,7 @@ int main(int argc, char* argv[]) {
             ("input-path,I", po::value<string>(),
              "folder with the inputs: source images, sparse/dense point clouds and MATLAB data sources")
             ("task,T", po::value<string>(), "task to execute")
+            ("timestamp,M", po::value<bool>(), "whether output folder name should be the current timestamp")
             ("output-path,O", po::value<string>(), "output path");
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -87,20 +91,33 @@ int main(int argc, char* argv[]) {
     const string task{vm.at(PARAM_TASK).as<string>()};
     validate_options(input_path, output_path, task);
 
-    const string current_timestamp = get_current_timestamp();
-    const path task_output_path{output_path / task / current_timestamp};
+    bool use_timestamps_as_output_name = true;
+    if (vm.count(PARAM_OUTPUT_NAME_TIMESTAMP)) {
+        use_timestamps_as_output_name = vm.at(PARAM_OUTPUT_NAME_TIMESTAMP).as<bool>();
+    }
+
+    string output_target_folder = "latest";
+    if (use_timestamps_as_output_name){
+        output_target_folder = get_current_timestamp();
+    }
+    const path task_output_path{output_path / task / output_target_folder};
 
     if (is_directory(task_output_path)) {
         cerr << "Warning: a directory with the name '" << task_output_path
-             << "' exists already and will be removed" << std::endl;
+             << "' exists already and will be removed" << endl;
         remove_all(task_output_path);
     }
     create_directories(task_output_path);
 
-    shared_ptr<InputDataCollector> input_collector = make_shared<InputDataCollector>(input_path);
+    try {
+        shared_ptr<InputDataCollector> input_collector = make_shared<InputDataCollector>(input_path);
 
-    const auto task_executor = available_tasks.at(task);
-    task_executor(*input_collector, task_output_path);
-
+        const auto task_executor = available_tasks.at(task);
+        task_executor(input_collector, task_output_path);
+    } catch (const std::exception& e) {
+        cerr << "Failed to execute given task, reason:" << endl;
+        cerr << e.what() << endl;
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }

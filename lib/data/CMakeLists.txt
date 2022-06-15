@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SFM_COLORING_DATA LANGUAGES CXX)
+project(RCSOP_DATA LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wpedantic")
@@ -14,7 +14,7 @@ FetchContent_MakeAvailable(matio)
 find_package(Eigen3 3.4 REQUIRED)
 
 include(GenerateExportHeader)
-add_library(sfm-coloring-data SHARED
+add_library(rcsop-data SHARED
         $<INSTALL_INTERFACE:include>
         src/az_data.cpp
         src/rcs_data.cpp
@@ -24,21 +24,21 @@ add_library(sfm-coloring-data SHARED
         src/point_cloud_provider.cpp
         src/azimuth_rcs_map.cpp
         src/observer_provider.cpp)
-generate_export_header(sfm-coloring-data)
+generate_export_header(rcsop-data)
 
-target_include_directories(sfm-coloring-data
+target_include_directories(rcsop-data
         PUBLIC
             ${MATIO_PUBLIC_HEADERS}
             ${PROJECT_SOURCE_DIR}/include
-            ${SFM_COLORING_COMMON_PUBLIC_INCLUDE_DIR}
+            ${RCSOP_COMMON_PUBLIC_INCLUDE_DIR}
         PRIVATE
             ${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(sfm-coloring-data
+target_link_libraries(rcsop-data
         PUBLIC
             matio
-            sfm-coloring-common)
-set_target_properties(sfm-coloring-data PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
+            rcsop-common)
+set_target_properties(rcsop-data PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
 
-install(TARGETS sfm-coloring-data
+install(TARGETS rcsop-data
         LIBRARY DESTINATION lib)

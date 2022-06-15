@@ -1,9 +1,12 @@
-#include "slices.h"
+#include "rcs_slices.h"
 
 #include "colors.h"
-#include "render_points.h"
-
 #include "options.h"
+
+#include "observer_provider.h"
+#include "point_cloud_provider.h"
+#include "observer_renderer.h"
+#include "utils/logging.h"
 
 using namespace sfm::rendering;
 
@@ -30,22 +33,24 @@ static bool inline is_in_triangle(const Vector2d& point,
     return (b1 == b2) && (b2 == b3);
 }
 
-void color_slices(SparseCloud& model,
-                  const vector<double>& rcs,
-                  const path& input_path,
-                  const path& output_path) {
-    auto images = model.get_cameras();
-    auto image_count = images.size();
-    auto image_positions = model.get_camera_positions();
+static const height_t DEFAULT_HEIGHT = 40;
+void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
+                const path& output_path) {
+    const auto observer_provider = make_shared<ObserverProvider>(*inputs);
+    const auto point_provider = make_shared<PointCloudProvider>(*inputs);
 
-    vector<scored_point> points = map_vec<point_pair, scored_point>(model.get_point_pairs(), [](const point_pair& pair) {
-        return scored_point(pair);
-    });
+    auto observers = observer_provider->observers();
+    auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
+    auto image_positions = map_vec<camera, Vector3d>(cameras, &camera::position);
+    auto image_count = cameras.size();
+
+    vector<scored_point> points = point_provider->get_base_scored_point_list();
 
     auto origin = Vector2d();
     origin.setZero();
 
-    const auto rcs_colors = color_values(rcs, map_turbo);
+    auto data = inputs->data<SIMPLE_RCS_MAT>(false)->at_height(DEFAULT_HEIGHT)->rcs();
+    const auto rcs_colors = color_values(data, map_turbo);
 
     for (auto& point: points) {
         auto flat_point = flat_down_from_above(point.position());
@@ -60,19 +65,23 @@ void color_slices(SparseCloud& model,
             auto midpoint_to_next = (current_camera + next_camera) / 2;
 
             if (is_in_triangle(flat_point, midpoint_to_previous, midpoint_to_next, origin)) {
-                model.set_point_color(point.id(), rcs_colors[image_id]);
-                point.increment_score(rcs[image_id]);
+                point.increment_score(data[image_id]);
                 continue;
             }
         }
     }
 
-    std::filesystem::create_directories(output_path);
-    model.save(output_path);
+    auto renderers = map_vec<Observer, ObserverRenderer>(observers, [points](const Observer& observer) -> ObserverRenderer {
+        ScoredCloud payload(observer, points);
+        return ObserverRenderer(payload);
+    });
 
-    const path render_path{output_path / "render"};
-    std::filesystem::remove_all(render_path);
+    auto score_range = scored_point::get_score_range(points);
+    auto colormap = construct_colormap_function(COLOR_MAP, score_range);
 
-    auto colormap = get_colormap(points, COLOR_MAP);
-    render_images(input_path, render_path, images, points, colormap);
+    size_t index = 0;
+    size_t last = renderers.size();
+    for(auto& renderer : renderers) {
+        renderer.render(output_path, colormap, construct_log_prefix(index++, last));
+    }
 }

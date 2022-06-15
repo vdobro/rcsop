@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RCSOP_DATA_RCS_DATA_H
+#define RCSOP_DATA_RCS_DATA_H
 
 #include <map>
 #include <stdexcept>
@@ -57,3 +58,5 @@ public:
 
     [[nodiscard]] vector<long> available_heights() const;
 };
+
+#endif //RCSOP_DATA_RCS_DATA_H

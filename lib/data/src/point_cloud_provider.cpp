@@ -8,10 +8,7 @@ PointCloudProvider::PointCloudProvider(const InputDataCollector& input) {
         this->sparse_cloud_points = sparse_cloud->get_scored_points();
 
         auto point_ids = map_vec<point_pair, point_id_t>(
-                sparse_cloud->get_point_pairs(),
-                [](const point_pair& point_pair) -> point_id_t {
-                    return point_pair.first;
-                });
+                sparse_cloud->get_point_pairs(), &point_pair::first);
         max_sparse_point_id = *std::max_element(point_ids.begin(), point_ids.end());
     }
     if (input.data_available<DENSE_MESH_PLY>()) {
@@ -33,6 +30,19 @@ scored_point_map PointCloudProvider::get_base_scored_points() const {
     }
 
     return result;
+}
+
+vector<scored_point> PointCloudProvider::get_base_scored_point_list() const {
+    scored_point_map point_map = get_base_scored_points();
+    vector<scored_point> points;
+    points.resize(point_map.size());
+
+    size_t index = 0;
+    for (const auto& pair : point_map) {
+        points[index] = pair.second;
+        index++;
+    }
+    return points;
 }
 
 double PointCloudProvider::get_world_scale() const {

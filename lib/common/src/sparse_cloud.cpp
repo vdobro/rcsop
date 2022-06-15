@@ -98,9 +98,7 @@ void SparseCloud::filter_points(const std::function<bool(const Vector3d&)>& pred
 }
 
 std::vector<Vector3d> SparseCloud::get_camera_positions() const {
-    return map_vec<camera, Vector3d>(get_cameras(), [](const camera& camera) {
-        return camera.get_position();
-    });
+    return map_vec<camera, Vector3d>(get_cameras(), &camera::position);
 }
 
 void SparseCloud::add_point(const Vector3d& point, const Vector3ub& color) {

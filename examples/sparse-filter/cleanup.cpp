@@ -7,9 +7,7 @@ static double distance_from_origin(const Vector3d& point) {
 }
 
 static double max_camera_distance(const SparseCloud& model) {
-    auto image_positions = map_vec<camera, Vector3d>(model.get_cameras(), [](const camera& camera) {
-        return camera.get_position();
-    });
+    auto image_positions = map_vec<camera, Vector3d>(model.get_cameras(), &camera::get_position);
     auto distances = map_vec<Vector3d, double>(image_positions, distance_from_origin);
     return *std::max_element(distances.begin(), distances.end());
 }

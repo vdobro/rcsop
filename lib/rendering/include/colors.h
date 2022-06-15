@@ -1,8 +1,11 @@
-#pragma once
+#ifndef RCSOP_RENDERING_COLORS_H
+#define RCSOP_RENDERING_COLORS_H
 
 #include "utils/types.h"
 #include "utils/colmap.h"
 #include "utils/vector.h"
+
+#include "scored_point.h"
 
 namespace sfm::rendering {
     typedef std::function<Vector3ub(double v, double vmin, double vmax)> local_colormap_func;
@@ -21,9 +24,15 @@ namespace sfm::rendering {
 
     global_colormap_func construct_colormap_function(
             const local_colormap_func& colormap,
+            const ScoreRange& range);
+
+    global_colormap_func construct_colormap_function(
+            const local_colormap_func& colormap,
             const vector<double>& values);
 
     vector<Vector3ub> color_values(const vector<double>& value,
                                    const local_colormap_func& colormap);
 
 }
+
+#endif //RCSOP_RENDERING_COLORS_H

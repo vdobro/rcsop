@@ -617,6 +617,11 @@ namespace sfm::rendering {
     }
 
     global_colormap_func construct_colormap_function(const local_colormap_func& colormap,
+                                                     const ScoreRange& range) {
+        return construct_colormap_function(colormap, range.min, range.max);
+    }
+
+    global_colormap_func construct_colormap_function(const local_colormap_func& colormap,
                                                      const vector<double>& values) {
         auto min_value = *std::min_element(values.begin(), values.end());
         auto max_value = *std::max_element(values.begin(), values.end());
@@ -633,5 +638,4 @@ namespace sfm::rendering {
             return colormap(value, min_value, max_value);
         });
     }
-
 }

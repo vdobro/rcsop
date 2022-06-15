@@ -4,17 +4,13 @@
 #include <utility>
 
 Observer::Observer(const ObserverPosition& camera_position,
-                   shared_ptr<camera> source_camera,
+                   const camera& source_camera,
                    path filepath,
                    double world_scale)
         : _position(camera_position),
           _source_filepath(std::move(filepath)),
-          _camera(std::move(source_camera)),
-          _worldScale(world_scale) {
-    if (_camera == nullptr) {
-        throw std::invalid_argument("Observer camera must not be null");
-    }
-}
+          _camera(source_camera),
+          _worldScale(world_scale) {}
 
 typedef Eigen::Hyperplane<double, 3> plane;
 
@@ -22,7 +18,7 @@ Vector3d Observer::get_right() const {
     Vector3d camera_right;
     camera_right.setZero();
     camera_right.x() = 1;
-    Vector3d direction = _camera->transform_to_world(camera_right) - _camera->get_position();
+    Vector3d direction = _camera.transform_to_world(camera_right) - _camera.position();
     return direction.normalized();
 }
 
@@ -30,7 +26,7 @@ Vector3d Observer::get_up() const {
     Vector3d camera_up;
     camera_up.setZero();
     camera_up.y() = -1;
-    Vector3d direction = _camera->transform_to_world(camera_up) - _camera->get_position();
+    Vector3d direction = _camera.transform_to_world(camera_up) - _camera.position();
     return direction.normalized();
 }
 
@@ -79,7 +75,7 @@ vector<observed_point> Observer::observe_points(const scored_point_map& camera_p
 
     const auto right = get_right();
     const auto up = get_up();
-    const Vector3d observer_position = this->_camera->get_position() + (height_offset * up);
+    const Vector3d observer_position = this->_camera.position() + (height_offset * up);
 
     const plane vertical_plane = plane(right, observer_position);
     const plane horizontal_plane = plane(up, observer_position);
@@ -104,6 +100,6 @@ path Observer::source_image_path() const {
     return this->_source_filepath;
 }
 
-shared_ptr<camera> Observer::native_camera() const {
+camera Observer::native_camera() const {
     return this->_camera;
 }

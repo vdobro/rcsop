@@ -1,4 +1,5 @@
 #include "scored_point.h"
+#include "utils/vector.h"
 
 #include <utility>
 
@@ -27,4 +28,19 @@ double scored_point::score_to_dB() const {
 
 void scored_point::increment_score(double value) {
     this->_score += value;
+}
+
+ScoreRange scored_point::get_score_range(const vector<scored_point>& points) {
+    if (points.empty()) {
+        throw std::invalid_argument("Point array may not be empty to find a min/max value.");
+    }
+    auto scores = map_vec<scored_point, double>(points, &scored_point::score_to_dB);
+
+    auto min_score = *std::min_element(scores.begin(), scores.end());
+    auto max_score = *std::max_element(scores.begin(), scores.end());
+
+    return ScoreRange{
+            .min = min_score,
+            .max = max_score,
+    };
 }

@@ -1,5 +1,5 @@
-#ifndef RCSO_DATA_INPUT_DATA_COLLECTOR_H
-#define RCSO_DATA_INPUT_DATA_COLLECTOR_H
+#ifndef RCSOP_DATA_INPUT_DATA_COLLECTOR_H
+#define RCSOP_DATA_INPUT_DATA_COLLECTOR_H
 
 #include <string>
 #include <vector>
@@ -104,4 +104,4 @@ public:
     }
 };
 
-#endif //RCSO_DATA_INPUT_DATA_COLLECTOR_H
+#endif //RCSOP_DATA_INPUT_DATA_COLLECTOR_H
