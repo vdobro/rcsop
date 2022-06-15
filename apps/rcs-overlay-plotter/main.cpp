@@ -5,9 +5,10 @@
 #include <chrono>
 
 #include "boost/program_options.hpp"
-
 #include "input_data_collector.h"
-#include "test_task.h"
+
+#include "tasks/test_task.h"
+#include "tasks/azimuth_rcs_plotter.h"
 
 namespace po = boost::program_options;
 
@@ -36,8 +37,9 @@ const char* PARAM_TASK = "task";
 const char* PARAM_OUTPUT_PATH = "output-path";
 
 const map<string, std::function<void(const InputDataCollector&,
-        const path&)>> available_tasks = {
-        {"test-task", dummy_task}
+                                     const path&)>> available_tasks = {
+        {"test-task", dummy_task},
+        {"azimuth-rcs", azimuth_rcs_plotter},
 };
 
 string get_current_timestamp() {

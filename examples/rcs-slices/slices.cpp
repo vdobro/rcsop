@@ -74,5 +74,5 @@ void color_slices(SparseCloud& model,
     std::filesystem::remove_all(render_path);
 
     auto colormap = get_colormap(points, COLOR_MAP);
-    render_images(model, input_path, render_path, points, colormap);
+    render_images(input_path, render_path, images, points, colormap);
 }

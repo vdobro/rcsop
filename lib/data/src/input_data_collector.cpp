@@ -22,9 +22,13 @@ void InputDataCollector::collect_images() {
         if (file_name.extension().string() != ".png") {
             continue;
         }
-        this->_image_names.push_back(file_path);
+        const InputImage image(file_path);
+        this->_images.push_back(image);
     }
-    std::sort(this->_image_names.begin(), this->_image_names.end());
+    std::sort(this->_images.begin(), this->_images.end(),
+              [](const InputImage& a, const InputImage& b) -> bool {
+                  return a.file_path() < b.file_path();
+              });
 }
 
 void InputDataCollector::collect_models() {
@@ -53,6 +57,6 @@ void InputDataCollector::collect_rcs_data() {
     }
 }
 
-vector<path> InputDataCollector::image_paths() const {
-    return this->_image_names;
+vector<InputImage> InputDataCollector::images() const {
+    return this->_images;
 }

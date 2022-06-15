@@ -36,13 +36,14 @@ map_azimuth_angles_to_data(height_t height, const path& data_path) {
     map<azimuth_t, shared_ptr<az_data>> azimuth_to_data;
     for (auto const& dir_entry: recursive_directory_iterator{height_path}) {
         smatch sm;
-        auto file_path = dir_entry.path().string();
-        auto filename = dir_entry.path().filename().string();
+        const path& directory_path = dir_entry.path();
+        const string file_path = directory_path.string();
+        const string filename = directory_path.filename().string();
         if (!regex_match(filename, sm, mat_file_regex)) {
             continue;
         }
         azimuth_t azimuth = stoi(sm[1]);
-        data_eval_position position = {
+        ObserverPosition position = {
                 .height = height,
                 .azimuth = azimuth,
         };
@@ -69,8 +70,12 @@ AzimuthRcsMap::AzimuthRcsMap(const path& input_path) {
     collect_all_heights(input_path, this->data);
 }
 
-shared_ptr<az_data> AzimuthRcsMap::atHeightAndAngle(height_t height, azimuth_t angle) const {
-    return this->data->at(height).at(angle);
+map<azimuth_t, shared_ptr<az_data>> AzimuthRcsMap::at_height(height_t height) const {
+    return this->data->at(height);
+}
+
+shared_ptr<az_data> AzimuthRcsMap::at_position(const ObserverPosition& position) const {
+    return this->at_height(position.height).at(position.azimuth);
 }
 
 vector<height_t> AzimuthRcsMap::heights() const {

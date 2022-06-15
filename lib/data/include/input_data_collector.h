@@ -1,5 +1,5 @@
-#ifndef RCS_OVERLAY_PLOTTER_INPUT_DATA_COLLECTOR_H
-#define RCS_OVERLAY_PLOTTER_INPUT_DATA_COLLECTOR_H
+#ifndef RCSO_DATA_INPUT_DATA_COLLECTOR_H
+#define RCSO_DATA_INPUT_DATA_COLLECTOR_H
 
 #include <string>
 #include <vector>
@@ -10,6 +10,7 @@
 #include "dense_cloud.h"
 #include "rcs_data.h"
 #include "azimuth_rcs_map.h"
+#include "input_image.h"
 
 using std::string;
 using std::vector;
@@ -62,7 +63,7 @@ class InputDataCollector {
 private:
     path _root_path;
     path _image_path;
-    vector<path> _image_names;
+    vector<InputImage> _images;
     map<InputAssetType, vector<path>> _asset_paths = {
             {InputAssetType::SPARSE_CLOUD_COLMAP, vector<path>{}},
             {InputAssetType::DENSE_MESH_PLY,      vector<path>{}},
@@ -79,7 +80,7 @@ private:
 public:
     explicit InputDataCollector(const path& root_path);
 
-    [[nodiscard]] vector<path> image_paths() const;
+    [[nodiscard]] vector<InputImage> images() const;
 
     template<InputAssetType AssetType>
     shared_ptr<InputAssetDataType<AssetType>> data(bool allow_multiple) const {
@@ -95,6 +96,12 @@ public:
         const path& asset_path = asset_paths[0];
         return make_shared<InputAssetDataType<AssetType>>(asset_path);
     }
+
+    template<InputAssetType AssetType>
+    [[nodiscard]] bool data_available() const {
+        vector<path> asset_paths = _asset_paths.at(AssetType);
+        return !asset_paths.empty();
+    }
 };
 
-#endif //RCS_OVERLAY_PLOTTER_INPUT_DATA_COLLECTOR_H
+#endif //RCSO_DATA_INPUT_DATA_COLLECTOR_H

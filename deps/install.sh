@@ -88,13 +88,13 @@ cd "$COLMAP_SRC_DIR"
 git reset --hard
 
 # pcl
-PCL_BUILD_DIR="$BUILD_DIR/pcl"
-mkdir -p "$PCL_BUILD_DIR"
-cd "$PCL_BUILD_DIR"
-cmake -DCMAKE_BUILD_TYPE="Release" \
-    -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
-    "$pwd/pcl"
-make -j 4
-make install
+#PCL_BUILD_DIR="$BUILD_DIR/pcl"
+#mkdir -p "$PCL_BUILD_DIR"
+#cd "$PCL_BUILD_DIR"
+#cmake -DCMAKE_BUILD_TYPE="Release" \
+#    -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
+#    "$pwd/pcl"
+#make -j 4
+#make install
 
 cd "$pwd"

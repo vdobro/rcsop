@@ -7,23 +7,18 @@ using std::string;
 
 namespace sfm::rendering {
 
-typedef struct rendered_point {
-    Vector2d coordinates = Vector2d::Zero();
-    Vector3ub color = Vector3ub::Zero();
-} rendered_point;
-
-static vector<rendered_point> project_in_camera_with_color(
+static vector<RenderedPoint> project_in_camera_with_color(
         const vector<image_point>& points,
         const camera& camera,
         const global_colormap_func& colormap) {
-    return map_vec<image_point, rendered_point>(points, [camera, colormap](const image_point& point) {
+    return map_vec<image_point, RenderedPoint>(points, [camera, colormap](const image_point& point) {
         auto camera_coordinates = camera.project_from_image(point.coords());
         auto score = point.score();
         if (std::isnan(score)) {
             throw std::invalid_argument("score");
         }
         auto color = colormap(point.score());
-        return rendered_point{
+        return RenderedPoint{
                 .coordinates = camera_coordinates,
                 .color = color
         };
@@ -31,7 +26,7 @@ static vector<rendered_point> project_in_camera_with_color(
 }
 
 static void render_point(
-        const rendered_point& point,
+        const RenderedPoint& point,
         sf::RenderTarget& render_target,
         sf::Shader& shader) {
     sf::VertexArray quad(sf::Quads, 4);
@@ -110,7 +105,7 @@ shared_ptr<sf::Shader> initialize_renderer() {
     return shader;
 }
 
-static void draw_background(
+void draw_background(
         sf::RenderTarget& render_target,
         const path& input_file_path) {
     sf::Texture background;
@@ -126,9 +121,9 @@ static void draw_background(
     render_target.draw(background_sprite);
 }
 
-static vector<rendered_point> project_points(const camera& camera,
-                                             const vector<scored_point>& points,
-                                             const global_colormap_func& colormap) {
+static vector<RenderedPoint> project_points(const camera& camera,
+                                            const vector<scored_point>& points,
+                                            const global_colormap_func& colormap) {
     auto img_points = camera.project_to_image(points);
 
     std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
@@ -137,7 +132,6 @@ static vector<rendered_point> project_points(const camera& camera,
 }
 
 void render_image(
-        const SparseCloud& model,
         const camera& camera,
         const shared_ptr<sf::Shader>& point_shader,
         const path& input_path,
@@ -151,7 +145,7 @@ void render_image(
     auto time_measure = start_time();
 
     sf::RenderTexture render_target;
-    if (!render_target.create(camera.width(), camera.height())) {
+    if (!render_target.create(camera.image_width(), camera.image_height())) {
         std::cerr << "Could not create render texture." << std::endl;
         exit(2);
     }
@@ -160,7 +154,7 @@ void render_image(
     time_measure = log_and_start_next(time_measure,
                                       log_prefix + "\tSetting up rendering pipeline for image " +
                                       input_file_path.string());
-    vector<rendered_point> rendered_points = project_points(camera, points, colormap);
+    vector<RenderedPoint> rendered_points = project_points(camera, points, colormap);
 
     time_measure = log_and_start_next(time_measure,
                                       log_prefix + "\tPreparing coloring and projection");
@@ -179,28 +173,20 @@ void render_image(
     log_and_start_next(time_measure, log_prefix + "\tSaving image " + camera.get_name());
 }
 
-void render_images(const SparseCloud& model,
-                   const path& input_path,
+void render_images(const path& input_path,
                    const path& output_path,
+                   const vector<camera>& cameras,
                    const vector<scored_point>& points,
                    const global_colormap_func& colormap) {
     auto shader = initialize_renderer();
 
     create_directories(output_path);
-#ifdef SINGLE_IMAGE
-    camera_id_t first_camera = DEFAULT_IMAGE_ID;
-    camera_id_t last_camera = first_camera;
-#else
-    camera_id_t first_camera = 1;
-    camera_id_t last_camera = model.get_cameras().size();
-#endif
-    for (camera_id_t camera_id = first_camera; camera_id <= last_camera; camera_id++) {
-        auto camera = model.find_camera(camera_id);
-        auto log_prefix = get_log_prefix(camera_id, last_camera);
-
-        render_image(model, camera,
+    for (const auto& camera : cameras) {
+        //auto log_prefix = get_log_prefix(camera.id(), last_camera);
+/*
+        render_image(camera,
                      shader, input_path, output_path,
-                     points, colormap, log_prefix);
+                     points, colormap, log_prefix);*/
 
     }
 }

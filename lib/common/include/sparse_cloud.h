@@ -14,7 +14,7 @@ using std::filesystem::path;
 class SparseCloud {
 private:
     path model_path;
-    std::unique_ptr<colmap::Reconstruction> reconstruction;
+    std::shared_ptr<colmap::Reconstruction> reconstruction;
 
     std::vector<camera> cameras;
     map<camera_id_t, camera> camera_map;

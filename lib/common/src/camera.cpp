@@ -3,8 +3,13 @@
 #include "utils/types.h"
 #include "utils/colmap.h"
 
-Vector3d camera::transform_to_world(const Vector3d& image_xyz) const {
-    return model_image.InverseProjectionMatrix() * image_xyz.homogeneous();
+camera::camera(const Image& image, const Reconstruction& model) {
+    this->model_image = image;
+    this->model_camera = model.Camera(image.CameraId());
+}
+
+Vector3d camera::transform_to_world(const Vector3d& local_coordinates) const {
+    return model_image.InverseProjectionMatrix() * local_coordinates.homogeneous();
 }
 
 Vector3d camera::get_position() const {
@@ -13,12 +18,7 @@ Vector3d camera::get_position() const {
     return transform_to_world(origin);
 }
 
-camera::camera(const Image& image, const Reconstruction& model) {
-    this->model_image = image;
-    this->model_camera = model.Camera(image.CameraId());
-}
-
-Eigen::Vector3d camera::get_direction() const {
+Vector3d camera::get_direction() const {
     return model_image.ViewingDirection();
 }
 
@@ -30,11 +30,11 @@ Vector2d camera::project_from_image(const Vector2d& point) const {
     return model_camera.WorldToImage(point);
 }
 
-size_t camera::width() const {
+size_t camera::image_width() const {
     return model_camera.Width();
 }
 
-size_t camera::height() const {
+size_t camera::image_height() const {
     return model_camera.Height();
 }
 
@@ -43,14 +43,14 @@ string camera::get_name() const {
 }
 
 vector<image_point> camera::project_to_image(const vector<scored_point>& points) const {
-    std::vector<image_point> result;
-    result.resize(points.size());
-    for (size_t i = 0; i < points.size(); i++) {
-        const scored_point& point = points[i];
-        Vector2d position_normalized = (model_image.ProjectionMatrix() * point.position().homogeneous()).hnormalized();
-        double distance_to_camera = (get_position() - point.position()).norm();
+    const auto camera_position = this->get_position();
+    const auto image_projection_matrix = model_image.ProjectionMatrix();
+
+    return map_vec<scored_point, image_point>(points, [camera_position, image_projection_matrix]
+            (const scored_point& point) -> image_point {
+        Vector2d position_normalized = (image_projection_matrix * point.position().homogeneous()).hnormalized();
+        double distance_to_camera = (camera_position - point.position()).norm();
         image_point projected_point = image_point(position_normalized, distance_to_camera, point.score_to_dB());
-        result[i] = projected_point;
-    }
-    return result;
+        return projected_point;
+    });
 }

@@ -65,7 +65,7 @@ void az_data::determine_step_sizes() {
 
 }
 
-az_data::az_data(const std::string& filename, const data_eval_position& position) {
+az_data::az_data(const std::string& filename, const ObserverPosition& position) {
     this->_position = position;
 
     mat_t* mat_file_handle = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
@@ -90,7 +90,7 @@ map<double, vector<double>> az_data::get_rcs() const {
     return this->_angle_to_rcs_values;
 }
 
-data_eval_position az_data::get_position() const {
+ObserverPosition az_data::get_position() const {
     return this->_position;
 }
 

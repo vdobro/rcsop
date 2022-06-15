@@ -1,8 +1,6 @@
 #include "azimuth_angles.h"
 
 #include <regex>
-#include <memory>
-#include <exception>
 #include <filesystem>
 
 #include "az_data.h"
@@ -67,7 +65,7 @@ static map<azimuth_t, shared_ptr<az_data>> map_azimuth_angles_to_data(height_t h
             continue;
         }
         azimuth_t azimuth = stoi(sm[1]);
-        data_eval_position position = {
+        ObserverPosition position = {
                 .height = height,
                 .azimuth = azimuth,
         };
@@ -137,7 +135,7 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<SparseCloud>&
     map<camera_id_t, vector<scored_point>> camera_to_points;
     for (const camera& camera: cameras) {
         auto log_prefix = get_log_prefix(camera.id(), camera_count);
-        map<point_id_t, scored_point> camera_points(scored_points);
+        scored_point_map camera_points(scored_points);
         map<height_t, shared_ptr<az_data>> height_to_data = data_by_camera.at(camera.id());
         for (auto& height: heights) {
             shared_ptr<az_data> data = height_to_data.at(height);
@@ -145,8 +143,7 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<SparseCloud>&
             auto relative_points = get_point_angles(camera, height_offset, camera_points);
             for (const auto& point: relative_points) {
                 if (point.horizontal_angle > 5) {
-                    //TODO fix for more than +-one additional height
-                    //if (point.distance_to_horizontal_plane > fabs(height_offset / 2.0)) {
+                //if (point.distance_to_horizontal_plane > fabs(height_offset / 2.0)) {
                     continue;
                 }
                 auto point_distance = point.distance / world_scale;
@@ -184,7 +181,6 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<SparseCloud>&
             .min_value = min_score,
             .max_value = max_score,
             .points = camera_to_points,
-            .model = model,
             .image_path = image_path,
     });
 }
@@ -192,8 +188,6 @@ shared_ptr<point_display_payload> display_azimuth(const shared_ptr<SparseCloud>&
 void render_to_files(const point_display_payload& point_payload,
                      const path& output_path) {
     const auto colormap = construct_colormap_function(COLOR_MAP, point_payload.min_value, point_payload.max_value);
-    auto model = point_payload.model;
-    auto cameras = model->get_cameras();
     auto camera_count = cameras.size();
     auto image_path = point_payload.image_path;
 
@@ -201,7 +195,7 @@ void render_to_files(const point_display_payload& point_payload,
     for (const camera& camera: cameras) {
         auto log_prefix = get_log_prefix(camera.id(), camera_count);
         auto points = point_payload.points.at(camera.id());
-        render_image(*model, camera, shader,
+        render_image(camera, shader,
                      image_path, output_path,
                      points, colormap, log_prefix);
     }

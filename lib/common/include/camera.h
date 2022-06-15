@@ -22,17 +22,21 @@ public:
 
     [[nodiscard]] camera_id_t id() const;
 
-    [[nodiscard]] Eigen::Vector3d transform_to_world(const Eigen::Vector3d& image_xyz) const;
+    /**
+     * Converts point from camera coordinate system to world coordinates
+     * @param local_coordinates xyz in the local coordinate system of this camera
+     */
+    [[nodiscard]] Vector3d transform_to_world(const Vector3d& local_coordinates) const;
 
-    [[nodiscard]] Eigen::Vector3d get_position() const;
+    [[nodiscard]] Vector3d get_position() const;
 
-    [[nodiscard]] Eigen::Vector3d get_direction() const;
+    [[nodiscard]] Vector3d get_direction() const;
 
     [[nodiscard]] Vector2d project_from_image(const Vector2d& point) const;
 
-    [[nodiscard]] size_t width() const;
+    [[nodiscard]] size_t image_width() const;
 
-    [[nodiscard]] size_t height() const;
+    [[nodiscard]] size_t image_height() const;
 
     [[nodiscard]] string get_name() const;
 

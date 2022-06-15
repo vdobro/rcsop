@@ -7,20 +7,16 @@
 
 #include "matio.h"
 #include "relative_points.h"
+#include "observer_position.h"
 
 using std::map;
 using std::string;
 using std::runtime_error;
 using std::invalid_argument;
 
-typedef struct data_eval_position {
-    long height;
-    long azimuth;
-} data_eval_position;
-
 class az_data {
 private:
-    data_eval_position _position{};
+    ObserverPosition _position{};
     vector<long> _ranges;
     long _range_step{};
 
@@ -32,13 +28,14 @@ private:
     map<double, vector<double>> reconstruct_value_table(const vector<double>& raw_values);
 
     void determine_step_sizes();
+
 public:
     explicit az_data(const string& filename,
-                     const data_eval_position& position);
+                     const ObserverPosition& position);
 
     [[nodiscard]] map<double, vector<double>> get_rcs() const;
 
-    [[nodiscard]] data_eval_position get_position() const;
+    [[nodiscard]] ObserverPosition get_position() const;
 
     [[nodiscard]] double find_nearest(double range_distance, double angle) const;
 };

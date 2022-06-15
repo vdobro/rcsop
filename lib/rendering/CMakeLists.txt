@@ -10,7 +10,8 @@ find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 include(GenerateExportHeader)
 add_library(sfm-coloring-rendering SHARED
         src/render_points.cpp
-        src/colors.cpp)
+        src/colors.cpp
+        src/observer_renderer.cpp)
 generate_export_header(sfm-coloring-data)
 
 target_include_directories(sfm-coloring-rendering

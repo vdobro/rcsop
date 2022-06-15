@@ -20,7 +20,8 @@ static Vector3d get_up(const camera& camera) {
 
 #define ARC_SIN(X) (asin(X) * 180.f / M_PI)
 
-vector<relative_point> get_point_angles(const camera& image,
+//FIXME find usages of deprecated method and fix them
+vector<observed_point> get_point_angles(const camera& image,
                                         double height_offset,
                                         const scored_point_map& points) {
     auto right = get_right(image);
@@ -30,7 +31,7 @@ vector<relative_point> get_point_angles(const camera& image,
     const plane vertical_plane = plane(right, image_pos);
     const plane horizontal_plane = plane(up, image_pos);
 
-    vector<relative_point> result;
+    vector<observed_point> result;
     for (const auto& point_pair: points) {
         auto id = point_pair.first;
         auto point = point_pair.second;
@@ -47,11 +48,10 @@ vector<relative_point> get_point_angles(const camera& image,
         auto horizontal_angle = (is_to_the_right ? 1 : -1) * ARC_SIN(distance_to_vertical_plane / distance_to_camera);
         auto vertical_angle = (is_up_above ? 1 : -1) * ARC_SIN(distance_to_horizontal_plane / distance_to_camera);
 
-        relative_point point_info = {
+        observed_point point_info = {
                 .position = point.position(),
-                .distance_to_horizontal_plane = distance_to_horizontal_plane,
                 .id = id,
-                .distance = distance_to_camera,
+                .distance_in_world = distance_to_camera,
                 .vertical_angle = vertical_angle,
                 .horizontal_angle = horizontal_angle,
         };

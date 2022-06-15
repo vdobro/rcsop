@@ -5,17 +5,9 @@
 
 #include "scored_point.h"
 #include "camera.h"
+#include "observed_point.h"
 
-typedef struct relative_point {
-    Vector3d position;
-    double distance_to_horizontal_plane = 0;
-    point_id_t id = 0;
-    double distance = 0;
-    double vertical_angle = 0;
-    double horizontal_angle = 0;
-} relative_point;
-
-vector<relative_point> get_point_angles(const camera& image,
+vector<observed_point> get_point_angles(const camera& camera,
                                         double height_offset,
                                         const scored_point_map& points);
 

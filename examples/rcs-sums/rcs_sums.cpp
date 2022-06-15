@@ -35,7 +35,7 @@ static double raw_gauss(const double& x,
     return M_SQRT1_2 * exp(-1 * (x * x + y * y) / (2 * sigma * sigma)) / (sigma * sqrt(M_PI));
 }
 
-static double calc_gauss(const relative_point& point,
+static double calc_gauss(const observed_point& point,
                          const gauss_options& distribution_options) {
     return raw_gauss(point.horizontal_angle / distribution_options.x_scale,
                      point.vertical_angle / distribution_options.y_scale,
@@ -44,24 +44,24 @@ static double calc_gauss(const relative_point& point,
            / (distribution_options.x_scale * distribution_options.y_scale);
 }
 
-static bool is_inside_ellipse(const relative_point& point, const gauss_options& options) {
+static bool is_inside_ellipse(const observed_point& point, const gauss_options& options) {
     auto x = point.horizontal_angle / options.x_scale;
     auto y = point.vertical_angle / options.y_scale;
     return x * x + y * y <= 1;
 }
 
-static double rcs_gaussian(const relative_point& point,
+static double rcs_gaussian(const observed_point& point,
                            const gauss_options& options) {
     if (!is_inside_ellipse(point, options)) {
         return 0;
     }
 
-    return calc_gauss(point, options) / point.distance;
+    return calc_gauss(point, options) / point.distance_in_world;
 }
 
 static void rcs_sums(const SparseCloud& model,
                      const rcs_data& rcs_data,
-                     const std::function<double(rcs_height_t, size_t, const relative_point&)>& rcs_mapper,
+                     const std::function<double(rcs_height_t, size_t, const observed_point&)>& rcs_mapper,
                      const path& input_path,
                      const path& output_path) {
 
@@ -95,7 +95,7 @@ static void rcs_sums(const SparseCloud& model,
             auto relevant_points = get_point_angles(image, height_offset, scored_points);
 
             std::for_each(std::execution::par_unseq, relevant_points.begin(), relevant_points.end(),
-                          [&](relative_point& point) {
+                          [&](observed_point& point) {
                               auto rcs_value = rcs_mapper(height, image_index, point);
                               auto gaussian = rcs_gaussian(point, distribution_options);
                               auto rcs_distributed = gaussian * rcs_value;
@@ -123,7 +123,7 @@ static void rcs_sums(const SparseCloud& model,
     std::filesystem::remove_all(render_path);
 
     auto colormap = get_colormap(filtered_points, COLOR_MAP);
-    render_images(model, input_path, render_path, filtered_points, colormap);
+    render_images(input_path, render_path, images, filtered_points, colormap);
 
     log_and_start_next(time_measure, "(Total) rendering done.");
 }
@@ -132,7 +132,7 @@ void accumulate_rcs(const SparseCloud& model,
                     const rcs_data& rcs_data,
                     const path& input_path,
                     const path& output_path) {
-    rcs_sums(model, rcs_data, [rcs_data](rcs_height_t height, size_t image_index, const relative_point& point) {
+    rcs_sums(model, rcs_data, [rcs_data](rcs_height_t height, size_t image_index, const observed_point& point) {
         return rcs_data.at_height(height)->rcs()[image_index];
     }, input_path, output_path);
 }
@@ -175,8 +175,8 @@ void accumulate_azimuth(const SparseCloud& model,
              [rcs_data, height_to_image_to_angle, world_scale, first_range, last_range]
                      (const rcs_height_t height,
                       const size_t image_index,
-                      const relative_point& point) {
-                 auto point_distance = point.distance / world_scale;
+                      const observed_point& point) {
+                 auto point_distance = point.distance_in_world / world_scale;
                  if (point_distance > last_range + RANGE_EPSILON || point_distance < first_range - RANGE_EPSILON) {
                      return 0.0;
                  }

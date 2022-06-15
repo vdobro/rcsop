@@ -18,7 +18,12 @@ add_library(sfm-coloring-data SHARED
         $<INSTALL_INTERFACE:include>
         src/az_data.cpp
         src/rcs_data.cpp
-        src/relative_points.cpp)
+        src/relative_points.cpp
+        src/input_data_collector.cpp
+        src/input_image.cpp
+        src/point_cloud_provider.cpp
+        src/azimuth_rcs_map.cpp
+        src/observer_provider.cpp)
 generate_export_header(sfm-coloring-data)
 
 target_include_directories(sfm-coloring-data

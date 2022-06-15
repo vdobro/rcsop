@@ -8,10 +8,8 @@ scored_point::scored_point(Vector3d position, ulong id)
 scored_point::scored_point(Vector3d position, ulong id, double score)
         : _point_id(id), _position(std::move(position)), _score(score) {}
 
-scored_point::scored_point(const point_pair& base) {
-    this->_point_id = base.first;
-    this->_position = base.second;
-}
+scored_point::scored_point(const point_pair& base)
+        : _point_id(base.first), _position(base.second) {}
 
 point_id_t scored_point::id() const { return _point_id; }
 

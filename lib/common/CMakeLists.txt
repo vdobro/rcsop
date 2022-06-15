@@ -12,6 +12,7 @@ endif()
 find_package(Eigen3 3.4 REQUIRED)
 find_package(CGAL REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
+find_package(Boost REQUIRED)
 
 include(GenerateExportHeader)
 add_library(sfm-coloring-common SHARED
@@ -21,7 +22,8 @@ add_library(sfm-coloring-common SHARED
         src/scored_point.cpp
         src/sparse_cloud.cpp
         src/dense_cloud.cpp
-        src/chronometer.cpp)
+        src/chronometer.cpp
+        src/observer.cpp)
 
 generate_export_header(sfm-coloring-common)
 
@@ -31,6 +33,9 @@ target_include_directories(sfm-coloring-common
             ${COLMAP_INCLUDE_DIRS}
         PRIVATE
             ${PROJECT_SOURCE_DIR}/include)
+
+include_directories(${COLMAP_INCLUDE_DIRS})
+link_directories(${COLMAP_LINK_DIRS})
 
 target_link_directories(sfm-coloring-common
         PUBLIC
