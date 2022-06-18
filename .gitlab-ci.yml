@@ -2,8 +2,8 @@ image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/rcsop-gitlab-ci:generic
 
 before_script:
   - curl -L -S -o inputs.tar.xz 'https://dobrovolskis.com/public/sfm/rcsop-input-ci.tar.xz'
-  - tar -xf inputs.tar.gz
-  - rm inputs.tar.gz
+  - tar -xf inputs.tar.xz
+  - rm inputs.tar.xz
 
 cache:
   key: "$CI_PIPELINE_ID"
