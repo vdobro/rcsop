@@ -7,6 +7,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     xz-utils \
     cmake \
     build-essential \
+    libboost-all-dev
 
 WORKDIR /home/colmap
 USER colmap
