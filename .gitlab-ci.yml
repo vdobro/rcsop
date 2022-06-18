@@ -1,4 +1,4 @@
-image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/colmap:generic
+image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/rcsop-gitlab-ci:generic
 
 before_script:
   - curl -L -S -o inputs.tar.xz 'https://dobrovolskis.com/public/sfm/rcsop-input-ci.tar.xz'
