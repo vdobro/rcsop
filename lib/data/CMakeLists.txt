@@ -17,8 +17,7 @@ include(GenerateExportHeader)
 add_library(rcsop-data SHARED
         $<INSTALL_INTERFACE:include>
         src/az_data.cpp
-        src/rcs_data.cpp
-        src/relative_points.cpp
+        src/basic_rcs_map.cpp
         src/input_data_collector.cpp
         src/input_image.cpp
         src/point_cloud_provider.cpp

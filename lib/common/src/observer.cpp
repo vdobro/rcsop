@@ -38,7 +38,7 @@ ObserverPosition Observer::position() const {
 
 static inline observed_point observe_point(
         point_id_t id,
-        const scored_point& point,
+        const ScoredPoint& point,
         const Vector3d& observer_position,
         const Vector3d& direction_right,
         const Vector3d& direction_up,
@@ -69,7 +69,7 @@ static inline observed_point observe_point(
     return point_info;
 }
 
-vector<observed_point> Observer::observe_points(const scored_point_map& camera_points) const {
+vector<observed_point> Observer::observe_points(const ScoredPointMap& camera_points) const {
     const auto height = this->position().height;
     const auto height_offset = static_cast<double>(height - 40) * _worldScale; //TODO default height provider
 

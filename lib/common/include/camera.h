@@ -40,7 +40,7 @@ public:
 
     [[nodiscard]] string get_name() const;
 
-    [[nodiscard]] vector<image_point> project_to_image(const vector<scored_point>& points) const;
+    [[nodiscard]] vector<ImagePoint> project_to_image(const vector<ScoredPoint>& points) const;
 };
 
 #endif //RCSOP_COMMON_CAMERA_H

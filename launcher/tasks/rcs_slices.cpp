@@ -44,7 +44,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
     auto image_positions = map_vec<camera, Vector3d>(cameras, &camera::position);
     auto image_count = cameras.size();
 
-    vector<scored_point> points = point_provider->get_base_scored_point_list();
+    vector<ScoredPoint> points = point_provider->get_base_scored_point_list();
 
     auto origin = Vector2d();
     origin.setZero();
@@ -76,7 +76,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
         return ObserverRenderer(payload);
     });
 
-    auto score_range = scored_point::get_score_range(points);
+    auto score_range = ScoredPoint::get_score_range(points);
     auto colormap = construct_colormap_function(COLOR_MAP, score_range);
 
     size_t index = 0;

@@ -1,5 +1,10 @@
 #include "az_data.h"
 
+#include <numeric>
+using std::reduce;
+
+#include "utils/vector.h"
+
 static matvar_t* get_all_variables(mat_t* file) {
     matvar_t* matvar = Mat_VarReadInfo(file, "auswertung");
     if (nullptr == matvar) {
@@ -28,7 +33,7 @@ static vector<double> get_raw_values(const char* name,
     return raw_values;
 }
 
-map<double, vector<double>> az_data::reconstruct_value_table(const vector<double>& raw_values) {
+map<double, vector<double>> AzimuthRcsDataSet::reconstruct_value_table(const vector<double>& raw_values) {
     map<double, vector<double>> result;
 
     auto angles = _angles.size();
@@ -48,24 +53,25 @@ map<double, vector<double>> az_data::reconstruct_value_table(const vector<double
     return result;
 }
 
-void az_data::determine_step_sizes() {
+void AzimuthRcsDataSet::determine_step_sizes() {
     vector<long> range_steps;
     for(size_t i = 1; i < _ranges.size(); i++) {
         range_steps.push_back(_ranges[i] - _ranges[i- 1]);
     }
-    _range_step = std::reduce(range_steps.begin(), range_steps.end())
+    _range_step = reduce(range_steps.begin(), range_steps.end())
                   / static_cast<long>(range_steps.size());
 
     vector<double> angle_steps;
     for(size_t i = 1; i < _angles.size(); i++) {
         angle_steps.push_back(_angles[i] - _angles[i- 1]);
     }
-    _angle_step = std::reduce(angle_steps.begin(), angle_steps.end())
+    _angle_step = reduce(angle_steps.begin(), angle_steps.end())
                   / static_cast<double>(angle_steps.size());
 
 }
 
-az_data::az_data(const std::string& filename, const ObserverPosition& position) {
+AzimuthRcsDataSet::AzimuthRcsDataSet(const string& filename,
+                                     const ObserverPosition& position) {
     this->_position = position;
 
     mat_t* mat_file_handle = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
@@ -86,15 +92,15 @@ az_data::az_data(const std::string& filename, const ObserverPosition& position) 
     determine_step_sizes();
 }
 
-map<double, vector<double>> az_data::get_rcs() const {
+map<double, vector<double>> AzimuthRcsDataSet::get_rcs() const {
     return this->_angle_to_rcs_values;
 }
 
-ObserverPosition az_data::get_position() const {
+ObserverPosition AzimuthRcsDataSet::get_position() const {
     return this->_position;
 }
 
-double az_data::find_nearest(double range_distance, double angle) const {
+double AzimuthRcsDataSet::find_nearest(double range_distance, double angle) const {
     auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
 
     auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);

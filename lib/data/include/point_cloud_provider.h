@@ -6,7 +6,7 @@
 class PointCloudProvider {
 private:
     shared_ptr<SparseCloud> sparse_cloud = nullptr;
-    scored_point_map sparse_cloud_points;
+    ScoredPointMap sparse_cloud_points;
     point_id_t max_sparse_point_id = 0;
 
     shared_ptr<DenseCloud> dense_mesh = nullptr;
@@ -15,11 +15,11 @@ private:
 public:
     explicit PointCloudProvider(const InputDataCollector& input);
 
-    [[nodiscard]] scored_point_map get_base_scored_points() const;
+    [[nodiscard]] ScoredPointMap get_base_scored_points() const;
 
     [[nodiscard]] double get_world_scale() const;
 
-    [[nodiscard]] vector<scored_point> get_base_scored_point_list() const;
+    [[nodiscard]] vector<ScoredPoint> get_base_scored_point_list() const;
 };
 
 #endif //RCSOP_DATA_POINT_CLOUD_PROVIDER_H

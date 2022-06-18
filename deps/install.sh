@@ -19,13 +19,6 @@ cd "$EIGEN_BUILD_DIR"
 cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" "$pwd/eigen"
 make install
 
-# cgal
-CGAL_BUILD_DIR="$BUILD_DIR/cgal"
-mkdir -p "$CGAL_BUILD_DIR"
-cd "$CGAL_BUILD_DIR"
-cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" "$pwd/cgal"
-make install
-
 # flann
 FLANN_SOURCE_DIR="$pwd/flann"
 cd "$FLANN_SOURCE_DIR"
@@ -66,6 +59,13 @@ cmake -DCMAKE_BUILD_TYPE="Release" \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
     "$pwd/ceres"
 make -j "$CPU_CORES"
+make install
+
+# cgal
+CGAL_BUILD_DIR="$BUILD_DIR/cgal"
+mkdir -p "$CGAL_BUILD_DIR"
+cd "$CGAL_BUILD_DIR"
+cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" "$pwd/cgal"
 make install
 
 # colmap

@@ -13,6 +13,7 @@
 [submodule "deps/cgal"]
 	path = deps/cgal
 	url = https://github.com/CGAL/cgal
+    branch = v5.4.1
 [submodule "deps/ceres"]
 	path = deps/ceres
 	url = https://ceres-solver.googlesource.com/ceres-solver

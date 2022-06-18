@@ -28,7 +28,7 @@ public:
 
     [[nodiscard]] std::vector<Eigen::Vector3d> get_camera_positions() const;
     [[nodiscard]] std::vector<point_pair> get_point_pairs() const;
-    [[nodiscard]] scored_point_map get_scored_points() const;
+    [[nodiscard]] ScoredPointMap get_scored_points() const;
 
     void reload();
     void save(const path& output_path);

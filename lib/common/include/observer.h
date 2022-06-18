@@ -28,7 +28,7 @@ public:
 
     [[nodiscard]] camera native_camera() const;
 
-    [[nodiscard]] vector<observed_point> observe_points(const scored_point_map& camera_points) const;
+    [[nodiscard]] vector<observed_point> observe_points(const ScoredPointMap& camera_points) const;
 };
 
 #endif //RCSOP_COMMON_OBSERVER_H

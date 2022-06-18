@@ -28,12 +28,12 @@ static vector<height_t> parse_available_heights(const path& data_path) {
     return result;
 }
 
-static map<azimuth_t, shared_ptr<az_data>>
+static map<azimuth_t, shared_ptr<AzimuthRcsDataSet>>
 map_azimuth_angles_to_data(height_t height, const path& data_path) {
 
     auto folder_name = std::to_string(height) + "cm";
     const path height_path{data_path / folder_name};
-    map<azimuth_t, shared_ptr<az_data>> azimuth_to_data;
+    map<azimuth_t, shared_ptr<AzimuthRcsDataSet>> azimuth_to_data;
     for (auto const& dir_entry: recursive_directory_iterator{height_path}) {
         smatch sm;
         const path& directory_path = dir_entry.path();
@@ -47,7 +47,7 @@ map_azimuth_angles_to_data(height_t height, const path& data_path) {
                 .height = height,
                 .azimuth = azimuth,
         };
-        auto data = make_shared<az_data>(file_path, position);
+        auto data = make_shared<AzimuthRcsDataSet>(file_path, position);
         azimuth_to_data.insert(make_pair(azimuth, data));
     }
     return azimuth_to_data;
@@ -59,7 +59,7 @@ static void collect_all_heights(const path& data_path,
     auto heights = parse_available_heights(data_path);
     result->clear();
     for (auto height: heights) {
-        map<azimuth_t, shared_ptr<az_data>> angle_mapping = map_azimuth_angles_to_data(height, data_path);
+        map<azimuth_t, shared_ptr<AzimuthRcsDataSet>> angle_mapping = map_azimuth_angles_to_data(height, data_path);
         result->insert(make_pair(height, angle_mapping));
     }
     log_and_start_next(start, "Reading .mat files finished");
@@ -70,11 +70,11 @@ AzimuthRcsMap::AzimuthRcsMap(const path& input_path) {
     collect_all_heights(input_path, this->data);
 }
 
-map<azimuth_t, shared_ptr<az_data>> AzimuthRcsMap::at_height(height_t height) const {
+map<azimuth_t, shared_ptr<AzimuthRcsDataSet>> AzimuthRcsMap::at_height(height_t height) const {
     return this->data->at(height);
 }
 
-shared_ptr<az_data> AzimuthRcsMap::at_position(const ObserverPosition& position) const {
+shared_ptr<AzimuthRcsDataSet> AzimuthRcsMap::at_position(const ObserverPosition& position) const {
     return this->at_height(position.height).at(position.azimuth);
 }
 

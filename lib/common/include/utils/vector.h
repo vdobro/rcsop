@@ -16,7 +16,7 @@ vector<Target> map_vec(const vector<Source>& source,
         result.resize(source.size());
         std::transform(source.begin(), source.end(), result.begin(), mapper);
     } else {
-        for (const auto & value : source) {
+        for (const auto& value: source) {
             result.push_back(mapper(value));
         }
     }
@@ -29,5 +29,23 @@ vector<Target> cast_vec(const vector<Source>& values) {
         return static_cast<Target>(value);
     });
 }
+
+
+template<typename InputValueType, typename SearchValue>
+size_t find_interval_match_index(InputValueType search_value,
+                                 SearchValue first_range,
+                                 SearchValue range_epsilon) {
+    return lround((static_cast<SearchValue>(search_value) - first_range) / (2 * range_epsilon));
+}
+
+template<typename InputValueType, typename SearchValue, typename MappedValue>
+MappedValue find_interval_match(InputValueType search_value,
+                                const vector<MappedValue>& mapped_values,
+                                SearchValue first_range,
+                                SearchValue range_epsilon) {
+    size_t index = find_interval_match_index(search_value, first_range, range_epsilon);
+    return mapped_values.at(index);
+}
+
 
 #endif //RCSOP_COMMON_VECTOR_H

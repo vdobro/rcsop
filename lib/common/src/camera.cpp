@@ -42,15 +42,15 @@ string camera::get_name() const {
     return model_image.Name();
 }
 
-vector<image_point> camera::project_to_image(const vector<scored_point>& points) const {
+vector<ImagePoint> camera::project_to_image(const vector<ScoredPoint>& points) const {
     const auto camera_position = this->position();
     const auto image_projection_matrix = model_image.ProjectionMatrix();
 
-    return map_vec<scored_point, image_point>(points, [camera_position, image_projection_matrix]
-            (const scored_point& point) -> image_point {
+    return map_vec<ScoredPoint, ImagePoint>(points, [camera_position, image_projection_matrix]
+            (const ScoredPoint& point) -> ImagePoint {
         Vector2d position_normalized = (image_projection_matrix * point.position().homogeneous()).hnormalized();
         double distance_to_camera = (camera_position - point.position()).norm();
-        image_point projected_point = image_point(position_normalized, distance_to_camera, point.score_to_dB());
+        ImagePoint projected_point = ImagePoint(position_normalized, distance_to_camera, point.score_to_dB());
         return projected_point;
     });
 }

@@ -1,4 +1,4 @@
-#include "rcs_data.h"
+#include "basic_rcs_map.h"
 
 #include "utils/vector.h"
 
@@ -83,7 +83,7 @@ static vector<long> get_ranges(size_t index, matvar_t* table) {
     });
 }
 
-map<long, vector<double>> rcs_data_row::reconstruct_azimuth_table(const vector<double>& raw_values) {
+map<long, vector<double>> BasicRcsDataSet::reconstruct_azimuth_table(const vector<double>& raw_values) {
     map<long, vector<double>> result;
 
     auto angles = _angles.size();
@@ -102,17 +102,17 @@ map<long, vector<double>> rcs_data_row::reconstruct_azimuth_table(const vector<d
     return result;
 }
 
-map<long, vector<double>> rcs_data_row::get_azimuth(size_t index, matvar_t* table) {
+map<long, vector<double>> BasicRcsDataSet::get_azimuth(size_t index, matvar_t* table) {
     auto raw_values = get_raw_values(index, RCS_COLUMN_AZIMUTH, table);
     return reconstruct_azimuth_table(raw_values);
 }
 
-map<long, vector<double>> rcs_data_row::get_azimuth_db(size_t index, matvar_t* table) {
+map<long, vector<double>> BasicRcsDataSet::get_azimuth_db(size_t index, matvar_t* table) {
     auto raw_values = get_raw_values(index, RCS_COLUMN_AZIMUTH_DB, table);
     return reconstruct_azimuth_table(raw_values);
 }
 
-rcs_data_row::rcs_data_row(size_t row_index, matvar_t* table) {
+BasicRcsDataSet::BasicRcsDataSet(size_t row_index, matvar_t* table) {
     _rcs = get_rcs(row_index, table);
     _rcs_dbs = get_rcs_db(row_index, table);
     _angles = get_angles(row_index, table);
@@ -121,23 +121,23 @@ rcs_data_row::rcs_data_row(size_t row_index, matvar_t* table) {
     _azimuth_db = get_azimuth_db(row_index, table);
 }
 
-vector<double> rcs_data_row::rcs() const {
+vector<double> BasicRcsDataSet::rcs() const {
     return _rcs;
 }
 
-map<long, vector<double>> rcs_data_row::azimuth() const {
+map<long, vector<double>> BasicRcsDataSet::azimuth() const {
     return _azimuth;
 }
 
-vector<long> rcs_data_row::ranges() const {
+vector<long> BasicRcsDataSet::ranges() const {
     return _ranges;
 }
 
-vector<long> rcs_data_row::angles() const {
+vector<long> BasicRcsDataSet::angles() const {
     return this->_angles;
 }
 
-rcs_data::rcs_data(const path& path) {
+BasicRcsMap::BasicRcsMap(const path& path) {
     mat_t* mat_file_handle = Mat_Open(path.c_str(), MAT_ACC_RDONLY);
     if (nullptr == mat_file_handle) {
         throw runtime_error("Could not open .mat file");
@@ -150,18 +150,18 @@ rcs_data::rcs_data(const path& path) {
         auto height = height_row_index.first;
         auto index = height_row_index.second;
 
-        auto rcs = std::make_shared<rcs_data_row>(rcs_data_row(index, table));
+        auto rcs = std::make_shared<BasicRcsDataSet>(BasicRcsDataSet(index, table));
         this->_rows.insert(std::make_pair(height, rcs));
     }
 
     Mat_Close(mat_file_handle);
 }
 
-shared_ptr<rcs_data_row> rcs_data::at_height(long height) const {
+shared_ptr<BasicRcsDataSet> BasicRcsMap::at_height(long height) const {
     return _rows.at(height);
 }
 
-vector<long> rcs_data::available_heights() const {
+vector<long> BasicRcsMap::available_heights() const {
     vector<long> heights;
     for (auto& row: _rows) {
         heights.push_back(row.first);

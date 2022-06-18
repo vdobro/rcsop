@@ -56,6 +56,7 @@ void InputDataCollector::collect_rcs_data() {
         const path& entry_path = dir_entry.path();
         if (std::filesystem::is_directory(entry_path)) {
             this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MAT).push_back(entry_path);
+            this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MINIMAP).push_back(entry_path);
         }
         if (std::filesystem::is_regular_file(entry_path)) {
             this->_asset_paths.at(InputAssetType::SIMPLE_RCS_MAT).push_back(entry_path);

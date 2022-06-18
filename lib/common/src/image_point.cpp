@@ -1,16 +1,16 @@
 #include "image_point.h"
 
-image_point::image_point(Vector2d coordinates, double distance, double score)
+ImagePoint::ImagePoint(Vector2d coordinates, double distance, double score)
         : _coordinates(std::move(coordinates)), _distance(distance), _score(score) {}
 
-double image_point::score() const {
+double ImagePoint::score() const {
     return _score;
 }
 
-double image_point::distance() const {
+double ImagePoint::distance() const {
     return _distance;
 }
 
-Vector2d image_point::coords() const {
+Vector2d ImagePoint::coordinates() const {
     return _coordinates;
 }

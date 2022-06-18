@@ -7,14 +7,14 @@
 class ScoredCloud {
 private:
     const Observer& _observer;
-    const vector<scored_point>& _points;
+    const vector<ScoredPoint>& _points;
 public:
     explicit ScoredCloud(const Observer& observer,
-                                 const vector<scored_point>& points);
+                                 const vector<ScoredPoint>& points);
 
     Observer observer() const;
 
-    vector<scored_point> points() const;
+    vector<ScoredPoint> points() const;
 };
 
 

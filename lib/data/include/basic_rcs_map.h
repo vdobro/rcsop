@@ -19,7 +19,7 @@ using std::string;
 using std::runtime_error;
 using std::invalid_argument;
 
-class rcs_data_row {
+class BasicRcsDataSet {
 private:
     vector<double> _rcs;
     vector<double> _rcs_dbs;
@@ -28,7 +28,7 @@ private:
     map<long, vector<double>> _azimuth;
     map<long, vector<double>> _azimuth_db;
 
-    rcs_data_row() = default;
+    BasicRcsDataSet() = default;
 
     map<long, vector<double>> reconstruct_azimuth_table(const vector<double>& raw_values);
 
@@ -37,7 +37,7 @@ private:
     map<long, vector<double>> get_azimuth_db(size_t index, matvar_t* table);
 
 public:
-    explicit rcs_data_row(size_t row_index, matvar_t* table);
+    explicit BasicRcsDataSet(size_t row_index, matvar_t* table);
 
     [[nodiscard]] vector<double> rcs() const;
 
@@ -48,13 +48,13 @@ public:
     [[nodiscard]] vector<long> angles() const;
 };
 
-class rcs_data {
+class BasicRcsMap {
 private:
-    map<long, shared_ptr<rcs_data_row>> _rows;
+    map<long, shared_ptr<BasicRcsDataSet>> _rows;
 public:
-    explicit rcs_data(const path& path);
+    explicit BasicRcsMap(const path& path);
 
-    [[nodiscard]] shared_ptr<rcs_data_row> at_height(long height) const;
+    [[nodiscard]] shared_ptr<BasicRcsDataSet> at_height(long height) const;
 
     [[nodiscard]] vector<long> available_heights() const;
 };

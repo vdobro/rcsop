@@ -13,7 +13,7 @@ struct ScoreRange {
     double max;
 };
 
-class scored_point {
+class ScoredPoint {
 
 private:
     point_id_t _point_id = -1;
@@ -21,13 +21,13 @@ private:
     double _score = 0;
 
 public:
-    explicit scored_point() = default;
+    explicit ScoredPoint() = default;
 
-    explicit scored_point(const point_pair& base);
+    explicit ScoredPoint(const point_pair& base);
 
-    explicit scored_point(Vector3d position, ulong id);
+    explicit ScoredPoint(Vector3d position, ulong id);
 
-    explicit scored_point(Vector3d position, ulong id, double score);
+    explicit ScoredPoint(Vector3d position, ulong id, double score);
 
     void increment_score(double value);
 
@@ -39,10 +39,10 @@ public:
 
     [[nodiscard]] double score_to_dB() const;
 
-    static ScoreRange get_score_range(const vector<scored_point>& points);
+    static ScoreRange get_score_range(const vector<ScoredPoint>& points);
 
 };
 
-typedef map<point_id_t, scored_point> scored_point_map;
+typedef map<point_id_t, ScoredPoint> ScoredPointMap;
 
 #endif //RCSOP_COMMON_SCORED_POINT_H

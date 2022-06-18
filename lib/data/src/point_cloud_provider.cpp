@@ -17,24 +17,24 @@ PointCloudProvider::PointCloudProvider(const InputDataCollector& input) {
     }
 }
 
-scored_point_map PointCloudProvider::get_base_scored_points() const {
-    scored_point_map result;
+ScoredPointMap PointCloudProvider::get_base_scored_points() const {
+    ScoredPointMap result;
     for (const auto& point: sparse_cloud_points) {
-        result.insert(make_pair(point.first, scored_point(point.second)));
+        result.insert(make_pair(point.first, ScoredPoint(point.second)));
     }
 
     auto dense_point_id = max_sparse_point_id + 1;
     for (const auto& point: dense_cloud_points) {
-        result.insert(make_pair(dense_point_id, scored_point(point, dense_point_id, 0)));
+        result.insert(make_pair(dense_point_id, ScoredPoint(point, dense_point_id, 0)));
         dense_point_id++;
     }
 
     return result;
 }
 
-vector<scored_point> PointCloudProvider::get_base_scored_point_list() const {
-    scored_point_map point_map = get_base_scored_points();
-    vector<scored_point> points;
+vector<ScoredPoint> PointCloudProvider::get_base_scored_point_list() const {
+    ScoredPointMap point_map = get_base_scored_points();
+    vector<ScoredPoint> points;
     points.resize(point_map.size());
 
     size_t index = 0;

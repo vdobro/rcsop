@@ -8,7 +8,7 @@
 
 #include "sparse_cloud.h"
 #include "dense_cloud.h"
-#include "rcs_data.h"
+#include "basic_rcs_map.h"
 #include "azimuth_rcs_map.h"
 #include "input_image.h"
 
@@ -23,13 +23,15 @@ enum InputAssetType {
     DENSE_MESH_PLY = 1,
     SIMPLE_RCS_MAT = 2,
     AZIMUTH_RCS_MAT = 3,
+    AZIMUTH_RCS_MINIMAP = 4,
 };
 
-static const char* inputAssetTypeDescriptions[4] = {
+static const char* inputAssetTypeDescriptions[5] = {
         "Sparse cloud (COLMAP)",
         "Dense mesh (.ply)",
         "RCS sums (rcs.mat)",
         "Azimuth RCS values",
+        "Azimuth RCS preview minimaps",
 };
 
 template<InputAssetType T>
@@ -48,11 +50,16 @@ struct InputAssetTrait<DENSE_MESH_PLY> {
 
 template<>
 struct InputAssetTrait<SIMPLE_RCS_MAT> {
-    using type = rcs_data;
+    using type = BasicRcsMap;
 };
 
 template<>
 struct InputAssetTrait<AZIMUTH_RCS_MAT> {
+    using type = AzimuthRcsMap;
+};
+
+template<>
+struct InputAssetTrait<AZIMUTH_RCS_MINIMAP> {
     using type = AzimuthRcsMap;
 };
 
@@ -69,6 +76,7 @@ private:
             {InputAssetType::DENSE_MESH_PLY,      vector<path>{}},
             {InputAssetType::SIMPLE_RCS_MAT,      vector<path>{}},
             {InputAssetType::AZIMUTH_RCS_MAT,     vector<path>{}},
+            {InputAssetType::AZIMUTH_RCS_MINIMAP, vector<path>{}},
     };
 
     void collect_images();

@@ -13,11 +13,11 @@ static const float GRADIENT_STRENGTH = 3.f;
 using namespace sfm::rendering;
 
 static vector<RenderedPoint> project_in_camera_with_color(
-        const vector<image_point>& points,
+        const vector<ImagePoint>& points,
         const camera& camera,
         const global_colormap_func& colormap) {
-    return map_vec<image_point, RenderedPoint>(points, [camera, colormap](const image_point& point) {
-        auto camera_coordinates = camera.project_from_image(point.coords());
+    return map_vec<ImagePoint, RenderedPoint>(points, [camera, colormap](const ImagePoint& point) {
+        auto camera_coordinates = camera.project_from_image(point.coordinates());
         auto score = point.score();
         if (isnan(score)) {
             throw invalid_argument("score");
@@ -74,12 +74,12 @@ static void draw_background(
 }
 
 vector<RenderedPoint> ObserverRenderer::project_points(
-        const vector<scored_point>& points,
+        const vector<ScoredPoint>& points,
         const global_colormap_func& colormap) {
     const auto& camera = _observer.native_camera();
     auto img_points = camera.project_to_image(points);
 
-    std::ranges::sort(img_points, std::ranges::greater(), &image_point::distance);
+    std::ranges::sort(img_points, std::ranges::greater(), &ImagePoint::distance);
     auto rendered_points = project_in_camera_with_color(img_points, camera, colormap);
     return rendered_points;
 }

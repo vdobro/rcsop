@@ -74,13 +74,13 @@ std::vector<point_pair> SparseCloud::get_point_pairs() const {
     return point_pairs;
 }
 
-scored_point_map SparseCloud::get_scored_points() const {
+ScoredPointMap SparseCloud::get_scored_points() const {
     auto model_points = get_point_pairs();
-    map<point_id_t, scored_point> result;
+    map<point_id_t, ScoredPoint> result;
     for (const auto& point_pair: model_points) {
         auto point_id = point_pair.first;
         auto point = point_pair.second;
-        result.insert(std::make_pair(point_id, scored_point(point, point_id, 0)));
+        result.insert(std::make_pair(point_id, ScoredPoint(point, point_id, 0)));
     }
     return result;
 }
