@@ -13,13 +13,15 @@ _deps
 .idea/*
 !.idea/codeStyles
 
-cmake-build-release
-cmake-build-debug
+cmake-build-*
 
 /datasets/
 /data/
-build/
+/input/
+/inputs/
+/build/
 /deps/cmake_build/
+/deps/build/
 
 .venv/
 
