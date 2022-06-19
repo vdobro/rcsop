@@ -1,0 +1,88 @@
+image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/rcsop-gitlab-ci:generic
+
+stages:
+  - build
+  - test
+
+Build launcher:
+  stage: build
+  script:
+    - mkdir build
+    - cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
+    - make -j 16
+  cache:
+    key: "$CI_PIPELINE_ID-build"
+    policy: push
+    paths:
+      - build/
+
+Fetch sample input data:
+  stage: build
+  script:
+    - curl -L -S -o inputs.tar.xz 'https://dobrovolskis.com/public/sfm/rcsop-input-ci.tar.xz'
+    - tar -xf inputs.tar.xz
+    - rm inputs.tar.xz
+  cache:
+    key: "$CI_PIPELINE_ID-input"
+    policy: push
+    paths:
+      - input/
+
+Test task "Azimuth RCS":
+  stage: test
+  when: manual
+  script:
+    - mkdir output
+    - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" -I input -O output -M false
+  cache:
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
+  artifacts:
+    paths:
+      - output
+    expire_in: never
+
+Test task "RCS slices":
+  stage: test
+  when: manual
+  script:
+    - mkdir output
+    - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" -I input -O output -M false
+  cache:
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
+  artifacts:
+    paths:
+      - output
+    expire_in: never
+
+Test dummy task:
+  stage: test
+  script:
+    - mkdir output
+    - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output -M false
+  cache:
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
+  artifacts:
+    paths:
+      - output
+    expire_in: never
