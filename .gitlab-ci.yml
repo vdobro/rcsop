@@ -70,7 +70,6 @@ Test task "RCS slices":
 
 Test dummy task:
   stage: test
-  when: manual
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output -M false
