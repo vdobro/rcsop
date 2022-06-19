@@ -30,6 +30,7 @@ Fetch sample input data:
 
 Test task "Azimuth RCS":
   stage: test
+  when: manual
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" -I input -O output -M false
@@ -49,6 +50,7 @@ Test task "Azimuth RCS":
 
 Test task "RCS slices":
   stage: test
+  when: manual
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" -I input -O output -M false
@@ -68,6 +70,7 @@ Test task "RCS slices":
 
 Test dummy task:
   stage: test
+  when: manual
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output -M false
