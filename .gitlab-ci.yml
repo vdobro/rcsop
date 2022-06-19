@@ -36,7 +36,7 @@ Test task "Azimuth RCS":
   stage: test
   script:
     - mkdir output
-    - .build/launcher/rcs-overlay-plotter -T "azimuth-rcs" -I input -O output -M false
+    - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" -I input -O output -M false
   cache:
     <<: *global_cache
     policy: pull
@@ -49,7 +49,7 @@ Test task "RCS slices":
   stage: test
   script:
     - mkdir output
-    - .build/launcher/rcs-overlay-plotter -T "rcs-slices" -I input -O output -M false
+    - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" -I input -O output -M false
   cache:
     <<: *global_cache
     policy: pull
@@ -65,7 +65,7 @@ Test dummy task:
     - pwd
     - ls -lah build
     - ls -lah input
-    - .build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output -M false
+    - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output -M false
   cache:
     <<: *global_cache
     policy: pull
