@@ -1,18 +1,18 @@
 #include "input_image.h"
 
+#include <stdexcept>
 #include <regex>
-
-#include "azimuth_rcs_map.h"
 
 using std::regex;
 using std::smatch;
+using std::invalid_argument;
 
 static const regex image_filename_pattern("^(\\d{3})°.*\\.png$");
 static const regex image_folder_name_pattern("^(\\d{1,3})cm$");
 
 const height_t DEFAULT_HEIGHT = 40;
 
-InputImage::InputImage(const path& path) : _file_path(path), _camera_position(ObserverPosition{
+CameraInputImage::CameraInputImage(const path& path) : _file_path(path), _camera_position(ObserverPosition{
         .height = DEFAULT_HEIGHT,
         .azimuth = 0,
 }){
@@ -35,10 +35,10 @@ InputImage::InputImage(const path& path) : _file_path(path), _camera_position(Ob
     };
 }
 
-ObserverPosition InputImage::position() const {
+ObserverPosition CameraInputImage::position() const {
     return this->_camera_position;
 }
 
-path InputImage::file_path() const {
+path CameraInputImage::file_path() const {
     return this->_file_path;
 }

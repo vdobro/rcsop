@@ -7,11 +7,10 @@
 #include <map>
 
 #include "matio.h"
+
 #include "utils/types.h"
 #include "observer_position.h"
 
-using std::map;
-using std::string;
 using std::runtime_error;
 using std::invalid_argument;
 
@@ -31,7 +30,7 @@ private:
     void determine_step_sizes();
 
 public:
-    explicit AzimuthRcsDataSet(const string& filename,
+    explicit AzimuthRcsDataSet(const path& filename,
                                const ObserverPosition& position);
 
     [[nodiscard]] map<double, vector<double>> get_rcs() const;

@@ -24,7 +24,8 @@ add_library(rcsop-common SHARED
         src/dense_cloud.cpp
         src/chronometer.cpp
         src/observer.cpp
-        src/scored_cloud.cpp src/logging.cpp)
+        src/scored_cloud.cpp
+        src/logging.cpp)
 
 generate_export_header(rcsop-common)
 

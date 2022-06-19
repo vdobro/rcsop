@@ -22,7 +22,11 @@ add_library(rcsop-data SHARED
         src/input_image.cpp
         src/point_cloud_provider.cpp
         src/azimuth_rcs_map.cpp
-        src/observer_provider.cpp)
+        src/observer_provider.cpp
+        src/azimuth_rcs_minimap.cpp
+        src/utils/rcs_data_utils.cpp
+        src/azimuth_minimap_provider.cpp)
+
 generate_export_header(rcsop-data)
 
 target_include_directories(rcsop-data

@@ -19,7 +19,7 @@ public:
 
     [[nodiscard]] double get_world_scale() const;
 
-    [[nodiscard]] vector<ScoredPoint> get_base_scored_point_list() const;
+    [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_base_scored_point_list() const;
 };
 
 #endif //RCSOP_DATA_POINT_CLOUD_PROVIDER_H

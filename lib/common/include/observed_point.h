@@ -1,11 +1,11 @@
 #ifndef RCSOP_COMMON_OBSERVED_POINT_H
 #define RCSOP_COMMON_OBSERVED_POINT_H
 
-#include <Eigen/Eigen>
 #include "utils/types.h"
+#include "utils/points.h"
 
 struct observed_point {
-    Eigen::Vector3d position;
+    Vector3d position;
     point_id_t id = 0;
     double distance_in_world = 0;
     double vertical_angle = 0;

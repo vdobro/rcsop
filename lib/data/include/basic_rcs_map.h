@@ -1,23 +1,9 @@
 #ifndef RCSOP_DATA_RCS_DATA_H
 #define RCSOP_DATA_RCS_DATA_H
 
-#include <map>
-#include <stdexcept>
-#include <memory>
-#include <string>
-#include <cmath>
-
 #include "matio.h"
 
 #include "utils/types.h"
-
-using std::vector;
-
-using std::map;
-using std::shared_ptr;
-using std::string;
-using std::runtime_error;
-using std::invalid_argument;
 
 class BasicRcsDataSet {
 private:

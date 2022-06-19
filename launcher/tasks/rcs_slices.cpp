@@ -44,7 +44,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
     auto image_positions = map_vec<camera, Vector3d>(cameras, &camera::position);
     auto image_count = cameras.size();
 
-    vector<ScoredPoint> points = point_provider->get_base_scored_point_list();
+    shared_ptr<vector<ScoredPoint>> points = point_provider->get_base_scored_point_list();
 
     auto origin = Vector2d();
     origin.setZero();
@@ -52,7 +52,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
     auto data = inputs->data<SIMPLE_RCS_MAT>(false)->at_height(DEFAULT_HEIGHT)->rcs();
     const auto rcs_colors = color_values(data, map_turbo);
 
-    for (auto& point: points) {
+    for (auto& point: *points) {
         auto flat_point = flat_down_from_above(point.position());
 
         for (size_t image_id = 0; image_id < image_count; image_id++) {
@@ -76,7 +76,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
         return ObserverRenderer(payload);
     });
 
-    auto score_range = ScoredPoint::get_score_range(points);
+    auto score_range = ScoredPoint::get_score_range(*points);
     auto colormap = construct_colormap_function(COLOR_MAP, score_range);
 
     size_t index = 0;

@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
     const path task_output_path{output_path / task / output_target_folder};
 
     if (is_directory(task_output_path)) {
-        cerr << "Warning: a directory with the name '" << task_output_path
+        cerr << "Warning: a directory with the name '" << task_output_path.string()
              << "' exists already and will be removed" << endl;
         remove_all(task_output_path);
     }

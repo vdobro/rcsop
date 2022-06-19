@@ -1,12 +1,8 @@
 #ifndef RCSOP_COMMON_SCORED_POINT_H
 #define RCSOP_COMMON_SCORED_POINT_H
 
-#include <vector>
-using std::vector;
-
 #include "utils/types.h"
-
-typedef std::pair<point_id_t, Vector3d> point_pair;
+#include "utils/points.h"
 
 struct ScoreRange {
     double min;

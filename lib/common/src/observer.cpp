@@ -4,12 +4,12 @@
 #include <utility>
 
 Observer::Observer(const ObserverPosition& camera_position,
-                   const camera& source_camera,
+                   camera  source_camera,
                    path filepath,
                    double world_scale)
         : _position(camera_position),
           _source_filepath(std::move(filepath)),
-          _camera(source_camera),
+          _camera(std::move(source_camera)),
           _worldScale(world_scale) {}
 
 typedef Eigen::Hyperplane<double, 3> plane;
@@ -22,11 +22,17 @@ Vector3d Observer::get_right() const {
     return direction.normalized();
 }
 
+const static int CAMERA_HEIGHT_CORRECTION_DEGREES = -5;
+const static double CAMERA_CORRECTION_RADIANS = (CAMERA_HEIGHT_CORRECTION_DEGREES * M_PI) / 180;
+const Eigen::Transform<double, 3, Eigen::Affine> CORRECTION_TRANSFORM(
+        Eigen::AngleAxis<double>(CAMERA_CORRECTION_RADIANS, Vector3d::UnitX()));
+
+
 Vector3d Observer::get_up() const {
     Vector3d camera_up;
     camera_up.setZero();
     camera_up.y() = -1;
-    Vector3d direction = _camera.transform_to_world(camera_up) - _camera.position();
+    Vector3d direction = _camera.transform_to_world(camera_up.transpose() * CORRECTION_TRANSFORM.rotation()) - _camera.position();
     return direction.normalized();
 }
 

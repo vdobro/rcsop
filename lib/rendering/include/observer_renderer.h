@@ -17,12 +17,11 @@ struct RenderedPoint {
 class ObserverRenderer {
 private:
     const Observer _observer;
-    const vector<ScoredPoint> _points;
+    const shared_ptr<vector<ScoredPoint>> _points;
 
     shared_ptr<sf::Shader> _shader;
 
-    vector<RenderedPoint> project_points(const vector<ScoredPoint>& points,
-                                         const sfm::rendering::global_colormap_func& colormap);
+    vector<RenderedPoint> project_points(const sfm::rendering::global_colormap_func& colormap);
 
     void render_point(const RenderedPoint& point, sf::RenderTarget& render_target);
 

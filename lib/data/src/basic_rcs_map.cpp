@@ -1,6 +1,12 @@
 #include "basic_rcs_map.h"
 
-#include "utils/vector.h"
+#include <stdexcept>
+#include <cmath>
+
+#include "utils/mapping.h"
+
+using std::runtime_error;
+using std::invalid_argument;
 
 static const auto RCS_TABLE_NAME = "result";
 static const auto RCS_COLUMN_HEIGHT = "height";

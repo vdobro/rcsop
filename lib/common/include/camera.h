@@ -4,7 +4,7 @@
 #include "colmap/util/types.h"
 #include "colmap/base/reconstruction.h"
 
-#include "utils/vector.h"
+#include "utils/points.h"
 
 #include "image_point.h"
 #include "scored_point.h"

@@ -1,7 +1,7 @@
 #include "camera.h"
 
-#include "utils/types.h"
 #include "utils/colmap.h"
+#include "utils/mapping.h"
 
 camera::camera(const Image& image, const Reconstruction& model) {
     this->model_image = image;

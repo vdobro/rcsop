@@ -1,8 +1,10 @@
 #ifndef RCSOP_COMMON_OBSERVER_H
 #define RCSOP_COMMON_OBSERVER_H
 
-#include "observer_position.h"
+#include "utils/points.h"
+
 #include "camera.h"
+#include "observer_position.h"
 #include "observed_point.h"
 
 class Observer {
@@ -18,7 +20,7 @@ private:
 
 public:
     explicit Observer(const ObserverPosition& camera_position,
-                      const camera& camera,
+                      camera  camera,
                       path filepath,
                       double world_scale);
 

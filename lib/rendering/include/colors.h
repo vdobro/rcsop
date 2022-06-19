@@ -3,13 +3,13 @@
 
 #include "utils/types.h"
 #include "utils/colmap.h"
-#include "utils/vector.h"
+#include "utils/mapping.h"
 
 #include "scored_point.h"
 
 namespace sfm::rendering {
-    typedef std::function<Vector3ub(double v, double vmin, double vmax)> local_colormap_func;
-    typedef std::function<Vector3ub(double v)> global_colormap_func;
+    typedef function<Vector3ub(double v, double vmin, double vmax)> local_colormap_func;
+    typedef function<Vector3ub(double v)> global_colormap_func;
 
     Vector3ub map_turbo(double v, double vmin, double vmax);
 

@@ -1,20 +1,22 @@
 #ifndef RCSOP_COMMON_OBSERVED_SCORED_CLOUD_H
 #define RCSOP_COMMON_OBSERVED_SCORED_CLOUD_H
 
+#include "utils/types.h"
+
 #include "scored_point.h"
 #include "observer.h"
 
 class ScoredCloud {
 private:
-    const Observer& _observer;
-    const vector<ScoredPoint>& _points;
+    const Observer _observer;
+    const shared_ptr<vector<ScoredPoint>> _points;
 public:
-    explicit ScoredCloud(const Observer& observer,
-                                 const vector<ScoredPoint>& points);
+    explicit ScoredCloud(Observer observer,
+                         shared_ptr<vector<ScoredPoint>> points);
 
-    Observer observer() const;
+    [[nodiscard]] Observer observer() const;
 
-    vector<ScoredPoint> points() const;
+    [[nodiscard]] shared_ptr<vector<ScoredPoint>> points() const;
 };
 
 

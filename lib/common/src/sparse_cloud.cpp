@@ -1,7 +1,7 @@
 #include "sparse_cloud.h"
 
 #include "utils/colmap.h"
-#include "utils/vector.h"
+#include "utils/mapping.h"
 
 SparseCloud::SparseCloud(const path& model_path) {
     this->model_path = model_path;

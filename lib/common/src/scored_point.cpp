@@ -1,5 +1,5 @@
 #include "scored_point.h"
-#include "utils/vector.h"
+#include "utils/mapping.h"
 
 #include <utility>
 

@@ -5,18 +5,13 @@
 #include <memory>
 #include <vector>
 
-using std::filesystem::path;
-using std::make_shared;
-using std::shared_ptr;
-using std::vector;
-
-#include <Eigen/Eigen>
-using Eigen::Vector3d;
-
 #include <CGAL/Surface_mesh/Surface_mesh.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Side_of_triangle_mesh.h>
 #include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
+
+#include "utils/types.h"
+#include "utils/points.h"
 
 class DenseCloud {
 public:

@@ -3,7 +3,7 @@
 #include <numeric>
 using std::reduce;
 
-#include "utils/vector.h"
+#include "utils/mapping.h"
 
 static matvar_t* get_all_variables(mat_t* file) {
     matvar_t* matvar = Mat_VarReadInfo(file, "auswertung");
@@ -70,7 +70,7 @@ void AzimuthRcsDataSet::determine_step_sizes() {
 
 }
 
-AzimuthRcsDataSet::AzimuthRcsDataSet(const string& filename,
+AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
                                      const ObserverPosition& position) {
     this->_position = position;
 

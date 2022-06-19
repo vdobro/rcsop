@@ -3,14 +3,9 @@
 
 #include "az_data.h"
 
-typedef long height_t;
-typedef long azimuth_t;
-
-typedef map<height_t, map<azimuth_t, shared_ptr<AzimuthRcsDataSet>>> azimuth_map_t;
-
 class AzimuthRcsMap {
 private:
-    shared_ptr<azimuth_map_t> data;
+    shared_ptr<map<height_t, map<azimuth_t, shared_ptr<AzimuthRcsDataSet>>>> _data;
 public:
     explicit AzimuthRcsMap(const path& input_path);
 

@@ -1,5 +1,7 @@
 #include "point_cloud_provider.h"
 
+#include "utils/mapping.h"
+
 using std::make_pair;
 
 PointCloudProvider::PointCloudProvider(const InputDataCollector& input) {
@@ -32,14 +34,14 @@ ScoredPointMap PointCloudProvider::get_base_scored_points() const {
     return result;
 }
 
-vector<ScoredPoint> PointCloudProvider::get_base_scored_point_list() const {
+shared_ptr<vector<ScoredPoint>> PointCloudProvider::get_base_scored_point_list() const {
     ScoredPointMap point_map = get_base_scored_points();
-    vector<ScoredPoint> points;
-    points.resize(point_map.size());
+    shared_ptr<vector<ScoredPoint>> points = make_shared<vector<ScoredPoint>>();
+    points->resize(point_map.size());
 
     size_t index = 0;
     for (const auto& pair : point_map) {
-        points[index] = pair.second;
+        points->at(index) = pair.second;
         index++;
     }
     return points;

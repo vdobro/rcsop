@@ -2,6 +2,7 @@
 #define RCSOP_COMMON_VECTOR_H
 
 #include <vector>
+#include <functional>
 #include <algorithm>
 #include <type_traits>
 

@@ -20,7 +20,7 @@ static vector<RenderedPoint> project_in_camera_with_color(
         auto camera_coordinates = camera.project_from_image(point.coordinates());
         auto score = point.score();
         if (isnan(score)) {
-            throw invalid_argument("score");
+            throw invalid_argument("Score of point is not a number");
         }
         auto color = colormap(point.score());
         return RenderedPoint{
@@ -74,10 +74,9 @@ static void draw_background(
 }
 
 vector<RenderedPoint> ObserverRenderer::project_points(
-        const vector<ScoredPoint>& points,
         const global_colormap_func& colormap) {
     const auto& camera = _observer.native_camera();
-    auto img_points = camera.project_to_image(points);
+    auto img_points = camera.project_to_image(*_points);
 
     std::ranges::sort(img_points, std::ranges::greater(), &ImagePoint::distance);
     auto rendered_points = project_in_camera_with_color(img_points, camera, colormap);
@@ -145,10 +144,9 @@ void ObserverRenderer::render(const path& output_path,
     draw_background(render_target, input_file_path);
     time_measure = log_and_start_next(time_measure,
                                       log_prefix + "\tSetting up rendering pipeline for image " + output_name);
-    vector<RenderedPoint> rendered_points = project_points(this->_points, colormap);
+    vector<RenderedPoint> rendered_points = this->project_points(colormap);
 
-    time_measure = log_and_start_next(time_measure,
-                                      log_prefix + "\tPreparing coloring and projection");
+    //time_measure = log_and_start_next(time_measure, log_prefix + "\tPreparing coloring and projection");
     for (const auto& point: rendered_points) {
         render_point(point, render_target);
     }
@@ -158,10 +156,10 @@ void ObserverRenderer::render(const path& output_path,
 
     const auto output_texture = render_target.getTexture();
     auto output_image = output_texture.copyToImage();
-    time_measure = log_and_start_next(time_measure, log_prefix + "\tRetrieving image from the GPU");
+    //time_measure = log_and_start_next(time_measure, log_prefix + "\tRetrieving image from the GPU");
 
     output_image.saveToFile(output_file_path);
-    log_and_start_next(time_measure, log_prefix + "\tSaving image " + output_name);
+    log_and_start_next(time_measure, log_prefix + "\tSaved image " + output_name);
 }
 
 ObserverRenderer::ObserverRenderer(const ScoredCloud& points_with_observer)

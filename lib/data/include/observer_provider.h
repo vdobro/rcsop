@@ -1,6 +1,8 @@
 #ifndef RCSOP_DATA_CAMERA_PROVIDER_H
 #define RCSOP_DATA_CAMERA_PROVIDER_H
 
+#include "utils/types.h"
+
 #include "input_data_collector.h"
 #include "observer.h"
 

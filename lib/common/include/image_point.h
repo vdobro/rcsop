@@ -2,6 +2,7 @@
 #define RCSOP_COMMON_IMAGE_POINT_H
 
 #include "utils/types.h"
+#include "utils/points.h"
 
 class ImagePoint {
 private:

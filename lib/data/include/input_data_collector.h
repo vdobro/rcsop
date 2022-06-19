@@ -1,22 +1,16 @@
 #ifndef RCSOP_DATA_INPUT_DATA_COLLECTOR_H
 #define RCSOP_DATA_INPUT_DATA_COLLECTOR_H
 
-#include <string>
-#include <vector>
-#include <map>
-#include <filesystem>
+#include "utils/types.h"
 
 #include "sparse_cloud.h"
 #include "dense_cloud.h"
 #include "basic_rcs_map.h"
 #include "azimuth_rcs_map.h"
+#include "azimuth_minimap_provider.h"
 #include "input_image.h"
 
-using std::string;
-using std::vector;
-using std::map;
 using std::domain_error;
-using std::filesystem::path;
 
 enum InputAssetType {
     SPARSE_CLOUD_COLMAP = 0,
@@ -60,7 +54,7 @@ struct InputAssetTrait<AZIMUTH_RCS_MAT> {
 
 template<>
 struct InputAssetTrait<AZIMUTH_RCS_MINIMAP> {
-    using type = AzimuthRcsMap;
+    using type = AzimuthMinimapProvider;
 };
 
 template<InputAssetType T>
@@ -70,7 +64,7 @@ class InputDataCollector {
 private:
     path _root_path;
     path _image_path;
-    vector<InputImage> _images;
+    vector<CameraInputImage> _images;
     map<InputAssetType, vector<path>> _asset_paths = {
             {InputAssetType::SPARSE_CLOUD_COLMAP, vector<path>{}},
             {InputAssetType::DENSE_MESH_PLY,      vector<path>{}},
@@ -88,7 +82,7 @@ private:
 public:
     explicit InputDataCollector(const path& root_path);
 
-    [[nodiscard]] vector<InputImage> images() const;
+    [[nodiscard]] vector<CameraInputImage> images() const;
 
     template<InputAssetType AssetType>
     shared_ptr<InputAssetDataType<AssetType>> data(bool allow_multiple) const {

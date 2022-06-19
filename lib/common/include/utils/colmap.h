@@ -4,8 +4,6 @@
 #include "colmap/base/reconstruction.h"
 #include "colmap/util/types.h"
 
-#include "types.h"
-
 using colmap::Reconstruction;
 using colmap::Image;
 using colmap::Point3D;
