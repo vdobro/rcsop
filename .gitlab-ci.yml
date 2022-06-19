@@ -1,12 +1,5 @@
 image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/rcsop-gitlab-ci:generic
 
-cache: &global_cache
-  key: $CI_PIPELINE_ID
-  paths:
-    - build/
-    - input/
-  policy: pull-push
-
 stages:
   - build
   - test
@@ -18,7 +11,7 @@ Build launcher:
     - cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
     - make -j 16
   cache:
-    <<: *global_cache
+    key: "$CI_PIPELINE_ID-build"
     policy: push
     paths:
       - build/
@@ -30,7 +23,7 @@ Fetch sample input data:
     - tar -xf inputs.tar.xz
     - rm inputs.tar.xz
   cache:
-    <<: *global_cache
+    key: "$CI_PIPELINE_ID-input"
     policy: push
     paths:
       - input/
@@ -41,8 +34,14 @@ Test task "Azimuth RCS":
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" -I input -O output -M false
   cache:
-    <<: *global_cache
-    policy: pull
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
   artifacts:
     paths:
       - output
@@ -54,8 +53,14 @@ Test task "RCS slices":
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" -I input -O output -M false
   cache:
-    <<: *global_cache
-    policy: pull
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
   artifacts:
     paths:
       - output
@@ -67,8 +72,14 @@ Test dummy task:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output -M false
   cache:
-    <<: *global_cache
-    policy: pull
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
   artifacts:
     paths:
       - output
