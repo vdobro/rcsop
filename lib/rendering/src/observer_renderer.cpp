@@ -83,6 +83,29 @@ vector<RenderedPoint> ObserverRenderer::project_points(
     return rendered_points;
 }
 
+static void render_texture(const Texture& texture,
+                           const TextureRenderParams& coordinates,
+                           sf::RenderTarget& render_target) {
+    sf::Texture sf_texture;
+    auto texture_path = texture.file_path();
+    if (!sf_texture.loadFromFile(texture_path)) {
+        throw invalid_argument("Could not load texture " + texture_path.string());
+    }
+    sf_texture.setSmooth(true);
+    sf::RectangleShape shape;
+    shape.setTexture(&sf_texture);
+
+    auto x = static_cast<float>(coordinates.coordinates.x());
+    auto y = static_cast<float>(coordinates.coordinates.y());
+    shape.setPosition(x, y);
+
+    auto width = static_cast<float>(coordinates.size.x());
+    auto height = static_cast<float>(coordinates.size.y());
+    shape.setSize(sf::Vector2f(width, height));
+
+    render_target.draw(shape);
+}
+
 void ObserverRenderer::render_point(
         const RenderedPoint& point,
         sf::RenderTarget& render_target) {
@@ -150,6 +173,9 @@ void ObserverRenderer::render(const path& output_path,
     for (const auto& point: rendered_points) {
         render_point(point, render_target);
     }
+    for (const auto& texture_pair: *_textures) {
+        render_texture(texture_pair.second, texture_pair.first, render_target);
+    }
 
     render_target.display();
     time_measure = log_and_start_next(time_measure, log_prefix + "\tRendering image");
@@ -166,4 +192,9 @@ ObserverRenderer::ObserverRenderer(const ScoredCloud& points_with_observer)
         : _observer(points_with_observer.observer()),
           _points(points_with_observer.points()) {
     this->initialize_renderer();
+    this->_textures = make_shared<vector<pair<TextureRenderParams, Texture>>>();
+}
+
+void ObserverRenderer::add_texture(Texture texture, TextureRenderParams coordinates) {
+    this->_textures->push_back(std::make_pair(coordinates, texture));
 }

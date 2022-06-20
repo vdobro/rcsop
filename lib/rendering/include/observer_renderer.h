@@ -8,16 +8,23 @@
 #include "utils/chronometer.h"
 #include "colors.h"
 #include "scored_cloud.h"
+#include "texture.h"
 
 struct RenderedPoint {
     Vector2d coordinates = Vector2d::Zero();
     Vector3ub color = Vector3ub::Zero();
 };
 
+struct TextureRenderParams {
+    Vector2d coordinates = Vector2d::Zero();
+    Vector2d size = Vector2d::Zero();
+};
+
 class ObserverRenderer {
 private:
     const Observer _observer;
     const shared_ptr<vector<ScoredPoint>> _points;
+    shared_ptr<vector<pair<TextureRenderParams, Texture>>> _textures;
 
     shared_ptr<sf::Shader> _shader;
 
@@ -29,6 +36,8 @@ private:
 
 public:
     explicit ObserverRenderer(const ScoredCloud& pointsWithObserver);
+
+    void add_texture(Texture texture, TextureRenderParams coordinates);
 
     void render(const path& output_path,
                 const sfm::rendering::global_colormap_func& colormap,

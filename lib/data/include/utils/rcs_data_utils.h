@@ -8,7 +8,7 @@
 #include "utils/chronometer.h"
 #include "az_data.h"
 #include "input_image.h"
-#include "azimuth_rcs_minimap.h"
+#include "texture.h"
 
 using std::filesystem::recursive_directory_iterator;
 using std::regex;
@@ -37,7 +37,7 @@ struct AzimuthAssetTrait<RCS_MAT> {
 
 template<>
 struct AzimuthAssetTrait<MINIMAP> {
-    using type = AzimuthRcsMinimap;
+    using type = Texture;
 };
 
 template<AzimuthInput T>
