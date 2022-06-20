@@ -1,7 +1,10 @@
 #include "az_data.h"
 
 #include <numeric>
+
 using std::reduce;
+using std::runtime_error;
+using std::invalid_argument;
 
 #include "utils/mapping.h"
 
@@ -71,9 +74,7 @@ void AzimuthRcsDataSet::determine_step_sizes() {
 }
 
 AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
-                                     const ObserverPosition& position) {
-    this->_position = position;
-
+                                     const ObserverPosition& position) : _position(position) {
     mat_t* mat_file_handle = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
     if (nullptr == mat_file_handle) {
         throw runtime_error("Could not open .mat file");
@@ -92,15 +93,10 @@ AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
     determine_step_sizes();
 }
 
-map<double, vector<double>> AzimuthRcsDataSet::get_rcs() const {
-    return this->_angle_to_rcs_values;
-}
+double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
+    double range_distance = point.distance_in_world;
+    double angle = point.horizontal_angle;
 
-ObserverPosition AzimuthRcsDataSet::get_position() const {
-    return this->_position;
-}
-
-double AzimuthRcsDataSet::find_nearest(double range_distance, double angle) const {
     auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
 
     auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);

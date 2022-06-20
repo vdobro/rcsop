@@ -2,6 +2,7 @@
 
 #include "colors.h"
 #include "options.h"
+#include "../default_options.h"
 
 #include "observer_provider.h"
 #include "point_cloud_provider.h"
@@ -33,7 +34,6 @@ static bool inline is_in_triangle(const Vector2d& point,
     return (b1 == b2) && (b2 == b3);
 }
 
-static const height_t DEFAULT_HEIGHT = 40;
 void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
                 const path& output_path) {
     const auto observer_provider = make_shared<ObserverProvider>(*inputs);

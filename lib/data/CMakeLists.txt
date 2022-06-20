@@ -21,7 +21,7 @@ add_library(rcsop-data SHARED
         src/input_data_collector.cpp
         src/input_image.cpp
         src/point_cloud_provider.cpp
-        src/azimuth_rcs_map.cpp
+        src/azimuth_rcs_data_collection.cpp
         src/observer_provider.cpp
         src/azimuth_rcs_minimap.cpp
         src/utils/rcs_data_utils.cpp

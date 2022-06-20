@@ -1,4 +1,9 @@
 #include "observer_provider.h"
+
+#include <stdexcept>
+
+using std::invalid_argument;
+
 #include "point_cloud_provider.h"
 
 ObserverProvider::ObserverProvider(const InputDataCollector& input) {

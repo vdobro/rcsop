@@ -9,12 +9,12 @@
 #include "matio.h"
 
 #include "utils/types.h"
+
 #include "observer_position.h"
+#include "observed_point.h"
+#include "abstract_rcs_map.h"
 
-using std::runtime_error;
-using std::invalid_argument;
-
-class AzimuthRcsDataSet {
+class AzimuthRcsDataSet : public AbstractDataSet {
 private:
     ObserverPosition _position{};
     vector<long> _ranges;
@@ -33,11 +33,7 @@ public:
     explicit AzimuthRcsDataSet(const path& filename,
                                const ObserverPosition& position);
 
-    [[nodiscard]] map<double, vector<double>> get_rcs() const;
-
-    [[nodiscard]] ObserverPosition get_position() const;
-
-    [[nodiscard]] double find_nearest(double range_distance, double angle) const;
+    [[nodiscard]] double map_to_nearest(const observed_point& point) const override;
 };
 
 #endif //RCSOP_DATA_AZ_DATA_H

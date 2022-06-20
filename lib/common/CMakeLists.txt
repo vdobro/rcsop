@@ -12,7 +12,6 @@ endif()
 find_package(Eigen3 3.4 REQUIRED)
 find_package(CGAL REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
-find_package(Boost REQUIRED)
 
 include(GenerateExportHeader)
 add_library(rcsop-common SHARED
@@ -25,7 +24,7 @@ add_library(rcsop-common SHARED
         src/chronometer.cpp
         src/observer.cpp
         src/scored_cloud.cpp
-        src/logging.cpp)
+        src/logging.cpp src/gauss.cpp)
 
 generate_export_header(rcsop-common)
 

@@ -1,32 +1,23 @@
-#include <filesystem>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <chrono>
 
 #include "boost/program_options.hpp"
+#include "utils/types.h"
 #include "input_data_collector.h"
 
 #include "tasks/test_task.h"
-#include "tasks/azimuth_rcs_plotter.h"
 #include "tasks/rcs_slices.h"
+#include "tasks/rcs_sums.h"
+#include "tasks/azimuth_rcs_plotter.h"
 
 namespace po = boost::program_options;
 
-using std::string;
-using std::vector;
-using std::map;
-using std::function;
 using std::stringstream;
 using std::cout;
 using std::cerr;
 using std::clog;
 using std::endl;
-using std::make_shared;
 
-using std::filesystem::path;
-using std::filesystem::create_directories;
-using std::filesystem::remove;
 using std::filesystem::remove_all;
 using std::filesystem::is_directory;
 using std::filesystem::is_regular_file;
@@ -38,14 +29,16 @@ const char* PARAM_TASK = "task";
 const char* PARAM_OUTPUT_PATH = "output-path";
 const char* PARAM_OUTPUT_NAME_TIMESTAMP = "timestamp";
 
-const map<string, std::function<void(const shared_ptr<InputDataCollector>,
-                                     const path&)>> available_tasks = {
-        {"test-task", dummy_task},
-        {"azimuth-rcs", azimuth_rcs_plotter},
-        {"rcs-slices", rcs_slices},
+const static map<string, std::function<void(const shared_ptr<InputDataCollector>,
+                                            const path&)>> available_tasks = {
+        {"test-task",    dummy_task},
+        {"rcs-slices",   rcs_slices},
+        {"rcs-sums",     accumulate_rcs},
+        {"azimuth-sums", accumulate_azimuth},
+        {"azimuth-rcs",  azimuth_rcs_plotter},
 };
 
-string get_current_timestamp() {
+static string get_current_timestamp() {
     const auto now = system_clock::now();
     const time_t t = system_clock::to_time_t(now);
     stringstream ss;
@@ -97,7 +90,7 @@ int main(int argc, char* argv[]) {
     }
 
     string output_target_folder = "latest";
-    if (use_timestamps_as_output_name){
+    if (use_timestamps_as_output_name) {
         output_target_folder = get_current_timestamp();
     }
     const path task_output_path{output_path / task / output_target_folder};

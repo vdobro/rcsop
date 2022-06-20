@@ -32,18 +32,18 @@ vector<Target> cast_vec(const vector<Source>& values) {
 }
 
 
-template<typename InputValueType, typename SearchValue>
+template<typename InputValueType, typename DataType>
 size_t find_interval_match_index(InputValueType search_value,
-                                 SearchValue first_range,
-                                 SearchValue range_epsilon) {
-    return lround((static_cast<SearchValue>(search_value) - first_range) / (2 * range_epsilon));
+                                 DataType first_range,
+                                 DataType range_epsilon) {
+    return lround((static_cast<DataType>(search_value) - first_range) / (2 * range_epsilon));
 }
 
-template<typename InputValueType, typename SearchValue, typename MappedValue>
-MappedValue find_interval_match(InputValueType search_value,
-                                const vector<MappedValue>& mapped_values,
-                                SearchValue first_range,
-                                SearchValue range_epsilon) {
+template<typename InputValueType, typename DataType, typename MappedValueType>
+MappedValueType find_interval_match(InputValueType search_value,
+                                    const vector<MappedValueType>& mapped_values,
+                                    DataType first_range,
+                                    DataType range_epsilon) {
     size_t index = find_interval_match_index(search_value, first_range, range_epsilon);
     return mapped_values.at(index);
 }

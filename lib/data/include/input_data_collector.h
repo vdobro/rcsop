@@ -6,7 +6,7 @@
 #include "sparse_cloud.h"
 #include "dense_cloud.h"
 #include "basic_rcs_map.h"
-#include "azimuth_rcs_map.h"
+#include "azimuth_rcs_data_collection.h"
 #include "azimuth_minimap_provider.h"
 #include "input_image.h"
 
@@ -49,7 +49,7 @@ struct InputAssetTrait<SIMPLE_RCS_MAT> {
 
 template<>
 struct InputAssetTrait<AZIMUTH_RCS_MAT> {
-    using type = AzimuthRcsMap;
+    using type = AzimuthRcsDataCollection;
 };
 
 template<>

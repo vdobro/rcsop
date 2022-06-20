@@ -12,7 +12,8 @@ add_executable(rcs-overlay-plotter
         main.cpp
         tasks/test_task.cpp
         tasks/azimuth_rcs_plotter.cpp
-        tasks/rcs_slices.cpp)
+        tasks/rcs_slices.cpp
+        tasks/rcs_sums.cpp tasks/utils/point_scoring.cpp tasks/utils/point_scoring.h)
 
 target_include_directories(rcs-overlay-plotter PRIVATE ${PROJECT_SOURCE_DIR})
 set_target_properties(rcs-overlay-plotter PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
