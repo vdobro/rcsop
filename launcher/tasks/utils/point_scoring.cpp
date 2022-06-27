@@ -54,7 +54,7 @@ shared_ptr<ScoredCloudPayload> score_points(
         const ScoreRange& range_limits,
         const global_colormap_func& colormap_func) {
     const CameraCorrectionParams observer_options{
-            .pitch = -0.5,
+            .pitch = -2.0,
             .default_height = DEFAULT_HEIGHT,
     };
     const auto observer_provider = make_shared<ObserverProvider>(*inputs, CAMERA_DISTANCE, observer_options);
