@@ -3,14 +3,10 @@
 
 #include <utility>
 
-ScoredPoint::ScoredPoint(Vector3d position, ulong id)
-        : _point_id(id), _position(std::move(position)) {}
-
-ScoredPoint::ScoredPoint(Vector3d position, ulong id, double score)
-        : _point_id(id), _position(std::move(position)), _score(score) {}
-
-ScoredPoint::ScoredPoint(const point_pair& base)
-        : _point_id(base.first), _position(base.second) {}
+ScoredPoint::ScoredPoint(Vector3d position, point_id_t id, double score) :
+        _point_id(id),
+        _position(std::move(position)),
+        _score(score) {}
 
 point_id_t ScoredPoint::id() const { return _point_id; }
 
@@ -24,10 +20,6 @@ double ScoredPoint::score() const {
 
 double ScoredPoint::score_to_dB() const {
     return 10.0 * log10(this->score());
-}
-
-void ScoredPoint::increment_score(double value) {
-    this->_score += value;
 }
 
 ScoreRange ScoredPoint::get_score_range(const vector<ScoredPoint>& points) {

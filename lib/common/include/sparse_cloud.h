@@ -23,11 +23,10 @@ public:
 
     [[nodiscard]] double get_world_scale(double camera_distance_to_origin) const;
     [[nodiscard]] vector<camera> get_cameras() const;
-    [[nodiscard]] camera find_camera(camera_id_t camera_id) const;
 
     [[nodiscard]] vector<Vector3d> get_camera_positions() const;
     [[nodiscard]] vector<point_pair> get_point_pairs() const;
-    [[nodiscard]] ScoredPointMap get_scored_points() const;
+    [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_scored_points() const;
 
     void reload();
     void save(const path& output_path);

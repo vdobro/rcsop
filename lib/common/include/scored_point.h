@@ -19,13 +19,7 @@ private:
 public:
     explicit ScoredPoint() = default;
 
-    explicit ScoredPoint(const point_pair& base);
-
-    explicit ScoredPoint(Vector3d position, ulong id);
-
-    explicit ScoredPoint(Vector3d position, ulong id, double score);
-
-    void increment_score(double value);
+    explicit ScoredPoint(Vector3d position, point_id_t id, double score = 0);
 
     [[nodiscard]] Vector3d position() const;
 
@@ -38,7 +32,5 @@ public:
     static ScoreRange get_score_range(const vector<ScoredPoint>& points);
 
 };
-
-typedef map<point_id_t, ScoredPoint> ScoredPointMap;
 
 #endif //RCSOP_COMMON_SCORED_POINT_H

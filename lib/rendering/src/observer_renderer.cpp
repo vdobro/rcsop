@@ -2,6 +2,7 @@
 
 using std::isnan;
 using std::invalid_argument;
+using std::runtime_error;
 using std::make_shared;
 using std::cerr;
 
@@ -49,11 +50,11 @@ const char* FRAGMENT_SHADER =
 
 void ObserverRenderer::initialize_renderer() {
     if (!sf::Shader::isAvailable()) {
-        throw std::runtime_error("Shaders unsupported");
+        throw runtime_error("Shaders unsupported");
     }
     this->_shader = make_shared<sf::Shader>();
     if (!this->_shader->loadFromMemory(FRAGMENT_SHADER, sf::Shader::Fragment)) {
-        throw std::runtime_error("Could not load required shader.");
+        throw runtime_error("Could not load required shader.");
     }
 }
 
@@ -62,8 +63,7 @@ static void draw_background(
         const path& input_file_path) {
     sf::Texture background;
     if (!background.loadFromFile(input_file_path)) {
-        std::cerr << "Could not load texture " << input_file_path << std::endl;
-        exit(3);
+        throw runtime_error("Could not load texture " + input_file_path.string());
     }
 
     sf::Sprite background_sprite;
@@ -160,8 +160,7 @@ void ObserverRenderer::render(const path& output_path,
 
     sf::RenderTexture render_target;
     if (!render_target.create(camera.image_width(), camera.image_height())) {
-        std::cerr << "Could not create render texture." << std::endl;
-        exit(2);
+        throw runtime_error("Could not create render texture.");
     }
 
     draw_background(render_target, input_file_path);

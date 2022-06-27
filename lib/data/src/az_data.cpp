@@ -87,6 +87,8 @@ AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
     _angles = get_raw_values("vAngDeg", table);
     auto raw_azimuth = get_raw_values("JOpt_RCS", table);
     _angle_to_rcs_values = reconstruct_value_table(raw_azimuth);
+
+    Mat_VarFree(table);
     Mat_Close(mat_file_handle);
 
     _ranges.erase(_ranges.begin());

@@ -10,6 +10,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 find_package(Eigen3 3.4 REQUIRED)
+find_package(TBB REQUIRED)
 find_package(CGAL REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
 
@@ -44,6 +45,7 @@ set_target_properties(rcsop-common PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_R
 target_link_libraries(rcsop-common
         PUBLIC
             ${COLMAP_LIBRARIES}
+            tbb
             Eigen3::Eigen
             CGAL::CGAL
 )

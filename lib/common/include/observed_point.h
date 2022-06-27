@@ -5,7 +5,7 @@
 #include "utils/points.h"
 
 struct observed_point {
-    Vector3d position;
+    Vector3d position = Vector3d::Zero();
     point_id_t id = 0;
     double distance_in_world = 0;
     double vertical_angle = 0;

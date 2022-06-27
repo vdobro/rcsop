@@ -1,5 +1,6 @@
 #include "test_task.h"
 #include "observer_provider.h"
+#include "default_options.h"
 
 #include <iostream>
 
@@ -14,7 +15,7 @@ void dummy_task(const shared_ptr<InputDataCollector>& inputs,
     }
 
     clog << "Observer positions: " << endl;
-    auto observer_provider = make_shared<ObserverProvider>(*inputs);
+    auto observer_provider = make_shared<ObserverProvider>(*inputs, CAMERA_DISTANCE);
     auto observers = observer_provider->observers();
     for (const auto& observer: observers) {
         clog << observer.position().str() << endl;

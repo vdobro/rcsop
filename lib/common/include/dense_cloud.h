@@ -17,9 +17,9 @@ class DenseCloud {
 public:
     explicit DenseCloud(const path& ply_file_path);
 
-    bool is_inside(const Vector3d& point);
+    [[nodiscard]] bool is_inside(const Vector3d& point) const;
 
-    vector<Vector3d> points();
+    [[nodiscard]] shared_ptr<vector<Vector3d>> points() const;
 
 private:
     typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;

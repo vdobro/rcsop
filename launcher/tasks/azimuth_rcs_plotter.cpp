@@ -14,9 +14,14 @@ using namespace sfm::rendering;
 void azimuth_rcs_plotter(const shared_ptr<InputDataCollector>& inputs,
                          const path& output_path) {
     const auto azimuth_data = inputs->data<AZIMUTH_RCS_MAT>(false);
-    const auto scored_payload = score_points(inputs, azimuth_data, COLOR_MAP);
+
+    const ScoreRange range = {
+            .min = -20,
+            .max = 5,
+    };
+    const auto colormap = construct_colormap_function(COLOR_MAP, range);
+    const auto scored_payload = score_points(inputs, azimuth_data, range, colormap);
     const auto& points = scored_payload->point_clouds;
-    const auto& colormap = scored_payload->colormap;
 
     const TextureRenderParams minimap_position = {
             .coordinates= Vector2d(915., 420.),

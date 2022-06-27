@@ -17,19 +17,18 @@ DenseCloud::DenseCloud(const path& ply_file_path) {
     inside = make_shared<InsideTriangleMesh>(*mesh);
 }
 
-bool DenseCloud::is_inside(const Eigen::Vector3d& point) {
+bool DenseCloud::is_inside(const Vector3d& point) const {
     Point cgalPoint(point.x(), point.y(), point.z());
     CGAL::Bounded_side res = (*this->inside)(cgalPoint);
 
     return res == CGAL::ON_BOUNDED_SIDE || res == CGAL::ON_BOUNDARY;
 }
 
-vector<Vector3d> DenseCloud::points() {
-    vector<Vector3d> result;
+shared_ptr<vector<Vector3d>> DenseCloud::points() const {
+    auto result = make_shared<vector<Vector3d>>();
     for (VertexDescriptor vertex_index : this->mesh->vertices()) {
         const Point vertex = this->mesh->point(vertex_index);
-        Vector3d point(vertex.x(), vertex.y(), vertex.z());
-        result.push_back(point);
+        result->emplace_back(vertex.x(), vertex.y(), vertex.z());
     }
     return result;
 }

@@ -1,18 +1,19 @@
 #include "observer_provider.h"
 
 #include <stdexcept>
-
 using std::invalid_argument;
 
 #include "point_cloud_provider.h"
 
-ObserverProvider::ObserverProvider(const InputDataCollector& input) {
+ObserverProvider::ObserverProvider(const InputDataCollector& input,
+                                   double distance_to_origin,
+                                   CameraCorrectionParams default_observer_correction) {
     if (!input.data_available<SPARSE_CLOUD_COLMAP>()) {
         throw invalid_argument("No COLMAP model");
     }
     auto model = input.data<SPARSE_CLOUD_COLMAP>(false);
     auto cameras = model->get_cameras();
-    auto world_scale = PointCloudProvider(input).get_world_scale();
+    auto world_scale = PointCloudProvider(input).get_world_scale(distance_to_origin);
     if (world_scale == 0) {
         throw invalid_argument("World scale must not be zero");
     }
@@ -25,8 +26,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input) {
 
         for (const auto& camera: cameras) {
             if (image_name == camera.get_name()) {
-                Observer observer(image.position(), camera, image_path, world_scale);
-                _observers.push_back(observer);
+                _observers.emplace_back(image.position(), camera, image_path, world_scale, default_observer_correction);
                 break;
             }
         }

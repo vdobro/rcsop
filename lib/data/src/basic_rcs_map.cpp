@@ -160,6 +160,7 @@ BasicRcsMap::BasicRcsMap(const path& path) {
         this->_rows.insert(std::make_pair(height, rcs));
     }
 
+    Mat_VarFree(table);
     Mat_Close(mat_file_handle);
 }
 

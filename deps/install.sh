@@ -12,6 +12,8 @@ mkdir -p "${INSTALL_DIR}"
 BUILD_DIR="$pwd/cmake_build"
 mkdir -p "$BUILD_DIR"
 
+export CMAKE_BUILD_TYPE="Release"
+
 # eigen
 EIGEN_BUILD_DIR="$BUILD_DIR/eigen"
 mkdir -p "$EIGEN_BUILD_DIR"

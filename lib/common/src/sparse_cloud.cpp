@@ -74,13 +74,13 @@ std::vector<point_pair> SparseCloud::get_point_pairs() const {
     return point_pairs;
 }
 
-ScoredPointMap SparseCloud::get_scored_points() const {
+shared_ptr<vector<ScoredPoint>> SparseCloud::get_scored_points() const {
     auto model_points = get_point_pairs();
-    map<point_id_t, ScoredPoint> result;
+    auto result = make_shared<vector<ScoredPoint>>();
     for (const auto& point_pair: model_points) {
         auto point_id = point_pair.first;
         auto point = point_pair.second;
-        result.insert(std::make_pair(point_id, ScoredPoint(point, point_id, 0)));
+        result->emplace_back(point, point_id, 0);
     }
     return result;
 }
@@ -107,8 +107,4 @@ void SparseCloud::add_point(const Vector3d& point, const Vector3ub& color) {
 
 void SparseCloud::set_point_color(point_id_t point_id, const Vector3ub& color) {
     reconstruction->Point3D(point_id).Color() = color;
-}
-
-camera SparseCloud::find_camera(camera_id_t camera_id) const {
-    return camera_map.at(camera_id);
 }

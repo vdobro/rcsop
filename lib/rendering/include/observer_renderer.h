@@ -24,6 +24,7 @@ class ObserverRenderer {
 private:
     const Observer _observer;
     const shared_ptr<vector<ScoredPoint>> _points;
+
     shared_ptr<vector<pair<TextureRenderParams, Texture>>> _textures;
 
     shared_ptr<sf::Shader> _shader;

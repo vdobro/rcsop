@@ -20,11 +20,13 @@ shared_ptr<ScoredCloudPayload> score_points(
         const shared_ptr<InputDataCollector>& inputs,
         const shared_ptr<AbstractDataCollection>& data,
         const observed_factor_func& factor_func,
-        const local_colormap_func& colormap_func);
+        const ScoreRange& range_limits,
+        const global_colormap_func& colormap_func);
 
 shared_ptr<ScoredCloudPayload> score_points(
         const shared_ptr<InputDataCollector>& inputs,
         const shared_ptr<AbstractDataCollection>& data,
-        const local_colormap_func& colormap_func);
+        const ScoreRange& range_limits,
+        const global_colormap_func& colormap_func);
 
 #endif //RCSOP_LAUNCHER_POINT_SCORING_H

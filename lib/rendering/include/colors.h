@@ -8,8 +8,8 @@
 #include "scored_point.h"
 
 namespace sfm::rendering {
-    typedef function<Vector3ub(double v, double vmin, double vmax)> local_colormap_func;
-    typedef function<Vector3ub(double v)> global_colormap_func;
+    using local_colormap_func = function<Vector3ub(double v, double vmin, double vmax)>;
+    using global_colormap_func = function<Vector3ub(double v)>;
 
     Vector3ub map_turbo(double v, double vmin, double vmax);
 

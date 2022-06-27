@@ -11,7 +11,9 @@ private:
     vector<Observer> _observers;
 
 public:
-    explicit ObserverProvider(const InputDataCollector& input);
+    explicit ObserverProvider(const InputDataCollector& input,
+                              double distance_to_origin,
+                              CameraCorrectionParams default_observer_correction = {});
 
     [[nodiscard]] vector<Observer> observers() const;
 };
