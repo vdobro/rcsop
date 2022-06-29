@@ -33,6 +33,8 @@ public:
     explicit AzimuthRcsDataSet(const path& filename,
                                const ObserverPosition& position);
 
+    ~AzimuthRcsDataSet() = default;
+
     [[nodiscard]] double map_to_nearest(const observed_point& point) const override;
 };
 

@@ -1,0 +1,7 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.installPrefix": "${workspaceFolder}/deps/build",
+    "cmake.configureSettings": {
+        "CGAL_DIR": "${workspaceFolder}/deps/cgal",
+    }
+}
