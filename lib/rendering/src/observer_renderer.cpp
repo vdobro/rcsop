@@ -151,12 +151,12 @@ void ObserverRenderer::render_point(
 void ObserverRenderer::render(const path& output_path,
                               const global_colormap_func& colormap,
                               const string& log_prefix) {
+    auto time_measure = start_time();
+
     const auto& camera = _observer.native_camera();
     const path input_file_path = _observer.source_image_path();
     const path output_file_path{output_path / camera.get_name()};
     string output_name = output_file_path.filename().string();
-
-    auto time_measure = start_time();
 
     sf::RenderTexture render_target;
     if (!render_target.create(camera.image_width(), camera.image_height())) {
@@ -164,11 +164,8 @@ void ObserverRenderer::render(const path& output_path,
     }
 
     draw_background(render_target, input_file_path);
-    time_measure = log_and_start_next(time_measure,
-                                      log_prefix + "\tSetting up rendering pipeline for image " + output_name);
     vector<RenderedPoint> rendered_points = this->project_points(colormap);
 
-    //time_measure = log_and_start_next(time_measure, log_prefix + "\tPreparing coloring and projection");
     for (const auto& point: rendered_points) {
         render_point(point, render_target);
     }
@@ -177,14 +174,12 @@ void ObserverRenderer::render(const path& output_path,
     }
 
     render_target.display();
-    time_measure = log_and_start_next(time_measure, log_prefix + "\tRendering image");
 
     const auto output_texture = render_target.getTexture();
     auto output_image = output_texture.copyToImage();
-    //time_measure = log_and_start_next(time_measure, log_prefix + "\tRetrieving image from the GPU");
 
     output_image.saveToFile(output_file_path);
-    log_and_start_next(time_measure, log_prefix + "\tSaved image " + output_name);
+    log_and_start_next(time_measure, log_prefix + "\tRendered image " + output_name);
 }
 
 ObserverRenderer::ObserverRenderer(const ScoredCloud& points_with_observer)

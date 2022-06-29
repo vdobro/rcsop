@@ -8,30 +8,48 @@
 #include <type_traits>
 #include <ranges>
 
+#include "utils/logging.h"
+
 using std::vector;
 using std::function;
 
-template<typename Source, typename Target, bool Parallel = true>
+#define PARALLEL_EXECUTOR std::execution::par_unseq
+
+template<typename Source, typename Target, bool Parallel = false>
 vector<Target> map_vec(const vector<Source>& source,
                        const function<Target(const Source&)>& mapper) {
     vector<Target> result;
     if constexpr(std::is_default_constructible<Target>::value) {
         result.resize(source.size());
         if constexpr (Parallel) {
-            std::transform(std::execution::par_unseq, source.begin(), source.end(), result.begin(), mapper);
+            std::transform(PARALLEL_EXECUTOR, source.begin(), source.end(), result.begin(), mapper);
         } else {
             std::transform(source.begin(), source.end(), result.begin(), mapper);
         }
-    } else {
-        static_assert(!Parallel, "Cannot parallelize for target types without a default constructor");
-        for (const auto& value: source) {
-            result.push_back(mapper(value));
-        }
+        return result;
+    }
+
+    if constexpr(Parallel) {
+        std::mutex vector_lock;
+        std::for_each(PARALLEL_EXECUTOR,
+                      source.cbegin(), source.cend(), [&vector_lock, &result, &mapper]
+                              (const Source& value) {
+                    const auto mapped_value = mapper(value);
+
+                    const std::lock_guard<std::mutex> lock(vector_lock);
+                    result.push_back(mapped_value);
+                });
+        return result;
+    }
+
+    for (const Source& value: source) {
+        Target mapped_value = mapper(value);
+        result.push_back(mapped_value);
     }
     return result;
 }
 
-template<typename Source, typename Target, bool Parallel = true>
+template<typename Source, typename Target, bool Parallel = false>
 shared_ptr<vector<Target>> map_vec_shared(const vector<Source>& source,
                                           const function<Target(const Source&)>& mapper) {
     static_assert(std::is_default_constructible<Target>::value);
@@ -39,32 +57,25 @@ shared_ptr<vector<Target>> map_vec_shared(const vector<Source>& source,
     result->resize(source.size());
 
     if constexpr(Parallel) {
-        std::transform(std::execution::par_unseq, source.begin(), source.end(), result->begin(), mapper);
+        std::transform(std::execution::par, source.begin(), source.end(), result->begin(), mapper);
     } else {
         std::transform(source.begin(), source.end(), result->begin(), mapper);
     }
     return result;
 }
 
-/*
-template<typename Source, typename Target>
-shared_ptr<vector<Target>> map_vec_shared(const vector<Source>& source,
-                                   const function<Target(const size_t, const Source&)>& mapper) {
-    static_assert(std::is_default_constructible<Target>::value);
-    auto result = make_shared<vector<Target>>();
-    std::ranges::iota_view indexes(0ul, source.size());
-    result.resize(source.size());
+template<typename Source, typename Target, bool Parallel = false>
+vector<Target> map_vec(
+        const vector<Source>& source,
+        const function<Target(const size_t, const Source&)>& mapper) {
+    std::ranges::iota_view index_range(0ul, source.size());
+    const vector<size_t> indexes(index_range.begin(), index_range.end());
 
-    std::for_each(
-            std::execution::par_unseq,
-            indexes.begin(), indexes.end(),
-            [&result, &source, &mapper](const size_t index) {
-                const auto& value = source[index];
-                (*result)[index] = mapper(index, value);
-            });
-    return result;
+    return map_vec<size_t, Target, Parallel>(indexes, [&source, &mapper](const size_t index) {
+        const auto& value = source[index];
+        return mapper(index, value);
+    });
 }
- */
 
 template<typename Source, typename Target>
 vector<Target> cast_vec(const vector<Source>& values) {

@@ -65,9 +65,14 @@ make install
 
 # cgal
 CGAL_BUILD_DIR="$BUILD_DIR/cgal"
+CGAL_SOURCE_DIR="$pwd/cgal"
 mkdir -p "$CGAL_BUILD_DIR"
 cd "$CGAL_BUILD_DIR"
-cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" "$pwd/cgal"
+cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
+    -DCGAL_DIR="$CGAL_SOURCE_DIR" \
+    -DWITH_examples=OFF \
+    -DWITH_demos=OFF \
+    "$CGAL_SOURCE_DIR"
 make install
 
 # colmap
@@ -80,6 +85,7 @@ mkdir -p "$COLMAP_BUILD_DIR"
 cd "$COLMAP_BUILD_DIR"
 cmake -DCMAKE_BUILD_TYPE="Release" \
     -DCUDA_NVCC_FLAGS="--std c++14" \
+    -DCGAL_DIR="$CGAL_SOURCE_DIR" \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
     -DGUI_ENABLED=ON \
     "$COLMAP_SRC_DIR"

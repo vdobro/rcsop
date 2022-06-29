@@ -13,12 +13,13 @@ add_executable(rcs-overlay-plotter
         tasks/test_task.cpp
         tasks/azimuth_rcs_plotter.cpp
         tasks/rcs_slices.cpp
-        tasks/rcs_sums.cpp tasks/utils/point_scoring.cpp tasks/utils/point_scoring.h)
+        tasks/rcs_sums.cpp
+        tasks/utils/point_scoring.cpp)
 
 target_include_directories(rcs-overlay-plotter PRIVATE ${PROJECT_SOURCE_DIR})
 set_target_properties(rcs-overlay-plotter PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")
 
-target_link_libraries(rcs-overlay-plotter PUBLIC
+target_link_libraries(rcs-overlay-plotter PRIVATE
         rcsop-common
         rcsop-data
         rcsop-rendering

@@ -2,10 +2,13 @@
 #define RCSOP_DATA_RCS_DATA_UTILS_H
 
 #include <regex>
+#include <execution>
+#include <mutex>
 
 #include "utils/types.h"
-#include "observer_position.h"
 #include "utils/chronometer.h"
+
+#include "observer_position.h"
 #include "az_data.h"
 #include "input_image.h"
 #include "texture.h"
@@ -13,6 +16,14 @@
 using std::filesystem::recursive_directory_iterator;
 using std::regex;
 using std::smatch;
+
+struct mat_path_with_azimuth {
+    path file_path;
+    azimuth_t azimuth;
+};
+
+vector<mat_path_with_azimuth> find_mat_files_in_folder(const path& folder_for_height,
+                                                       const regex& data_file_regex);
 
 vector<height_t> parse_available_heights(const path& data_path);
 
@@ -54,21 +65,23 @@ map<azimuth_t, shared_ptr<AzimuthInputType<T>>> map_azimuth_angles_to_data(
     const path height_path{data_path / folder_name};
 
     map<azimuth_t, shared_ptr<AT>> azimuth_to_data;
-    for (auto const& dir_entry: recursive_directory_iterator{height_path}) {
-        smatch sm;
-        const path& file_path = dir_entry.path();
-        const string filename = file_path.filename().string();
-        if (!regex_match(filename, sm, data_file_regex)) {
-            continue;
-        }
-        azimuth_t azimuth = stoi(sm[1]);
-        ObserverPosition position = {
-                .height = height,
-                .azimuth = azimuth,
-        };
-        auto data = make_shared<AT>(file_path, position);
-        azimuth_to_data.insert(make_pair(azimuth, data));
-    }
+
+    auto file_paths = find_mat_files_in_folder(height_path, data_file_regex);
+    std::mutex map_mutex;
+    std::for_each(std::execution::par_unseq,
+                  begin(file_paths), end(file_paths),
+                  [&map_mutex, &azimuth_to_data, &height, &data_file_regex]
+                          (const auto& mat_file_entry) {
+                      const auto data = make_shared<AT>(
+                              mat_file_entry.file_path,
+                              ObserverPosition{
+                                      .height = height,
+                                      .azimuth = mat_file_entry.azimuth,
+                              });
+
+                      const std::lock_guard<std::mutex> lock(map_mutex);
+                      azimuth_to_data.insert(make_pair(mat_file_entry.azimuth, data));
+                  });
     return azimuth_to_data;
 }
 

@@ -43,9 +43,9 @@ static inline bool is_within_camera_slice(
         const size_t& image_count,
         const vector<Vector2d>& image_positions) {
     auto previous_camera_id = image_id == 0 ? image_count - 1 : (image_id - 1);
-    auto previous_camera = image_positions[previous_camera_id];
-    auto next_camera = image_positions[(image_id + 1) % image_count];
-    auto current_camera = image_positions[image_id];
+    const auto& previous_camera = image_positions[previous_camera_id];
+    const auto& next_camera = image_positions[(image_id + 1) % image_count];
+    const auto& current_camera = image_positions[image_id];
 
     auto midpoint_to_previous = (previous_camera + current_camera) / 2;
     auto midpoint_to_next = (current_camera + next_camera) / 2;
@@ -59,7 +59,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
     const auto point_provider = make_shared<PointCloudProvider>(*inputs);
 
     auto observers = observer_provider->observers();
-    const auto cameras = map_vec<Observer, camera, false>(observers, &Observer::native_camera);
+    const auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
     const auto image_positions = map_vec<camera, Vector3d>(cameras, &camera::position);
     const auto flattened_image_positions = map_vec<Vector3d, Vector2d>(image_positions, flat_down_from_above);
     const auto image_count = image_positions.size();
@@ -86,7 +86,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
                 return ScoredPoint(point.position(), point.id());
             });
 
-    auto renderers = map_vec<Observer, ObserverRenderer, false>(
+    auto renderers = map_vec<Observer, ObserverRenderer>(
             observers, [&points](const Observer& observer) -> ObserverRenderer {
                 ScoredCloud payload(observer, points);
                 return ObserverRenderer(payload);

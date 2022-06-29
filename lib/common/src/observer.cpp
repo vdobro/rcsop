@@ -92,8 +92,6 @@ shared_ptr<vector<observed_point>> Observer::observe_points(
     const plane horizontal_plane = plane(up, observer_position);
     const double world_scale = this->_world_scale;
 
-    auto time = start_time();
-
     auto result = map_vec<ScoredPoint, observed_point, true>(
             camera_points,
             [&observer_position, &right, &up, &vertical_plane, &horizontal_plane, &world_scale](
@@ -107,7 +105,6 @@ shared_ptr<vector<observed_point>> Observer::observe_points(
                 );
             });
 
-    log_and_start_next(time, "Observed " + std::to_string(camera_points.size()) + " points");
     return make_shared<vector<observed_point>>(result);
 }
 
