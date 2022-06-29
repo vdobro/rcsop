@@ -73,6 +73,20 @@ void AzimuthRcsDataSet::determine_step_sizes() {
 
 }
 
+void AzimuthRcsDataSet::filter_peaks() {
+    for (const auto& angle_to_data : _raw_values) {
+        vector<double> column(angle_to_data.second);
+
+        auto max_value = *std::max_element(column.cbegin(), column.cend());
+        for (size_t i = 0; i < column.size(); i++) {
+            if (column[i] < max_value) {
+                column[i] = 0;
+            }
+        }
+        _filtered_values.insert(std::make_pair(angle_to_data.first, column));
+    }
+}
+
 AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
                                      const ObserverPosition& position) : _position(position) {
     mat_t* mat_file_handle = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
@@ -86,26 +100,31 @@ AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
 
     _angles = get_raw_values("vAngDeg", table);
     auto raw_azimuth = get_raw_values("JOpt_RCS", table);
-    _angle_to_rcs_values = reconstruct_value_table(raw_azimuth);
+    _raw_values = reconstruct_value_table(raw_azimuth);
 
     Mat_VarFree(table);
     Mat_Close(mat_file_handle);
 
     _ranges.erase(_ranges.begin());
     determine_step_sizes();
+
+    filter_peaks();
 }
 
 double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
-    double range_distance = point.distance_in_world;
-    double angle = point.horizontal_angle;
+    const double range_distance = point.distance_in_world;
+    const double angle = point.horizontal_angle;
 
-    auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
+    const auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
+    const auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
 
-    auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
-
-    auto range_to_values = _angle_to_rcs_values.at(nearest_angle);
+    const auto range_to_values = _selected_values.at(nearest_angle);
     if (nearest_range_index >= range_to_values.size()) {
         return 0;
     }
     return range_to_values.at(nearest_range_index);
+}
+
+void AzimuthRcsDataSet::use_filtered_peaks() {
+    _selected_values = _filtered_values;
 }

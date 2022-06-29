@@ -16,3 +16,11 @@ shared_ptr<AbstractDataSet> AzimuthRcsDataCollection::at_position(const Observer
     return std::static_pointer_cast<AbstractDataSet>(
             this->_data->at(position.height).at(position.azimuth));
 }
+
+void AzimuthRcsDataCollection::use_filtered_peaks() {
+    for (auto& height_pair : *_data) {
+        for (auto& azimuth_pair : height_pair.second) {
+            azimuth_pair.second->use_filtered_peaks();
+        }
+    }
+}

@@ -14,6 +14,7 @@ using namespace sfm::rendering;
 void azimuth_rcs_plotter(const shared_ptr<InputDataCollector>& inputs,
                          const path& output_path) {
     const auto azimuth_data = inputs->data<AZIMUTH_RCS_MAT>(false);
+    azimuth_data->use_filtered_peaks();
 
     const ScoreRange range = {
             .min = -20,

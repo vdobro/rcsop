@@ -11,6 +11,8 @@ public:
     explicit AzimuthRcsDataCollection(const path& input_path);
 
     [[nodiscard]] shared_ptr<AbstractDataSet> at_position(const ObserverPosition& position) const override;
+
+    void use_filtered_peaks();
 };
 
 #endif //RCSOP_DATA_AZIMUTH_RCS_MAP_H
