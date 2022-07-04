@@ -31,12 +31,12 @@ const static gauss_options distribution_options = {
 };
 
 void accumulate_rcs(const shared_ptr<InputDataCollector>& input,
-                    const path& output_path) {
+                    const task_options& options) {
     //TODO: WIP
 }
 
 void accumulate_azimuth(const shared_ptr<InputDataCollector>& inputs,
-                        const path& output_path) {
+                        const task_options& options) {
     /*
      //TODO WIP: adapter for BasicRcsMap or refactoring
     const shared_ptr<BasicRcsMap> rcs_data = inputs->data<SIMPLE_RCS_MAT>(false);

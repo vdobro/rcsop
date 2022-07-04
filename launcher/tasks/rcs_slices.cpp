@@ -54,11 +54,11 @@ static inline bool is_within_camera_slice(
 }
 
 void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
-                const path& output_path) {
-    const auto observer_provider = make_shared<ObserverProvider>(*inputs, CAMERA_DISTANCE);
+                const task_options& options) {
+    const auto observer_provider = make_shared<ObserverProvider>(*inputs, options.camera_distance_to_origin);
     const auto point_provider = make_shared<PointCloudProvider>(*inputs);
 
-    auto observers = observer_provider->observers();
+    auto observers = observer_provider->observers_with_positions();
     const auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
     const auto image_positions = map_vec<camera, Vector3d>(cameras, &camera::position);
     const auto flattened_image_positions = map_vec<Vector3d, Vector2d>(image_positions, flat_down_from_above);
@@ -98,6 +98,6 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
     size_t index = 0;
     size_t last = renderers.size();
     for (auto& renderer: renderers) {
-        renderer.render(output_path, colormap, construct_log_prefix(index++, last));
+        renderer.render(options.output_path, colormap, construct_log_prefix(index++, last));
     }
 }

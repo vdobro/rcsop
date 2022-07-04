@@ -1,6 +1,10 @@
 #ifndef RCSOP_COMMON_OBSERVER_H
 #define RCSOP_COMMON_OBSERVER_H
 
+#include <optional>
+
+using std::optional;
+
 #include "utils/points.h"
 
 #include "camera.h"
@@ -14,12 +18,12 @@ struct CameraCorrectionParams {
 
 class Observer {
 private:
-    const ObserverPosition _position;
-    const path _source_filepath;
-    const camera _camera;
+    optional<ObserverPosition> _position;
+    path _source_filepath;
+    camera _camera;
 
-    const double _world_scale;
-    double _height_offset;
+    double _world_scale = 1;
+    double _height_offset = 0;
     Eigen::Transform<double, 3, Eigen::Affine> _correction_transform;
 
     [[nodiscard]] Vector3d get_right() const;
@@ -27,13 +31,14 @@ private:
     [[nodiscard]] Vector3d get_up() const;
 
 public:
-    explicit Observer(const ObserverPosition& camera_position,
-                      camera camera,
+    explicit Observer(optional<ObserverPosition> camera_position,
                       path filepath,
+                      camera camera,
                       double world_scale,
-                      CameraCorrectionParams camera_correction = {});
+                      CameraCorrectionParams camera_correction);
 
     [[nodiscard]] ObserverPosition position() const;
+    [[nodiscard]] bool has_position() const;
 
     [[nodiscard]] path source_image_path() const;
 

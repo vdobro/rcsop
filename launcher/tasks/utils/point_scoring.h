@@ -19,6 +19,7 @@ using observed_factor_func = function<double(const observed_point&)>;
 shared_ptr<ScoredCloudPayload> score_points(
         const shared_ptr<InputDataCollector>& inputs,
         const shared_ptr<AbstractDataCollection>& data,
+        const double distance_to_origin,
         const observed_factor_func& factor_func,
         const ScoreRange& range_limits,
         const global_colormap_func& colormap_func);
@@ -26,6 +27,7 @@ shared_ptr<ScoredCloudPayload> score_points(
 shared_ptr<ScoredCloudPayload> score_points(
         const shared_ptr<InputDataCollector>& inputs,
         const shared_ptr<AbstractDataCollection>& data,
+        const double distance_to_origin,
         const ScoreRange& range_limits,
         const global_colormap_func& colormap_func);
 

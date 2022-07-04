@@ -3,8 +3,8 @@
 
 #include "utils/types.h"
 
-#include "observer_position.h"
 #include "observed_point.h"
+#include "observer.h"
 
 class AbstractDataSet {
 public:
@@ -13,7 +13,7 @@ public:
 
 class AbstractDataCollection {
 public:
-    [[nodiscard]] virtual shared_ptr<AbstractDataSet> at_position(const ObserverPosition& position) const = 0;
+    [[nodiscard]] virtual shared_ptr<AbstractDataSet> get_for_exact_position(const Observer& observer) const = 0;
 };
 
 #endif //RCSOP_DATA_ABSTRACT_RCS_MAP_H

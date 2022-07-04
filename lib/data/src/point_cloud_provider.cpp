@@ -49,7 +49,7 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud() 
     }
     const Kernel::Iso_cuboid_3 bound = CGAL::bounding_box(base_points->begin(), base_points->end());
 
-    const double STEP_SIZE = 0.02;
+    const double STEP_SIZE = 0.018;
     const double begin_x = bound.xmin();
     const double begin_y = bound.ymin();
     const double begin_z = bound.zmin();

@@ -19,6 +19,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
     }
 
     auto source_images = input.images();
+    vector<Observer> all_observers;
 
     for (const auto& image: source_images) {
         auto image_path = image.file_path();
@@ -26,13 +27,25 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
 
         for (const auto& camera: cameras) {
             if (image_name == camera.get_name()) {
-                _observers.emplace_back(image.position(), camera, image_path, world_scale, default_observer_correction);
+                Observer observer(image.position(), image_path, camera, world_scale, default_observer_correction);
+                all_observers.push_back(observer);
                 break;
             }
         }
     }
+    for (auto& observer : all_observers) {
+        if (observer.has_position()) {
+            this->_positioned_observers.push_back(observer);
+        } else {
+            this->_auxiliary_observers.push_back(observer);
+        }
+    }
 }
 
-vector<Observer> ObserverProvider::observers() const {
-    return this->_observers;
+vector<Observer> ObserverProvider::observers_with_positions() const {
+    return this->_positioned_observers;
+}
+
+vector<Observer> ObserverProvider::all_observers() const {
+    return this->_auxiliary_observers;
 }

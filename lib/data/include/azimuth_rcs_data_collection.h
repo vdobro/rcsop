@@ -10,7 +10,7 @@ private:
 public:
     explicit AzimuthRcsDataCollection(const path& input_path);
 
-    [[nodiscard]] shared_ptr<AbstractDataSet> at_position(const ObserverPosition& position) const override;
+    [[nodiscard]] shared_ptr<AbstractDataSet> get_for_exact_position(const Observer& observer) const override;
 
     void use_filtered_peaks();
 };

@@ -7,24 +7,26 @@
 using std::clog;
 using std::endl;
 
-void dummy_task(const shared_ptr<InputDataCollector>& inputs,
-                const path& output_path) {
+void test_task(const shared_ptr<InputDataCollector>& inputs,
+                const task_options& options) {
     clog << "Image file paths: " << endl;
     for (const auto& image: inputs->images()) {
         clog << image.file_path() << endl;
     }
 
     clog << "Observer positions: " << endl;
-    auto observer_provider = make_shared<ObserverProvider>(*inputs, CAMERA_DISTANCE);
-    auto observers = observer_provider->observers();
+    auto observer_provider = make_shared<ObserverProvider>(*inputs, options.camera_distance_to_origin);
+    auto observers = observer_provider->observers_with_positions();
     for (const auto& observer: observers) {
-        clog << observer.position().str() << endl;
+        if (observer.has_position()) {
+            clog << observer.position().str() << endl;
+        }
     }
 
     clog << "RCS minimap paths: " << endl;
     shared_ptr<AzimuthMinimapProvider> minimaps = inputs->data<AZIMUTH_RCS_MINIMAP>(false);
     for (const auto& observer: observers) {
-        clog << minimaps->at_position(observer.position())->file_path() << endl;
+        clog << minimaps->for_position(observer)->file_path() << endl;
     }
 
     clog << "Test task done" << endl;

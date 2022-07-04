@@ -14,7 +14,7 @@ public:
     explicit ScoredCloud(Observer observer,
                          shared_ptr<vector<ScoredPoint>> points);
 
-    [[nodiscard]] Observer observer() const;
+    [[nodiscard]] const Observer& observer() const;
 
     [[nodiscard]] shared_ptr<vector<ScoredPoint>> points() const;
 };

@@ -2,8 +2,8 @@
 #define RCSOP_DATA_AZIMUTH_MINIMAP_PROVIDER_H
 
 #include "utils/types.h"
-#include "observer_position.h"
 
+#include "observer.h"
 #include "texture.h"
 
 class AzimuthMinimapProvider {
@@ -12,7 +12,7 @@ private:
 public:
     explicit AzimuthMinimapProvider(const path& input_root_path);
 
-    [[nodiscard]] shared_ptr<Texture> at_position(const ObserverPosition& position) const;
+    [[nodiscard]] shared_ptr<Texture> for_position(const Observer& observer) const;
 };
 
 #endif //RCSOP_DATA_AZIMUTH_MINIMAP_PROVIDER_H

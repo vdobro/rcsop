@@ -7,7 +7,7 @@ ScoredCloud::ScoredCloud(Observer observer,
         _observer(std::move(observer)),
         _points(std::move(points)) {}
 
-Observer ScoredCloud::observer() const {
+const Observer& ScoredCloud::observer() const {
     return _observer;
 }
 

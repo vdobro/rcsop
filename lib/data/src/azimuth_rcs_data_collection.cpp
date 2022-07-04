@@ -12,14 +12,16 @@ AzimuthRcsDataCollection::AzimuthRcsDataCollection(const path& input_path) {
     this->_data = collect_all_heights<AzimuthInput::RCS_MAT>(input_path, mat_file_regex);
 }
 
-shared_ptr<AbstractDataSet> AzimuthRcsDataCollection::at_position(const ObserverPosition& position) const {
+shared_ptr<AbstractDataSet> AzimuthRcsDataCollection::get_for_exact_position(
+        const Observer& observer) const {
+    const auto position = observer.position();
     return std::static_pointer_cast<AbstractDataSet>(
             this->_data->at(position.height).at(position.azimuth));
 }
 
 void AzimuthRcsDataCollection::use_filtered_peaks() {
-    for (auto& height_pair : *_data) {
-        for (auto& azimuth_pair : height_pair.second) {
+    for (auto& height_pair: *_data) {
+        for (auto& azimuth_pair: height_pair.second) {
             azimuth_pair.second->use_filtered_peaks();
         }
     }

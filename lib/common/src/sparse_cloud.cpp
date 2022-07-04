@@ -7,12 +7,8 @@ SparseCloud::SparseCloud(const path& model_path) {
     this->model_path = model_path;
     reload();
 
-    auto image_count = reconstruction->NumImages();
-    auto image_map = reconstruction->Images();
-
-    for (size_t i = 1; i <= image_count; ++i) {
-        auto image = image_map[i];
-        camera camera(image, *reconstruction);
+    for (auto& image_with_id: reconstruction->Images()) {
+        camera camera(image_with_id.second, *reconstruction);
         this->cameras.push_back(camera);
         this->camera_map.insert(std::make_pair(camera.id(), camera));
     }

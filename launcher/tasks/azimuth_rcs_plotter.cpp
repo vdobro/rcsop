@@ -12,7 +12,7 @@
 using namespace sfm::rendering;
 
 void azimuth_rcs_plotter(const shared_ptr<InputDataCollector>& inputs,
-                         const path& output_path) {
+                         const task_options& options) {
     const auto azimuth_data = inputs->data<AZIMUTH_RCS_MAT>(false);
     azimuth_data->use_filtered_peaks();
 
@@ -21,7 +21,7 @@ void azimuth_rcs_plotter(const shared_ptr<InputDataCollector>& inputs,
             .max = 5,
     };
     const auto colormap = construct_colormap_function(COLOR_MAP, range);
-    const auto scored_payload = score_points(inputs, azimuth_data, range, colormap);
+    const auto scored_payload = score_points(inputs, azimuth_data, options.camera_distance_to_origin, range, colormap);
     const auto& points = scored_payload->point_clouds;
 
     const TextureRenderParams minimap_position = {
@@ -34,8 +34,8 @@ void azimuth_rcs_plotter(const shared_ptr<InputDataCollector>& inputs,
         ScoredCloud scored_cloud = points[index - 1];
         ObserverRenderer renderer(scored_cloud);
 
-        shared_ptr<Texture> minimap = minimaps->at_position(scored_cloud.observer().position());
+        shared_ptr<Texture> minimap = minimaps->for_position(scored_cloud.observer());
         renderer.add_texture(*minimap, minimap_position);
-        renderer.render(output_path, colormap, construct_log_prefix(index, payload_size));
+        renderer.render(options.output_path, colormap, construct_log_prefix(index, payload_size));
     }
 }

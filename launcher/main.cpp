@@ -3,12 +3,14 @@
 
 #include "boost/program_options.hpp"
 #include "utils/types.h"
-#include "input_data_collector.h"
 
+#include "tasks/task_utils.h"
 #include "tasks/test_task.h"
 #include "tasks/rcs_slices.h"
 #include "tasks/rcs_sums.h"
 #include "tasks/azimuth_rcs_plotter.h"
+#include "tasks/sparse_filter.h"
+#include "default_options.h"
 
 namespace po = boost::program_options;
 
@@ -28,14 +30,16 @@ const char* PARAM_INPUT_PATH = "input-path";
 const char* PARAM_TASK = "task";
 const char* PARAM_OUTPUT_PATH = "output-path";
 const char* PARAM_OUTPUT_NAME_TIMESTAMP = "timestamp";
+const char* PARAM_CAMERA_DISTANCE = "camera-distance";
 
-const static map<string, std::function<void(const shared_ptr<InputDataCollector>,
-                                            const path&)>> available_tasks = {
-        {"test-task",    dummy_task},
-        {"rcs-slices",   rcs_slices},
-        {"rcs-sums",     accumulate_rcs},
-        {"azimuth-sums", accumulate_azimuth},
-        {"azimuth-rcs",  azimuth_rcs_plotter},
+const static char* DEFAULT_TASK = "azimuth-rcs";
+const static map<string, launcher_task> available_tasks = {
+        {"test-task",     test_task},
+        {"rcs-slices",    rcs_slices},
+        {"rcs-sums",      accumulate_rcs},
+        {"azimuth-sums",  accumulate_azimuth},
+        {DEFAULT_TASK,    azimuth_rcs_plotter},
+        {"sparse-filter", sparse_filter},
 };
 
 static string get_current_timestamp() {
@@ -46,9 +50,10 @@ static string get_current_timestamp() {
     return ss.str();
 }
 
-void validate_options(const path& input_path,
-                      const path& output_path,
-                      const string& task) {
+static void validate_options(const path& input_path,
+                             const path& output_path,
+                             const string& task,
+                             const double camera_distance) {
     if (!available_tasks.contains(task)) {
         cerr << "Could not find task '" << task << "', consult documentation for available options" << endl;
         exit(EXIT_FAILURE);
@@ -61,6 +66,10 @@ void validate_options(const path& input_path,
         cerr << "Output path not a folder and already exists as a file, exiting." << endl;
         exit(EXIT_FAILURE);
     }
+    if (camera_distance <= 0.) {
+        cerr << "Camera distance must be greater than zero" << endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -68,13 +77,16 @@ int main(int argc, char* argv[]) {
     desc.add_options()
             ("input-path,I", po::value<string>(),
              "folder with the inputs: source images, sparse/dense point clouds and MATLAB data sources")
-            ("task,T", po::value<string>(), "task to execute")
-            ("timestamp,M", po::value<bool>(), "whether output folder name should be the current timestamp")
+            ("task,T", po::value<string>()->default_value(DEFAULT_TASK), "task to execute")
+            ("timestamp,M", po::value<bool>()->default_value(true),
+             "whether output folder name should be the current timestamp")
+            ("camera-distance,R", po::value<double>()->default_value(DEFAULT_CAMERA_DISTANCE),
+             "camera distance from the origin at the center")
             ("output-path,O", po::value<string>(), "output path");
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
-    if (!vm.count(PARAM_INPUT_PATH) || !vm.count(PARAM_OUTPUT_PATH) || !vm.count(PARAM_TASK)) {
+    if (!vm.count(PARAM_INPUT_PATH) || !vm.count(PARAM_OUTPUT_PATH)) {
         cout << desc;
         exit(EXIT_FAILURE);
     }
@@ -82,7 +94,8 @@ int main(int argc, char* argv[]) {
     const path input_path{vm.at(PARAM_INPUT_PATH).as<string>()};
     const path output_path{vm.at(PARAM_OUTPUT_PATH).as<string>()};
     const string task{vm.at(PARAM_TASK).as<string>()};
-    validate_options(input_path, output_path, task);
+    const double camera_distance{vm.at(PARAM_CAMERA_DISTANCE).as<double>()};
+    validate_options(input_path, output_path, task, camera_distance);
 
     bool use_timestamps_as_output_name = true;
     if (vm.count(PARAM_OUTPUT_NAME_TIMESTAMP)) {
@@ -102,11 +115,17 @@ int main(int argc, char* argv[]) {
     }
     create_directories(task_output_path);
 
+    const task_options options{
+            .input_path = input_path,
+            .output_path = task_output_path,
+            .camera_distance_to_origin = camera_distance,
+    };
+
     try {
         shared_ptr<InputDataCollector> input_collector = make_shared<InputDataCollector>(input_path);
 
         const auto task_executor = available_tasks.at(task);
-        task_executor(input_collector, task_output_path);
+        task_executor(input_collector, options);
     } catch (const std::exception& e) {
         cerr << "Failed to execute given task, reason:" << endl;
         cerr << e.what() << endl;

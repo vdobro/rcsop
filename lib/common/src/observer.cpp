@@ -1,24 +1,24 @@
 #include "observer.h"
 #include "observed_point.h"
-#include "utils/chronometer.h"
 #include "utils/mapping.h"
 
 #include <execution>
 #include <utility>
 #include <ranges>
 
-Observer::Observer(const ObserverPosition& camera_position,
-                   camera source_camera,
+Observer::Observer(optional<ObserverPosition> camera_position,
                    path filepath,
+                   camera source_camera,
                    double world_scale,
                    CameraCorrectionParams camera_correction)
         : _position(camera_position),
           _source_filepath(std::move(filepath)),
           _camera(std::move(source_camera)),
           _world_scale(world_scale) {
-    const auto height = this->position().height;
-    this->_height_offset = static_cast<double>(height - camera_correction.default_height) * _world_scale;
-
+    if (this->has_position()) {
+        const auto height = this->position().height;
+        this->_height_offset = static_cast<double>(height - camera_correction.default_height) * _world_scale;
+    }
     const double pitch_correction_radians = (camera_correction.pitch * M_PI) / 180;
     this->_correction_transform = Eigen::AngleAxis<double>(pitch_correction_radians, Vector3d::UnitX());
 }
@@ -38,12 +38,17 @@ Vector3d Observer::get_up() const {
     camera_up.setZero();
     camera_up.y() = -1;
     Vector3d direction =
-            _camera.transform_to_world(camera_up.transpose() * this->_correction_transform.rotation()) - _camera.position();
+            _camera.transform_to_world(camera_up.transpose() * this->_correction_transform.rotation()) -
+            _camera.position();
     return direction.normalized();
 }
 
 ObserverPosition Observer::position() const {
-    return this->_position;
+    if (!this->has_position()) {
+        throw std::logic_error("Observer for " + this->source_image_path().filename().string()
+                               + " does not have a predefined position");
+    }
+    return *this->_position;
 }
 
 #define ARC_SIN(X) (asin(X) * 180.f / M_PI)
@@ -114,4 +119,8 @@ path Observer::source_image_path() const {
 
 camera Observer::native_camera() const {
     return this->_camera;
+}
+
+bool Observer::has_position() const {
+    return this->_position.has_value();
 }
