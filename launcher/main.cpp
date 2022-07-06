@@ -119,10 +119,14 @@ int main(int argc, char* argv[]) {
             .input_path = input_path,
             .output_path = task_output_path,
             .camera_distance_to_origin = camera_distance,
+            .db_range = {
+                    .min = -20,
+                    .max = 5,
+            },
     };
 
     try {
-        shared_ptr<InputDataCollector> input_collector = make_shared<InputDataCollector>(input_path);
+        InputDataCollector input_collector(input_path);
 
         const auto task_executor = available_tasks.at(task);
         task_executor(input_collector, options);

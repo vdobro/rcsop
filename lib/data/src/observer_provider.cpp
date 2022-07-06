@@ -13,7 +13,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
     }
     auto model = input.data<SPARSE_CLOUD_COLMAP>(false);
     auto cameras = model->get_cameras();
-    auto world_scale = PointCloudProvider(input).get_world_scale(distance_to_origin);
+    auto world_scale = PointCloudProvider(input, distance_to_origin).get_units_per_centimeter();
     if (world_scale == 0) {
         throw invalid_argument("World scale must not be zero");
     }

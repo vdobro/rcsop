@@ -42,7 +42,7 @@ static map<long, size_t> get_heights(matvar_t* table) {
     while (nullptr != cell) {
         auto height_raw = *reinterpret_cast<double*>(cell->data);
         auto height = lround(height_raw);
-        result.insert(std::make_pair(height, index));
+        result.insert(make_pair(height, index));
 
         cell = get_variable(++index, name, table);
     }
@@ -103,7 +103,7 @@ map<long, vector<double>> BasicRcsDataSet::reconstruct_azimuth_table(const vecto
         for (size_t i = 0; i < ranges; i++) {
             values[i] = raw_values[angle_i * ranges + i];
         }
-        result.insert(std::make_pair(angle, values));
+        result.insert(make_pair(angle, values));
     }
     return result;
 }
@@ -156,8 +156,8 @@ BasicRcsMap::BasicRcsMap(const path& path) {
         auto height = height_row_index.first;
         auto index = height_row_index.second;
 
-        auto rcs = std::make_shared<BasicRcsDataSet>(BasicRcsDataSet(index, table));
-        this->_rows.insert(std::make_pair(height, rcs));
+        auto rcs = make_shared<BasicRcsDataSet>(BasicRcsDataSet(index, table));
+        this->_rows.insert(make_pair(height, rcs));
     }
 
     Mat_VarFree(table);

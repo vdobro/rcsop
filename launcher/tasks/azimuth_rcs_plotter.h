@@ -3,7 +3,7 @@
 
 #include "task_utils.h"
 
-void azimuth_rcs_plotter(const shared_ptr<InputDataCollector>& inputs,
+void azimuth_rcs_plotter(const InputDataCollector& inputs,
                          const task_options& options);
 
 #endif //RCSOP_LAUNCHER_AZIMUTH_RCS_PLOTTER_H

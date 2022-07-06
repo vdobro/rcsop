@@ -3,7 +3,7 @@
 
 #include "task_utils.h"
 
-void test_task(const shared_ptr<InputDataCollector>& inputs,
+void test_task(const InputDataCollector& inputs,
                const task_options& options);
 
 #endif //RCSOP_LAUNCHER_TEST_TASK_H

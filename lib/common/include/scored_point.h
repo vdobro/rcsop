@@ -17,9 +17,20 @@ private:
     double _score = 0;
 
 public:
-    explicit ScoredPoint() = default;
+    ScoredPoint() = default;
 
-    explicit ScoredPoint(Vector3d position, point_id_t id, double score = 0);
+    ScoredPoint(Vector3d position, point_id_t id, double score = 0);
+
+    ScoredPoint(const ScoredPoint& other) : ScoredPoint(other.position(), other.id(), other.score()) {}
+
+    ScoredPoint& operator=(const ScoredPoint& other) {
+        if (this == &other)
+            return *this;
+        this->_point_id = other.id();
+        this->_position = other.position();
+        this->_score = other.score();
+        return *this;
+    }
 
     [[nodiscard]] Vector3d position() const;
 
@@ -31,6 +42,7 @@ public:
 
     static ScoreRange get_score_range(const vector<ScoredPoint>& points);
 
+    virtual ~ScoredPoint() = default;
 };
 
 #endif //RCSOP_COMMON_SCORED_POINT_H

@@ -190,5 +190,5 @@ ObserverRenderer::ObserverRenderer(const ScoredCloud& points_with_observer)
 }
 
 void ObserverRenderer::add_texture(Texture texture, TextureRenderParams coordinates) {
-    this->_textures->push_back(std::make_pair(coordinates, texture));
+    this->_textures->push_back(make_pair(coordinates, texture));
 }

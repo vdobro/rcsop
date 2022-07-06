@@ -14,6 +14,7 @@
 #include "observed_point.h"
 #include "abstract_rcs_map.h"
 
+using az_value_map_t = map<double, vector<double>>;
 class AzimuthRcsDataSet : public AbstractDataSet {
 private:
     ObserverPosition _position{};
@@ -23,19 +24,18 @@ private:
     vector<double> _angles;
     double _angle_step{};
 
-    map<double, vector<double>> _raw_values;
-    map<double, vector<double>> _filtered_values;
+    az_value_map_t _raw_values;
+    az_value_map_t _filtered_values;
+    bool use_filtered = false;
 
-    map<double, vector<double>>& _selected_values = _raw_values;
-
-    map<double, vector<double>> reconstruct_value_table(const vector<double>& raw_values);
+    az_value_map_t reconstruct_value_table(const vector<double>& raw_values);
 
     void determine_step_sizes();
 
     void filter_peaks();
 public:
-    explicit AzimuthRcsDataSet(const path& filename,
-                               const ObserverPosition& position);
+    AzimuthRcsDataSet(const path& filename,
+                      const ObserverPosition& position);
 
     ~AzimuthRcsDataSet() = default;
 

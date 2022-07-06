@@ -36,8 +36,8 @@ static vector<double> get_raw_values(const char* name,
     return raw_values;
 }
 
-map<double, vector<double>> AzimuthRcsDataSet::reconstruct_value_table(const vector<double>& raw_values) {
-    map<double, vector<double>> result;
+az_value_map_t AzimuthRcsDataSet::reconstruct_value_table(const vector<double>& raw_values) {
+    az_value_map_t result;
 
     auto angles = _angles.size();
     auto ranges = _ranges.size();
@@ -51,39 +51,42 @@ map<double, vector<double>> AzimuthRcsDataSet::reconstruct_value_table(const vec
             range_values[i] = raw_values[angle_i * ranges + i];
         }
         range_values.erase(range_values.begin()); // first value is NaN because of the range = 0
-        result.insert(std::make_pair(angle, range_values));
+        result.insert(make_pair(angle, range_values));
     }
     return result;
 }
 
+const size_t ROWS_TO_SKIP = 1; // first row is filled with NaN
+
 void AzimuthRcsDataSet::determine_step_sizes() {
     vector<long> range_steps;
-    for(size_t i = 1; i < _ranges.size(); i++) {
-        range_steps.push_back(_ranges[i] - _ranges[i- 1]);
+    for (size_t i = ROWS_TO_SKIP; i < _ranges.size(); i++) {
+        range_steps.push_back(_ranges[i] - _ranges[i - 1]);
     }
     _range_step = reduce(range_steps.begin(), range_steps.end())
                   / static_cast<long>(range_steps.size());
 
     vector<double> angle_steps;
-    for(size_t i = 1; i < _angles.size(); i++) {
-        angle_steps.push_back(_angles[i] - _angles[i- 1]);
+    for (size_t i = ROWS_TO_SKIP; i < _angles.size(); i++) {
+        angle_steps.push_back(_angles[i] - _angles[i - 1]);
     }
     _angle_step = reduce(angle_steps.begin(), angle_steps.end())
                   / static_cast<double>(angle_steps.size());
-
 }
 
 void AzimuthRcsDataSet::filter_peaks() {
-    for (const auto& angle_to_data : _raw_values) {
-        vector<double> column(angle_to_data.second);
+    for (const auto& angle_to_data: _raw_values) {
+        const auto& raw_column = angle_to_data.second;
+        double max_value = *std::max_element(raw_column.cbegin(), raw_column.cend());
 
-        auto max_value = *std::max_element(column.cbegin(), column.cend());
-        for (size_t i = 0; i < column.size(); i++) {
-            if (column[i] < max_value) {
-                column[i] = 0;
+        vector<double> filtered_column = map_vec<double, double>(raw_column, [&max_value]
+                (const double& value) -> double {
+            if (value < max_value) {
+                return 0;
             }
-        }
-        _filtered_values.insert(std::make_pair(angle_to_data.first, column));
+            return value;
+        });
+        _filtered_values.insert(make_pair(angle_to_data.first, filtered_column));
     }
 }
 
@@ -118,13 +121,14 @@ double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
     const auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
     const auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
 
-    const auto range_to_values = _selected_values.at(nearest_angle);
+    const auto& value_map = (use_filtered) ? _filtered_values : _raw_values;
+    const auto& range_to_values = value_map.at(nearest_angle);
     if (nearest_range_index >= range_to_values.size()) {
-        return 0;
+        return std::nanf("out of distance range");
     }
     return range_to_values.at(nearest_range_index);
 }
 
 void AzimuthRcsDataSet::use_filtered_peaks() {
-    _selected_values = _filtered_values;
+    this->use_filtered = true;
 }

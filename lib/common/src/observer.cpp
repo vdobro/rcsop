@@ -9,21 +9,17 @@
 Observer::Observer(optional<ObserverPosition> camera_position,
                    path filepath,
                    camera source_camera,
-                   double world_scale,
+                   double units_per_centimeter,
                    CameraCorrectionParams camera_correction)
         : _position(camera_position),
           _source_filepath(std::move(filepath)),
           _camera(std::move(source_camera)),
-          _world_scale(world_scale) {
-    if (this->has_position()) {
-        const auto height = this->position().height;
-        this->_height_offset = static_cast<double>(height - camera_correction.default_height) * _world_scale;
-    }
-    const double pitch_correction_radians = (camera_correction.pitch * M_PI) / 180;
+          _units_per_centimeter(units_per_centimeter) {
+    const double pitch_correction_radians = (camera_correction.pitch * M_PI) / 180.;
     this->_correction_transform = Eigen::AngleAxis<double>(pitch_correction_radians, Vector3d::UnitX());
 }
 
-typedef Eigen::Hyperplane<double, 3> plane;
+using plane = Eigen::Hyperplane<double, 3>;
 
 Vector3d Observer::get_right() const {
     Vector3d camera_right;
@@ -51,17 +47,18 @@ ObserverPosition Observer::position() const {
     return *this->_position;
 }
 
-#define ARC_SIN(X) (asin(X) * 180.f / M_PI)
+static inline double arc_sin(double x) {
+    return asin(x) * 180. / M_PI;
+}
 
 static inline observed_point observe_point(
-        const point_id_t& id,
         const ScoredPoint& point,
         const Vector3d& observer_position,
         const Vector3d& direction_right,
         const Vector3d& direction_up,
         const plane& vertical_plane,
         const plane& horizontal_plane,
-        const double& world_scale) {
+        const double& units_per_centimeter) {
 
     const Vector3d point_position = point.position();
 
@@ -73,13 +70,13 @@ static inline observed_point observe_point(
     auto is_to_the_right = (point_position - observer_position).dot(direction_right) > 0;
     auto is_up_above = (point_position - observer_position).dot(direction_up) > 0;
 
-    auto horizontal_angle = (is_to_the_right ? 1 : -1) * ARC_SIN(distance_to_vertical_plane / distance_to_camera);
-    auto vertical_angle = (is_up_above ? 1 : -1) * ARC_SIN(distance_to_horizontal_plane / distance_to_camera);
+    auto horizontal_angle = (is_to_the_right ? 1 : -1) * arc_sin(distance_to_vertical_plane / distance_to_camera);
+    auto vertical_angle = (is_up_above ? 1 : -1) * arc_sin(distance_to_horizontal_plane / distance_to_camera);
 
     observed_point point_info = {
             .position = point.position(),
-            .id = id,
-            .distance_in_world = distance_to_camera / world_scale,
+            .id = point.id(),
+            .distance_in_world = distance_to_camera / units_per_centimeter,
             .vertical_angle = vertical_angle,
             .horizontal_angle = horizontal_angle,
     };
@@ -91,26 +88,25 @@ shared_ptr<vector<observed_point>> Observer::observe_points(
 
     const auto right = get_right();
     const auto up = get_up();
-    const Vector3d observer_position = this->_camera.position() + (this->_height_offset * up);
+    const auto observer_position = this->_camera.position();
 
-    const plane vertical_plane = plane(right, observer_position);
-    const plane horizontal_plane = plane(up, observer_position);
-    const double world_scale = this->_world_scale;
+    const plane vertical_plane(right, observer_position);
+    const plane horizontal_plane(up, observer_position);
+    const double units_per_cm = this->_units_per_centimeter;
 
-    auto result = map_vec<ScoredPoint, observed_point, true>(
+    auto result = map_vec_shared<ScoredPoint, observed_point, true>(
             camera_points,
-            [&observer_position, &right, &up, &vertical_plane, &horizontal_plane, &world_scale](
+            [&observer_position, &right, &up, &vertical_plane, &horizontal_plane, &units_per_cm](
                     const auto& point) {
-                return observe_point(
-                        point.id(), point,
+                return observe_point(point,
                         observer_position,
                         right, up,
                         vertical_plane, horizontal_plane,
-                        world_scale
+                        units_per_cm
                 );
             });
 
-    return make_shared<vector<observed_point>>(result);
+    return (result);
 }
 
 path Observer::source_image_path() const {

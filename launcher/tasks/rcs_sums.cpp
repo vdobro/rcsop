@@ -30,12 +30,12 @@ const static gauss_options distribution_options = {
         .y_scale = VERTICAL_SPREAD,
 };
 
-void accumulate_rcs(const shared_ptr<InputDataCollector>& input,
+void accumulate_rcs(const InputDataCollector& input,
                     const task_options& options) {
     //TODO: WIP
 }
 
-void accumulate_azimuth(const shared_ptr<InputDataCollector>& inputs,
+void accumulate_azimuth(const InputDataCollector& inputs,
                         const task_options& options) {
     /*
      //TODO WIP: adapter for BasicRcsMap or refactoring

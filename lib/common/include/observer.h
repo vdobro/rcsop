@@ -13,7 +13,6 @@ using std::optional;
 
 struct CameraCorrectionParams {
     double pitch = 0.;
-    height_t default_height = 40;
 };
 
 class Observer {
@@ -22,8 +21,7 @@ private:
     path _source_filepath;
     camera _camera;
 
-    double _world_scale = 1;
-    double _height_offset = 0;
+    double _units_per_centimeter = 1;
     Eigen::Transform<double, 3, Eigen::Affine> _correction_transform;
 
     [[nodiscard]] Vector3d get_right() const;
@@ -34,7 +32,7 @@ public:
     explicit Observer(optional<ObserverPosition> camera_position,
                       path filepath,
                       camera camera,
-                      double world_scale,
+                      double units_per_centimeter,
                       CameraCorrectionParams camera_correction);
 
     [[nodiscard]] ObserverPosition position() const;

@@ -10,7 +10,7 @@ SparseCloud::SparseCloud(const path& model_path) {
     for (auto& image_with_id: reconstruction->Images()) {
         camera camera(image_with_id.second, *reconstruction);
         this->cameras.push_back(camera);
-        this->camera_map.insert(std::make_pair(camera.id(), camera));
+        this->camera_map.insert(make_pair(camera.id(), camera));
     }
 }
 
@@ -33,7 +33,7 @@ void SparseCloud::save(const path& output_path) {
     reconstruction->Write(output_path);
 }
 
-double SparseCloud::get_world_scale(double camera_distance_to_origin) const {
+double SparseCloud::get_units_per_centimeter(double camera_distance_to_origin) const {
     auto camera_positions = get_camera_positions();
 
     auto camera_count = cameras.size();
@@ -61,7 +61,7 @@ std::vector<point_pair> SparseCloud::get_point_pairs() const {
 
     vector<point_pair> point_pairs;
     for (const auto& item: point_map) {
-        auto pair = std::make_pair(item.first, item.second.XYZ());
+        auto pair = make_pair(item.first, item.second.XYZ());
         point_pairs.push_back(pair);
     }
 

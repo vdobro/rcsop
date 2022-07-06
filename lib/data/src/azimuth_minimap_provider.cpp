@@ -13,7 +13,7 @@ AzimuthMinimapProvider::AzimuthMinimapProvider(const path& input_root_path) {
             minimap_filename_pattern);
 }
 
-shared_ptr<Texture> AzimuthMinimapProvider::for_position(const Observer& observer) const {
+const Texture& AzimuthMinimapProvider::for_position(const Observer& observer) const {
     const auto position = observer.position();
-    return this->_data->at(position.height).at(position.azimuth);
+    return this->_data.at(position.height).at(position.azimuth);
 }

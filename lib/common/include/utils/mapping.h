@@ -57,9 +57,9 @@ shared_ptr<vector<Target>> map_vec_shared(const vector<Source>& source,
     result->resize(source.size());
 
     if constexpr(Parallel) {
-        std::transform(std::execution::par, source.begin(), source.end(), result->begin(), mapper);
+        std::transform(PARALLEL_EXECUTOR, source.cbegin(), source.cend(), result->begin(), mapper);
     } else {
-        std::transform(source.begin(), source.end(), result->begin(), mapper);
+        std::transform(source.cbegin(), source.cend(), result->begin(), mapper);
     }
     return result;
 }

@@ -2,6 +2,8 @@
 #define RCSOP_LAUNCHER_POINT_SCORING_H
 
 #include "utils/types.h"
+#include "tasks/task_utils.h"
+
 #include "scored_cloud.h"
 #include "input_data_collector.h"
 
@@ -16,19 +18,13 @@ struct ScoredCloudPayload {
 
 using observed_factor_func = function<double(const observed_point&)>;
 
-shared_ptr<ScoredCloudPayload> score_points(
-        const shared_ptr<InputDataCollector>& inputs,
-        const shared_ptr<AbstractDataCollection>& data,
-        const double distance_to_origin,
-        const observed_factor_func& factor_func,
-        const ScoreRange& range_limits,
-        const global_colormap_func& colormap_func);
+double identity_factor(const observed_point& point);
 
 shared_ptr<ScoredCloudPayload> score_points(
-        const shared_ptr<InputDataCollector>& inputs,
-        const shared_ptr<AbstractDataCollection>& data,
-        const double distance_to_origin,
-        const ScoreRange& range_limits,
-        const global_colormap_func& colormap_func);
+        const InputDataCollector& inputs,
+        const AbstractDataCollection& data,
+        const task_options& task_options,
+        const global_colormap_func& colormap_func,
+        const observed_factor_func& factor_func = &identity_factor);
 
 #endif //RCSOP_LAUNCHER_POINT_SCORING_H

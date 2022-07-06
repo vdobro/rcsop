@@ -6,11 +6,11 @@
 
 class AzimuthRcsDataCollection : public AbstractDataCollection {
 private:
-    shared_ptr<map<height_t, map<azimuth_t, shared_ptr<AzimuthRcsDataSet>>>> _data;
+    map<height_t, map<azimuth_t, AzimuthRcsDataSet>> _data;
 public:
     explicit AzimuthRcsDataCollection(const path& input_path);
 
-    [[nodiscard]] shared_ptr<AbstractDataSet> get_for_exact_position(const Observer& observer) const override;
+    [[nodiscard]] const AbstractDataSet* get_for_exact_position(const Observer& observer) const override;
 
     void use_filtered_peaks();
 };

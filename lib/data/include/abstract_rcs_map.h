@@ -13,7 +13,7 @@ public:
 
 class AbstractDataCollection {
 public:
-    [[nodiscard]] virtual shared_ptr<AbstractDataSet> get_for_exact_position(const Observer& observer) const = 0;
+    [[nodiscard]] virtual const AbstractDataSet* get_for_exact_position(const Observer& observer) const = 0;
 };
 
 #endif //RCSOP_DATA_ABSTRACT_RCS_MAP_H

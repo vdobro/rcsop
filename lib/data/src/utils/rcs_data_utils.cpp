@@ -2,7 +2,7 @@
 
 using std::filesystem::directory_iterator;
 
-static const regex height_folder_regex("^(\\d{1,2})cm$");
+static const regex height_folder_regex("^(\\d{1,2})(cm)?$");
 
 vector<mat_path_with_azimuth> find_mat_files_in_folder(
         const path& folder_for_height,
@@ -27,17 +27,25 @@ vector<mat_path_with_azimuth> find_mat_files_in_folder(
     return paths;
 }
 
-vector<height_t> parse_available_heights(const path& data_path) {
-    vector<height_t> result;
-    for (auto const& dir_entry: directory_iterator{data_path}) {
-        smatch sm;
-        auto path_string = dir_entry.path().filename().string();
-        if (!regex_match(path_string, sm, height_folder_regex)) {
-            continue;
-        }
+vector<height_data_folder> parse_available_heights(const path& data_path) {
+    vector<height_data_folder> result;
+    for (auto const& picture_dir_entry: directory_iterator{data_path}) {
+        const auto& picture_dir_path = picture_dir_entry.path();
+        for (auto const& dir_entry: directory_iterator{picture_dir_path}) {
+            smatch sm;
+            const auto path = dir_entry.path();
+            auto path_string = path.filename().string();
+            if (!regex_match(path_string, sm, height_folder_regex)) {
+                continue;
+            }
 
-        height_t height = stoi(sm[1]);
-        result.push_back(height);
+            height_t height = stoi(sm[1]);
+            height_data_folder height_entry{
+                    .folder_path = path.parent_path(),
+                    .height = height,
+            };
+            result.push_back(height_entry);
+        }
     }
     return result;
 }

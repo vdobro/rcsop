@@ -3,7 +3,7 @@
 
 #include "task_utils.h"
 
-void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
+void rcs_slices(const InputDataCollector& inputs,
                 const task_options& options);
 
 #endif //RCSOP_LAUNCHER_RCS_SLICES_H

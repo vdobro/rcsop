@@ -53,10 +53,10 @@ static inline bool is_within_camera_slice(
     return is_in_triangle(point, midpoint_to_previous, midpoint_to_next, origin);
 }
 
-void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
+void rcs_slices(const InputDataCollector& inputs,
                 const task_options& options) {
-    const auto observer_provider = make_shared<ObserverProvider>(*inputs, options.camera_distance_to_origin);
-    const auto point_provider = make_shared<PointCloudProvider>(*inputs);
+    const auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera_distance_to_origin);
+    const auto point_provider = make_shared<PointCloudProvider>(inputs, options.camera_distance_to_origin);
 
     auto observers = observer_provider->observers_with_positions();
     const auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
@@ -67,7 +67,7 @@ void rcs_slices(const shared_ptr<InputDataCollector>& inputs,
     const auto base_points = point_provider->get_base_scored_points();
 
     const auto origin = Vector2d(0, 0);
-    const auto data = inputs->data<SIMPLE_RCS_MAT>(false)
+    const auto data = inputs.data<SIMPLE_RCS_MAT>(false)
             ->at_height(DEFAULT_HEIGHT)
             ->rcs();
     const auto rcs_colors = color_values(data, map_turbo);

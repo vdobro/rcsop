@@ -25,3 +25,7 @@ target_link_libraries(rcs-overlay-plotter PRIVATE
         rcsop-data
         rcsop-rendering
         Boost::program_options)
+
+include(GNUInstallDirs)
+install(TARGETS rcs-overlay-plotter RUNTIME)
+install(IMPORTED_RUNTIME_ARTIFACTS rcs-overlay-plotter)
