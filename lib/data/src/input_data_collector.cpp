@@ -1,6 +1,7 @@
 #include "input_data_collector.h"
 
 using std::filesystem::directory_iterator;
+using std::filesystem::recursive_directory_iterator;
 
 InputDataCollector::InputDataCollector(const path& root_path) {
     this->_root_path = root_path;
@@ -16,10 +17,7 @@ void InputDataCollector::collect_images() {
         std::clog << "WARNING: no folder 'images' found, images will not be collected" << std::endl;
         return;
     }
-    for (auto const& image_dir_entry : directory_iterator{_image_path}) {
-        if (image_dir_entry.is_directory()) {
-            continue;
-        }
+    for (auto const& image_dir_entry : recursive_directory_iterator{_image_path}) {
         const path& file_path = image_dir_entry.path();
         const path file_name = file_path.filename();
         if (file_name.extension().string() != ".png") {
