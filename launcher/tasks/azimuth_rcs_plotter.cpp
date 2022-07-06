@@ -8,6 +8,7 @@
 #include "observer_renderer.h"
 #include "scored_cloud.h"
 #include "azimuth_minimap_provider.h"
+#include "utils/gauss.h"
 
 using namespace sfm::rendering;
 
@@ -18,7 +19,8 @@ void azimuth_rcs_plotter(const InputDataCollector& inputs,
 
     const ScoreRange range = options.db_range;
     const auto colormap = construct_colormap_function(COLOR_MAP, range);
-    const auto scored_payload = score_points(inputs, *azimuth_data, options, colormap);
+    const auto scored_payload = score_points(inputs, *azimuth_data, options, colormap,
+                                             rcs_gaussian_vertical);
     const auto& points = scored_payload->point_clouds;
 
     const TextureRenderParams minimap_position = {

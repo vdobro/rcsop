@@ -29,11 +29,14 @@ vector<mat_path_with_azimuth> find_mat_files_in_folder(
 
 vector<height_data_folder> parse_available_heights(const path& data_path) {
     vector<height_data_folder> result;
-    for (auto const& picture_dir_entry: directory_iterator{data_path}) {
+    for (auto const& picture_dir_entry: recursive_directory_iterator{data_path}) {
+        if (!picture_dir_entry.is_directory()) {
+            continue;
+        }
         const auto& picture_dir_path = picture_dir_entry.path();
         for (auto const& dir_entry: directory_iterator{picture_dir_path}) {
             smatch sm;
-            const auto path = dir_entry.path();
+            const auto& path = dir_entry.path();
             auto path_string = path.filename().string();
             if (!regex_match(path_string, sm, height_folder_regex)) {
                 continue;

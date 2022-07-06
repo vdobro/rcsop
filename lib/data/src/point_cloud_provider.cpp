@@ -55,14 +55,14 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(
     const double step_size = step_size_meters * units_per_meter;
 
     const Vector3d middle_point = Vector3d::Zero();
-    const double distance_to_origin_units = _distance_to_origin * get_units_per_centimeter() * 1.5;
-    const double begin_x = std::max(middle_point.x() - distance_to_origin_units, bound.xmin());
-    const double begin_y = std::max(middle_point.y() - distance_to_origin_units, bound.ymin());
-    const double begin_z = std::max(middle_point.z() - distance_to_origin_units, bound.zmin());
+    const double radius_limit = _distance_to_origin * get_units_per_centimeter() * 0.7;
+    const double begin_x = std::max(middle_point.x() - radius_limit, bound.xmin());
+    const double begin_y = std::max(middle_point.y() - radius_limit, bound.ymin());
+    const double begin_z = std::max(middle_point.z() - radius_limit, bound.zmin());
 
-    const double end_x = std::min(middle_point.x() + distance_to_origin_units, bound.xmax());
-    const double end_y = std::min(middle_point.y() + distance_to_origin_units, bound.ymax());
-    const double end_z = std::min(middle_point.z() + distance_to_origin_units, bound.zmax());
+    const double end_x = std::min(middle_point.x() + radius_limit, bound.xmax());
+    const double end_y = std::min(middle_point.y() + radius_limit, bound.ymax());
+    const double end_z = std::min(middle_point.z() + radius_limit, bound.zmax());
 
     const double span_x = (end_x - begin_x);
     const double span_y = (end_y - begin_y);
@@ -81,7 +81,7 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(
     std::mt19937 e2(rd());
     std::uniform_real_distribution<double> dist(-step_size / 2, step_size / 2);
 
-    const auto distance_threshold = distance_to_origin_units;
+    const auto distance_threshold = radius_limit;
     size_t index = 0;
     auto x = begin_x;
     auto time = start_time();

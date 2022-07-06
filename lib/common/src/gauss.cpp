@@ -5,25 +5,17 @@
 static double raw_gauss(const double& x,
                         const double& y,
                         const double& sigma) {
-    return M_SQRT1_2 * exp(-1 * (x * x + y * y) / (2 * sigma * sigma)) / (sigma * sqrt(M_PI));
+    return (M_SQRT1_2 / (sigma * sqrt(M_PI))) * exp(-0.5 * (x * x + y * y) / (sigma * sigma));
 }
 
+static double raw_gauss(const double x,
+                        const double& sigma) {
+    auto exponent_to_square = (x / sigma);
+    return (M_SQRT1_2 / (sigma * sqrt(M_PI))) * exp(-0.5 * exponent_to_square * exponent_to_square);
+}
 
 #define HORIZONTAL_SPREAD (45.0 / 2.0)
-#define VERTICAL_SPREAD (15.0 / 2.0)
-#define GAUSS_SIGMA_2 (3 * 3)
-
-//(numeric) sum of Riemann integral of 1 / (exp (-(3x)^2)) from -3 to +3
-#define GAUSS_INTEGRAL_FACTOR 1.69260614115415
-
-static double calc_gauss_vertical(const observed_point& point,
-                                  const gauss_options& distribution_options,
-                                  const double& sigma) {
-    const auto value = point.vertical_angle;
-    const auto exp_arg = -1 * GAUSS_SIGMA_2 * value * value / distribution_options.y_scale;
-    const auto result = exp(exp_arg) * GAUSS_INTEGRAL_FACTOR / HORIZONTAL_SPREAD;
-    return result;
-}
+#define VERTICAL_SPREAD (5.0 / 2.0)
 
 static double calc_gauss(const observed_point& point,
                          const gauss_options& distribution_options) {
@@ -60,11 +52,7 @@ double rcs_gaussian(const observed_point& point,
     return calc_gauss(point, options) / point.distance_in_world;
 }
 
-double rcs_gaussian_vertical(const observed_point& point,
-                             const gauss_options& options) {
-    if (!is_inside_ellipse(point, options)) {
-        return 0;
-    }
-
-    return calc_gauss(point, options) / point.distance_in_world;
+static const double STIGLER_SIGMA_SQ = M_2_SQRTPI * M_SQRT1_2 / 2;
+double rcs_gaussian_vertical(const observed_point& point) {
+    return raw_gauss(point.vertical_angle / VERTICAL_SPREAD, STIGLER_SIGMA_SQ);
 }

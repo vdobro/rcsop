@@ -1,6 +1,7 @@
 #include "point_scoring.h"
 
 #include "utils/chronometer.h"
+#include "utils/gauss.h"
 
 #include "observer_provider.h"
 #include "point_cloud_provider.h"
@@ -47,7 +48,7 @@ shared_ptr<ScoredCloudPayload> score_points(
         const global_colormap_func& colormap_func,
         const observed_factor_func& factor_func) {
     const CameraCorrectionParams observer_options{
-            .pitch = -5.4,
+            .pitch = -2.0,
     };
     const auto distance_to_origin = task_options.camera_distance_to_origin;
     const auto range_limits = task_options.db_range;
