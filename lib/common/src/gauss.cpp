@@ -5,17 +5,14 @@
 static double raw_gauss(const double& x,
                         const double& y,
                         const double& sigma) {
-    return (M_SQRT1_2 / (sigma * sqrt(M_PI))) * exp(-0.5 * (x * x + y * y) / (sigma * sigma));
+    return (M_SQRT1_2 * M_2_SQRTPI / (2 * sigma)) * exp(-0.5 * (x * x + y * y) / (sigma * sigma));
 }
 
 static double raw_gauss(const double x,
                         const double& sigma) {
     auto exponent_to_square = (x / sigma);
-    return (M_SQRT1_2 / (sigma * sqrt(M_PI))) * exp(-0.5 * exponent_to_square * exponent_to_square);
+    return (M_SQRT1_2 * M_2_SQRTPI / (2 * sigma)) * exp(-0.5 * exponent_to_square * exponent_to_square);
 }
-
-#define HORIZONTAL_SPREAD (45.0 / 2.0)
-#define VERTICAL_SPREAD (5.0 / 2.0)
 
 static double calc_gauss(const observed_point& point,
                          const gauss_options& distribution_options) {
@@ -24,11 +21,6 @@ static double calc_gauss(const observed_point& point,
                      distribution_options.sigma)
            * distribution_options.integral_factor
            / (distribution_options.x_scale * distribution_options.y_scale);
-}
-
-static bool is_inside_vertical_range(const observed_point& point, const gauss_options& options) {
-    auto y = point.vertical_angle / options.y_scale;
-    return y <= 1;
 }
 
 static bool is_inside_ellipse(const observed_point& point, const gauss_options& options) {
@@ -52,7 +44,11 @@ double rcs_gaussian(const observed_point& point,
     return calc_gauss(point, options) / point.distance_in_world;
 }
 
+#define HORIZONTAL_SPREAD (45.0 / 2.0)
+#define VERTICAL_SPREAD (5.0 / 2.0)
+
 static const double STIGLER_SIGMA_SQ = M_2_SQRTPI * M_SQRT1_2 / 2;
+
 double rcs_gaussian_vertical(const observed_point& point) {
     return raw_gauss(point.vertical_angle / VERTICAL_SPREAD, STIGLER_SIGMA_SQ);
 }

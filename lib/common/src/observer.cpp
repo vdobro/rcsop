@@ -9,12 +9,10 @@
 Observer::Observer(optional<ObserverPosition> camera_position,
                    path filepath,
                    camera source_camera,
-                   double units_per_centimeter,
                    CameraCorrectionParams camera_correction)
         : _position(camera_position),
           _source_filepath(std::move(filepath)),
-          _camera(std::move(source_camera)),
-          _units_per_centimeter(units_per_centimeter) {
+          _camera(std::move(source_camera)) {
     const double pitch_correction_radians = (camera_correction.pitch * M_PI) / 180.;
     this->_correction_transform = Eigen::AngleAxis<double>(pitch_correction_radians, Vector3d::UnitX());
 }
@@ -119,4 +117,8 @@ camera Observer::native_camera() const {
 
 bool Observer::has_position() const {
     return this->_position.has_value();
+}
+
+void Observer::set_units_per_centimeter(double units) {
+    this->_units_per_centimeter = units;
 }

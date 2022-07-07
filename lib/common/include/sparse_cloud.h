@@ -21,10 +21,8 @@ private:
 public:
     explicit SparseCloud(const path& model_path);
 
-    [[nodiscard]] double get_units_per_centimeter(double camera_distance_to_origin) const;
     [[nodiscard]] vector<camera> get_cameras() const;
 
-    [[nodiscard]] vector<Vector3d> get_camera_positions() const;
     [[nodiscard]] vector<point_pair> get_point_pairs() const;
     [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_scored_points() const;
 

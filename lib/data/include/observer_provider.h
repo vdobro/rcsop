@@ -10,7 +10,7 @@ class ObserverProvider {
 private:
     vector<Observer> _positioned_observers;
     vector<Observer> _auxiliary_observers;
-
+    double _units_per_centimeter;
 public:
     explicit ObserverProvider(const InputDataCollector& input,
                               double distance_to_origin,
@@ -18,6 +18,8 @@ public:
 
     [[nodiscard]] vector<Observer> observers_with_positions() const;
     [[nodiscard]] vector<Observer> all_observers() const;
+
+    [[nodiscard]] double get_units_per_centimeter() const;
 };
 
 #endif //RCSOP_DATA_CAMERA_PROVIDER_H

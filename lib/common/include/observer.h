@@ -32,10 +32,12 @@ public:
     explicit Observer(optional<ObserverPosition> camera_position,
                       path filepath,
                       camera camera,
-                      double units_per_centimeter,
                       CameraCorrectionParams camera_correction);
 
+    void set_units_per_centimeter(double units);
+
     [[nodiscard]] ObserverPosition position() const;
+
     [[nodiscard]] bool has_position() const;
 
     [[nodiscard]] path source_image_path() const;

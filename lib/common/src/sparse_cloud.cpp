@@ -7,8 +7,17 @@ SparseCloud::SparseCloud(const path& model_path) {
     this->model_path = model_path;
     reload();
 
-    for (auto& image_with_id: reconstruction->Images()) {
-        camera camera(image_with_id.second, *reconstruction);
+    vector<Image> images;
+    for (auto& image: reconstruction->Images()) {
+        images.push_back(image.second);
+    }
+    std::sort(std::execution::par_unseq,
+              images.begin(), images.end(),
+              [](const Image& a, const Image& b) {
+                  return a.Name() < b.Name();
+              });
+    for (auto& image: images) {
+        camera camera(image, *reconstruction);
         this->cameras.push_back(camera);
         this->camera_map.insert(make_pair(camera.id(), camera));
     }
@@ -31,25 +40,6 @@ void SparseCloud::save(const path& output_path) {
     remove(points_path);
 
     reconstruction->Write(output_path);
-}
-
-double SparseCloud::get_units_per_centimeter(double camera_distance_to_origin) const {
-    auto camera_positions = get_camera_positions();
-
-    auto camera_count = cameras.size();
-
-    vector<double> distances;
-    distances.resize(camera_count);
-    for (size_t i = 0; i < camera_count; ++i) {
-        auto opposing_index = (i + (camera_count / 2)) % camera_count;
-
-        auto current_camera = camera_positions[i];
-        auto opposing_camera = camera_positions[opposing_index];
-        auto distance = (current_camera - opposing_camera).norm();
-        distances[i] = distance;
-    }
-    auto average = std::reduce(distances.begin(), distances.end()) / static_cast<double>(camera_count);
-    return (average / 2) / camera_distance_to_origin;
 }
 
 std::vector<camera> SparseCloud::get_cameras() const {
@@ -91,10 +81,6 @@ void SparseCloud::filter_points(const std::function<bool(const Vector3d&)>& pred
             reconstruction->DeletePoint3D(point_id);
         }
     }
-}
-
-std::vector<Vector3d> SparseCloud::get_camera_positions() const {
-    return map_vec<camera, Vector3d>(get_cameras(), &camera::position);
 }
 
 void SparseCloud::add_point(const Vector3d& point, const Vector3ub& color) {

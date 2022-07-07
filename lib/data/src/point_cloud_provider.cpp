@@ -8,6 +8,7 @@
 
 #include "utils/mapping.h"
 #include "utils/chronometer.h"
+#include "observer_provider.h"
 
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Point = Kernel::Point_3;
@@ -23,6 +24,9 @@ PointCloudProvider::PointCloudProvider(const InputDataCollector& input,
         auto point_ids = map_vec<point_pair, point_id_t>(
                 sparse_cloud->get_point_pairs(), &point_pair::first);
         max_sparse_point_id = *std::max_element(point_ids.begin(), point_ids.end());
+
+        auto observer_provider = ObserverProvider(input, distance_to_origin);
+        this->_units_per_centimeter = observer_provider.get_units_per_centimeter();
     }
     if (input.data_available<DENSE_MESH_PLY>()) {
         this->dense_mesh = input.data<DENSE_MESH_PLY>(false);
@@ -50,12 +54,12 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(
     }
     const Kernel::Iso_cuboid_3 bound = CGAL::bounding_box(base_points->begin(), base_points->end());
 
-    const double units_per_meter = get_units_per_centimeter() * 100;
+    const double units_per_meter = _units_per_centimeter * 100;
     const double step_size_meters = 1. / static_cast<double>(points_per_meter);
     const double step_size = step_size_meters * units_per_meter;
 
     const Vector3d middle_point = Vector3d::Zero();
-    const double radius_limit = _distance_to_origin * get_units_per_centimeter() * 0.7;
+    const double radius_limit = _distance_to_origin * _units_per_centimeter;
     const double begin_x = std::max(middle_point.x() - radius_limit, bound.xmin());
     const double begin_y = std::max(middle_point.y() - radius_limit, bound.ymin());
     const double begin_z = std::max(middle_point.z() - radius_limit, bound.zmin());
@@ -106,8 +110,4 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(
 
     log_and_start_next(time, "Generated " + std::to_string(index + 1) + " point cloud");
     return result;
-}
-
-double PointCloudProvider::get_units_per_centimeter() const {
-    return this->sparse_cloud->get_units_per_centimeter(this->_distance_to_origin);
 }
