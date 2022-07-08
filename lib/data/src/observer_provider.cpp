@@ -1,18 +1,26 @@
 #include "observer_provider.h"
 
-#include <stdexcept>
 #include "utils/mapping.h"
 
-using std::invalid_argument;
+static vector<camera> filter_with_positions(const vector<camera>& cameras) {
+    vector<camera> result;
+    std::copy_if(cameras.cbegin(), cameras.cend(),
+                 std::back_inserter(result),
+                 [](const camera& camera) {
+                     const optional<azimuth_t> angle = CameraInputImage::parse_angle_from_name(camera.get_name());
+                     return angle.has_value(); // a camera is positioned if at least its angle can be identified by its name
+                 });
+    return result;
+}
 
 static double calculate_units_per_centimeter(double camera_distance_to_origin,
-                                             const vector<Observer>& observers_in_a_circle) {
-    auto observer_positions = map_vec<Observer, Vector3d, true>(
-            observers_in_a_circle, [](const auto& observer) {
-                return observer.native_camera().position();
-            });
+                                             const vector<camera>& cameras) {
+    auto positioned_cameras = filter_with_positions(cameras);
+    auto observer_positions = map_vec<camera, Vector3d, true>(positioned_cameras, [](const auto& camera) {
+        return camera.position();
+    });
 
-    auto camera_count = observer_positions.size();
+    auto camera_count = positioned_cameras.size();
 
     vector<double> distances;
     distances.resize(camera_count);
@@ -25,7 +33,12 @@ static double calculate_units_per_centimeter(double camera_distance_to_origin,
         distances[i] = distance;
     }
     auto average = std::reduce(distances.begin(), distances.end()) / static_cast<double>(camera_count);
-    return (average / 2) / camera_distance_to_origin;
+    const auto result = (average / 2) / camera_distance_to_origin;
+
+    if (result == 0 || std::isnan(result)) {
+        throw invalid_argument("World scale must not be zero and not NaN");
+    }
+    return result;
 }
 
 ObserverProvider::ObserverProvider(const InputDataCollector& input,
@@ -35,6 +48,10 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
     }
     auto model = input.data<SPARSE_CLOUD_COLMAP>(false);
     auto cameras = model->get_cameras();
+
+    this->_units_per_centimeter = calculate_units_per_centimeter(
+            default_camera_options.distance_to_origin, cameras);
+
     auto source_images = input.images();
     vector<Observer> all_observers;
 
@@ -64,12 +81,8 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
         }
     }
 
-    this->_units_per_centimeter = calculate_units_per_centimeter(default_camera_options.distance_to_origin, _positioned_observers);
-    if (_units_per_centimeter == 0) {
-        throw invalid_argument("World scale must not be zero");
-    }
-    for (auto& observer : _positioned_observers) observer.set_units_per_centimeter(_units_per_centimeter);
-    for (auto& observer : _auxiliary_observers) observer.set_units_per_centimeter(_units_per_centimeter);
+    for (auto& observer: _positioned_observers) observer.set_units_per_centimeter(_units_per_centimeter);
+    for (auto& observer: _auxiliary_observers) observer.set_units_per_centimeter(_units_per_centimeter);
 }
 
 vector<Observer> ObserverProvider::observers_with_positions() const {

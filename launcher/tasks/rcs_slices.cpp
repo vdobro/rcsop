@@ -3,7 +3,6 @@
 #include <execution>
 
 #include "colors.h"
-#include "../default_options.h"
 
 #include "observer_provider.h"
 #include "point_cloud_provider.h"
@@ -67,7 +66,7 @@ void rcs_slices(const InputDataCollector& inputs,
 
     const auto origin = Vector2d(0, 0);
     const auto data = inputs.data<SIMPLE_RCS_MAT>(false)
-            ->at_height(DEFAULT_HEIGHT)
+            ->at_height(40)
             ->rcs();
     const auto rcs_colors = color_values(data, map_turbo);
 

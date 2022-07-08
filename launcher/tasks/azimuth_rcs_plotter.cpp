@@ -18,8 +18,7 @@ void azimuth_rcs_plotter(const InputDataCollector& inputs,
 
     const ScoreRange range = options.db_range;
     const auto color_map = construct_colormap_function(options.rendering.color_map, range);
-    const auto scored_payload = score_points(inputs, *azimuth_data, options, color_map,
-                                             rcs_gaussian_vertical);
+    const auto scored_payload = score_points(inputs, *azimuth_data, options, color_map, rcs_gaussian_vertical);
     const auto& points = scored_payload->point_clouds;
     const auto heights = scored_payload->observer_heights();
     map<height_t, path> height_folders;
@@ -29,7 +28,7 @@ void azimuth_rcs_plotter(const InputDataCollector& inputs,
         height_folders.insert(make_pair(height, height_path));
     }
 
-    const TextureRenderParams minimap_position = {
+    const texture_rendering_options minimap_position = {
             .coordinates= Vector2d(915., 420.),
             .size = Vector2d(400., 300.),
     };

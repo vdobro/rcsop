@@ -19,7 +19,11 @@ public:
 
     [[nodiscard]] path file_path() const;
 
-    static optional<ObserverPosition> parse_filename(const path& path);
+    static optional<ObserverPosition> parse_position_from_file_path(const path& path);
+
+    static optional<ObserverPosition> parse_position_from_name(const string& filename);
+
+    static optional<azimuth_t> parse_angle_from_name(const string& filename);
 };
 
 #endif //RCSOP_DATA_INPUT_IMAGE_H

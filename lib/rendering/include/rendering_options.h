@@ -6,7 +6,6 @@
 struct gradient_options {
     float radius;
     float center_alpha;
-    float strength;
 };
 
 struct rendering_options {

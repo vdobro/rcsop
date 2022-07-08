@@ -21,7 +21,8 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     libmetis-dev \
     libhdf5-dev \
     libatlas-base-dev \
-    libsfml-dev
+    libsfml-dev \
+    libcairomm-1.0-dev
 
 USER colmap
 WORKDIR /app

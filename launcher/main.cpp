@@ -30,7 +30,7 @@ const char* PARAM_INPUT_PATH = "input-path";
 const char* PARAM_TASK = "task";
 const char* PARAM_OUTPUT_PATH = "output-path";
 const char* PARAM_OUTPUT_NAME_TIMESTAMP = "timestamp";
-const char* PARAM_USE_GPU = "use-gpu";
+const char* PARAM_SOFTWARE_RENDERING = "software-rendering";
 const char* PARAM_CAMERA_DISTANCE = "camera-distance";
 
 const static char* DEFAULT_TASK = "azimuth-rcs";
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
             ("task,T", po::value<string>()->default_value(DEFAULT_TASK), "task to execute")
             (PARAM_OUTPUT_NAME_TIMESTAMP, po::bool_switch()->default_value(true),
              "use current timestamp as output folder name")
-            (PARAM_USE_GPU, po::bool_switch()->default_value(true), "enable GPU rendering")
+            (PARAM_SOFTWARE_RENDERING, po::bool_switch()->default_value(false), "enable software rendering instead of GPU")
             ("camera-distance,R", po::value<double>()->default_value(DEFAULT_CAMERA_DISTANCE),
              "distance from the camera to the origin/center")
             ("output-path,O", po::value<string>(), "output path");
@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     validate_options(input_path, output_path, task, camera_distance);
 
     bool use_timestamps_as_output_name = vm.at(PARAM_OUTPUT_NAME_TIMESTAMP).as<bool>();
-    bool use_gpu = vm.at(PARAM_USE_GPU).as<bool>();
+    bool use_software_rendering = vm.at(PARAM_SOFTWARE_RENDERING).as<bool>();
 
     string output_target_folder = "latest";
     if (use_timestamps_as_output_name) {
@@ -127,12 +127,11 @@ int main(int argc, char* argv[]) {
                     .distance_to_origin = camera_distance,
             },
             .rendering = {
-                    .use_gpu_rendering = use_gpu,
+                    .use_gpu_rendering = !use_software_rendering,
                     .color_map = COLOR_MAP,
                     .gradient = {
                             .radius = 25.f,
-                            .center_alpha = 0.2f,
-                            .strength = 3.f,
+                            .center_alpha = 0.3f,
                     },
             },
     };

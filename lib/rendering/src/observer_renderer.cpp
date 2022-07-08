@@ -1,29 +1,33 @@
 #include "observer_renderer.h"
+#include "sfml_renderer.h"
+#include "cairo_renderer.h"
+
+#include <utility>
 
 using std::isnan;
 using std::cerr;
 
 using namespace sfm::rendering;
 
-static vector<RenderedPoint> project_in_camera_with_color(
+static vector<rendered_point> project_in_camera_with_color(
         const vector<ImagePoint>& points,
         const camera& camera,
         const global_colormap_func& color_map) {
-    return map_vec<ImagePoint, RenderedPoint>(points, [camera, color_map](const ImagePoint& point) {
+    return map_vec<ImagePoint, rendered_point>(points, [camera, color_map](const ImagePoint& point) {
         auto camera_coordinates = camera.project_from_image(point.coordinates());
         auto score = point.score();
         if (isnan(score)) {
             throw invalid_argument("Score of point is not a number");
         }
         auto color = color_map(point.score());
-        return RenderedPoint{
+        return rendered_point{
                 .coordinates = camera_coordinates,
                 .color = color
         };
     });
 }
 
-vector<RenderedPoint> ObserverRenderer::project_points() {
+vector<rendered_point> ObserverRenderer::project_points() {
     const auto& camera = _observer.native_camera();
     auto img_points = camera.project_to_image(*_points);
 
@@ -44,7 +48,7 @@ void ObserverRenderer::render(const path& output_path,
 
     shared_ptr<BaseRendererContext> renderer_context = this->_renderer->create_context(_observer);
 
-    vector<RenderedPoint> rendered_points = this->project_points();
+    vector<rendered_point> rendered_points = this->project_points();
 
     for (const auto& point: rendered_points) {
         renderer_context->render_point(point);
@@ -65,14 +69,15 @@ ObserverRenderer::ObserverRenderer(
         : _observer(points_with_observer.observer()),
           _points(points_with_observer.points()),
           _color_map(color_map) {
-    this->_textures = make_unique<vector<pair<TextureRenderParams, Texture>>>();
+    this->_textures = make_unique<vector<pair<texture_rendering_options, Texture>>>();
     if (options.use_gpu_rendering) {
         this->_renderer = make_shared<SfmlRenderer>(options.gradient);
     } else {
-        throw invalid_argument("Software rendering not implemented yet");
+        this->_renderer = make_shared<CairoRenderer>(options.gradient);
     }
 }
 
-void ObserverRenderer::add_texture(Texture texture, TextureRenderParams coordinates) {
+void ObserverRenderer::add_texture(Texture texture,
+                                   texture_rendering_options coordinates) {
     this->_textures->push_back(make_pair(coordinates, texture));
 }
