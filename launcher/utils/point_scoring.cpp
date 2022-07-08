@@ -41,25 +41,21 @@ static inline shared_ptr<vector<ScoredPoint>> value_observed_points(
             });
 }
 
-shared_ptr<ScoredCloudPayload> score_points(
+shared_ptr<scored_cloud_payload> score_points(
         const InputDataCollector& inputs,
         const AbstractDataCollection& data,
         const task_options& task_options,
         const global_colormap_func& colormap_func,
         const observed_factor_func& factor_func) {
-    const CameraCorrectionParams observer_options{
-            .pitch = -2.4,
-    };
-    const auto distance_to_origin = task_options.camera_distance_to_origin;
     const auto range_limits = task_options.db_range;
-    const auto observer_provider = make_shared<ObserverProvider>(inputs, distance_to_origin, observer_options);
-    const auto point_provider = make_shared<PointCloudProvider>(inputs, distance_to_origin);
+    const auto observer_provider = make_shared<ObserverProvider>(inputs, task_options.camera);
+    const auto point_provider = make_shared<PointCloudProvider>(inputs, task_options.camera);
 
     const auto observers = observer_provider->observers_with_positions();
     const auto observer_count = observers.size();
     const shared_ptr<vector<ScoredPoint>> base_points = point_provider
-            ->get_base_scored_points();
-            //->generate_homogenous_cloud(40);
+            //->get_base_scored_points();
+            ->generate_homogenous_cloud(30);
 
     const auto total_time = start_time();
     const vector<ScoredCloud> complete_payload = map_vec<Observer, ScoredCloud, false>(
@@ -81,7 +77,7 @@ shared_ptr<ScoredCloudPayload> score_points(
     log_and_start_next(total_time, "Scored and filtered " + std::to_string(base_points->size()) +
                                    " for each of " + std::to_string(observer_count) + " observers_with_positions");
 
-    return make_shared<ScoredCloudPayload>(ScoredCloudPayload{
+    return make_shared<scored_cloud_payload>(scored_cloud_payload{
             .point_clouds = complete_payload,
             .colormap = colormap_func,
     });

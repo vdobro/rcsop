@@ -13,8 +13,7 @@ private:
     double _units_per_centimeter;
 public:
     explicit ObserverProvider(const InputDataCollector& input,
-                              double distance_to_origin,
-                              CameraCorrectionParams default_observer_correction = {});
+                              const camera_options& default_camera_options);
 
     [[nodiscard]] vector<Observer> observers_with_positions() const;
     [[nodiscard]] vector<Observer> all_observers() const;

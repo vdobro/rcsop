@@ -50,9 +50,9 @@ vector<Target> map_vec(const vector<Source>& source,
 }
 
 template<typename Source, typename Target, bool Parallel = false>
+requires std::is_default_constructible<Target>::value
 shared_ptr<vector<Target>> map_vec_shared(const vector<Source>& source,
                                           const function<Target(const Source&)>& mapper) {
-    static_assert(std::is_default_constructible<Target>::value);
     auto result = make_shared<vector<Target>>();
     result->resize(source.size());
 

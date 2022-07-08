@@ -12,7 +12,6 @@
 #include "observer_provider.h"
 #include "scored_cloud.h"
 #include "observer_renderer.h"
-#include "options.h"
 
 using namespace sfm::rendering;
 
@@ -40,7 +39,7 @@ void accumulate_azimuth(const InputDataCollector& inputs,
     /*
      //TODO WIP: adapter for BasicRcsMap or refactoring
     const shared_ptr<BasicRcsMap> rcs_data = inputs->data<SIMPLE_RCS_MAT>(false);
-    const auto scored_payload = score_points(inputs, rcs_data, COLOR_MAP);
+    const auto scored_payload = score_points(inputs, rcs_data, options.rendering.color_map);
     const auto& points = scored_payload->point_clouds;
     const auto& colormap = scored_payload->colormap;
 

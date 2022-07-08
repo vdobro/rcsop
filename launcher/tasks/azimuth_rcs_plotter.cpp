@@ -1,14 +1,13 @@
 #include "azimuth_rcs_plotter.h"
 
 #include "utils/logging.h"
+#include "utils/gauss.h"
 #include "utils/point_scoring.h"
 
 #include "colors.h"
-#include "options.h"
 #include "observer_renderer.h"
 #include "scored_cloud.h"
 #include "azimuth_minimap_provider.h"
-#include "utils/gauss.h"
 
 using namespace sfm::rendering;
 
@@ -18,10 +17,17 @@ void azimuth_rcs_plotter(const InputDataCollector& inputs,
     azimuth_data->use_filtered_peaks();
 
     const ScoreRange range = options.db_range;
-    const auto colormap = construct_colormap_function(COLOR_MAP, range);
-    const auto scored_payload = score_points(inputs, *azimuth_data, options, colormap,
+    const auto color_map = construct_colormap_function(options.rendering.color_map, range);
+    const auto scored_payload = score_points(inputs, *azimuth_data, options, color_map,
                                              rcs_gaussian_vertical);
     const auto& points = scored_payload->point_clouds;
+    const auto heights = scored_payload->observer_heights();
+    map<height_t, path> height_folders;
+    for (auto height: scored_payload->observer_heights()) {
+        path height_path{options.output_path / (std::to_string(height) + "cm")};
+        std::filesystem::create_directories(height_path);
+        height_folders.insert(make_pair(height, height_path));
+    }
 
     const TextureRenderParams minimap_position = {
             .coordinates= Vector2d(915., 420.),
@@ -31,10 +37,14 @@ void azimuth_rcs_plotter(const InputDataCollector& inputs,
     auto payload_size = points.size();
     for (size_t index = 1; index <= payload_size; index++) {
         ScoredCloud scored_cloud = points[index - 1];
-        ObserverRenderer renderer(scored_cloud);
+        ObserverRenderer renderer(scored_cloud, color_map, options.rendering);
 
         Texture minimap = minimaps->for_position(scored_cloud.observer());
         renderer.add_texture(minimap, minimap_position);
-        renderer.render(options.output_path, colormap, construct_log_prefix(index, payload_size));
+
+        path output_path = scored_cloud.observer().has_position()
+                ? height_folders.at(scored_cloud.observer().position().height)
+                : options.output_path;
+        renderer.render(output_path, construct_log_prefix(index, payload_size));
     }
 }

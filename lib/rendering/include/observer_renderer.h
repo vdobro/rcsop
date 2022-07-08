@@ -1,49 +1,36 @@
 #ifndef RCSOP_RENDERING_OBSERVER_RENDERER_H
 #define RCSOP_RENDERING_OBSERVER_RENDERER_H
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Graphics/RenderTexture.hpp>
+#include "utils/chronometer.h"
 
 #include "observer.h"
-#include "utils/chronometer.h"
 #include "colors.h"
 #include "scored_cloud.h"
 #include "texture.h"
-
-struct RenderedPoint {
-    Vector2d coordinates = Vector2d::Zero();
-    Vector3ub color = Vector3ub::Zero();
-};
-
-struct TextureRenderParams {
-    Vector2d coordinates = Vector2d::Zero();
-    Vector2d size = Vector2d::Zero();
-};
+#include "rendering_options.h"
+#include "sfml_renderer.h"
 
 class ObserverRenderer {
 private:
-    const Observer _observer;
-    const shared_ptr<vector<ScoredPoint>> _points;
+    Observer _observer;
+    shared_ptr<vector<ScoredPoint>> _points;
+    sfm::rendering::global_colormap_func _color_map;
+
+    shared_ptr<SfmlRenderer> _renderer = nullptr;
 
     shared_ptr<vector<pair<TextureRenderParams, Texture>>> _textures;
 
-    shared_ptr<sf::Shader> _shader;
-
-    vector<RenderedPoint> project_points(const sfm::rendering::global_colormap_func& colormap);
-
-    void render_point(const RenderedPoint& point, sf::RenderTarget& render_target);
-
-    void initialize_renderer();
+    vector<RenderedPoint> project_points();
 
 public:
-    explicit ObserverRenderer(const ScoredCloud& pointsWithObserver);
+    explicit ObserverRenderer(const ScoredCloud& pointsWithObserver,
+                              const sfm::rendering::global_colormap_func& color_map,
+                              const rendering_options& options);
 
     void add_texture(Texture texture, TextureRenderParams coordinates);
 
     void render(const path& output_path,
-                const sfm::rendering::global_colormap_func& colormap,
                 const string& log_prefix);
-
 };
 
 #endif //RCSOP_RENDERING_OBSERVER_RENDERER_H

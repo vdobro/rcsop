@@ -10,7 +10,8 @@ find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 include(GenerateExportHeader)
 add_library(rcsop-rendering SHARED
         src/colors.cpp
-        src/observer_renderer.cpp)
+        src/observer_renderer.cpp
+        src/sfml_renderer.cpp)
 generate_export_header(rcsop-data)
 
 target_include_directories(rcsop-rendering

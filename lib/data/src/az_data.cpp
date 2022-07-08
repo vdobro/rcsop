@@ -1,10 +1,7 @@
 #include "az_data.h"
 
 #include <numeric>
-
 using std::reduce;
-using std::runtime_error;
-using std::invalid_argument;
 
 #include "utils/mapping.h"
 

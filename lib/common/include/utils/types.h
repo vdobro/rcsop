@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <map>
 #include <vector>
+#include <stdexcept>
 
 using std::string;
 using std::shared_ptr;
@@ -18,6 +19,8 @@ using std::pair;
 using std::make_pair;
 using std::vector;
 using std::function;
+using std::invalid_argument;
+using std::runtime_error;
 
 using std::filesystem::path;
 using std::filesystem::create_directories;

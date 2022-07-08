@@ -5,9 +5,6 @@
 
 #include "utils/mapping.h"
 
-using std::runtime_error;
-using std::invalid_argument;
-
 static const auto RCS_TABLE_NAME = "result";
 static const auto RCS_COLUMN_HEIGHT = "height";
 static const auto RCS_COLUMN_RCS = "rcs";

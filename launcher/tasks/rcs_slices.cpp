@@ -3,7 +3,6 @@
 #include <execution>
 
 #include "colors.h"
-#include "options.h"
 #include "../default_options.h"
 
 #include "observer_provider.h"
@@ -55,8 +54,8 @@ static inline bool is_within_camera_slice(
 
 void rcs_slices(const InputDataCollector& inputs,
                 const task_options& options) {
-    const auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera_distance_to_origin);
-    const auto point_provider = make_shared<PointCloudProvider>(inputs, options.camera_distance_to_origin);
+    const auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera);
+    const auto point_provider = make_shared<PointCloudProvider>(inputs, options.camera);
 
     auto observers = observer_provider->observers_with_positions();
     const auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
@@ -86,18 +85,18 @@ void rcs_slices(const InputDataCollector& inputs,
                 return ScoredPoint(point.position(), point.id());
             });
 
-    auto renderers = map_vec<Observer, ObserverRenderer>(
-            observers, [&points](const Observer& observer) -> ObserverRenderer {
-                ScoredCloud payload(observer, points);
-                return ObserverRenderer(payload);
-            });
-
     auto score_range = ScoredPoint::get_score_range(*points);
-    auto colormap = construct_colormap_function(COLOR_MAP, score_range);
+    auto color_map = construct_colormap_function(options.rendering.color_map, score_range);
+
+    auto renderers = map_vec<Observer, ObserverRenderer>(
+            observers, [&points, &color_map, &options](const Observer& observer) -> ObserverRenderer {
+                ScoredCloud payload(observer, points);
+                return ObserverRenderer(payload, color_map, options.rendering);
+            });
 
     size_t index = 0;
     size_t last = renderers.size();
     for (auto& renderer: renderers) {
-        renderer.render(options.output_path, colormap, construct_log_prefix(index++, last));
+        renderer.render(options.output_path, construct_log_prefix(index++, last));
     }
 }

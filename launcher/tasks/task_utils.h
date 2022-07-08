@@ -6,12 +6,14 @@
 using std::filesystem::path;
 
 #include "input_data_collector.h"
+#include "rendering_options.h"
 
 struct task_options {
     path input_path;
     path output_path;
-    double camera_distance_to_origin;
     ScoreRange db_range;
+    camera_options camera;
+    rendering_options rendering;
 };
 
 using launcher_task = std::function<void(const InputDataCollector&, const task_options&)>;

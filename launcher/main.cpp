@@ -30,6 +30,7 @@ const char* PARAM_INPUT_PATH = "input-path";
 const char* PARAM_TASK = "task";
 const char* PARAM_OUTPUT_PATH = "output-path";
 const char* PARAM_OUTPUT_NAME_TIMESTAMP = "timestamp";
+const char* PARAM_USE_GPU = "use-gpu";
 const char* PARAM_CAMERA_DISTANCE = "camera-distance";
 
 const static char* DEFAULT_TASK = "azimuth-rcs";
@@ -78,10 +79,11 @@ int main(int argc, char* argv[]) {
             ("input-path,I", po::value<string>(),
              "folder with the inputs: source images, sparse/dense point clouds and MATLAB data sources")
             ("task,T", po::value<string>()->default_value(DEFAULT_TASK), "task to execute")
-            ("timestamp,M", po::value<bool>()->default_value(true),
-             "whether output folder name should be the current timestamp")
+            (PARAM_OUTPUT_NAME_TIMESTAMP, po::bool_switch()->default_value(true),
+             "use current timestamp as output folder name")
+            (PARAM_USE_GPU, po::bool_switch()->default_value(true), "enable GPU rendering")
             ("camera-distance,R", po::value<double>()->default_value(DEFAULT_CAMERA_DISTANCE),
-             "camera distance from the origin at the center")
+             "distance from the camera to the origin/center")
             ("output-path,O", po::value<string>(), "output path");
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -97,10 +99,8 @@ int main(int argc, char* argv[]) {
     const double camera_distance{vm.at(PARAM_CAMERA_DISTANCE).as<double>()};
     validate_options(input_path, output_path, task, camera_distance);
 
-    bool use_timestamps_as_output_name = true;
-    if (vm.count(PARAM_OUTPUT_NAME_TIMESTAMP)) {
-        use_timestamps_as_output_name = vm.at(PARAM_OUTPUT_NAME_TIMESTAMP).as<bool>();
-    }
+    bool use_timestamps_as_output_name = vm.at(PARAM_OUTPUT_NAME_TIMESTAMP).as<bool>();
+    bool use_gpu = vm.at(PARAM_USE_GPU).as<bool>();
 
     string output_target_folder = "latest";
     if (use_timestamps_as_output_name) {
@@ -118,10 +118,22 @@ int main(int argc, char* argv[]) {
     const task_options options{
             .input_path = input_path,
             .output_path = task_output_path,
-            .camera_distance_to_origin = camera_distance,
             .db_range = {
                     .min = -20,
                     .max = 5,
+            },
+            .camera = {
+                    .pitch_correction = -5.4,
+                    .distance_to_origin = camera_distance,
+            },
+            .rendering = {
+                    .use_gpu_rendering = use_gpu,
+                    .color_map = COLOR_MAP,
+                    .gradient = {
+                            .radius = 25.f,
+                            .center_alpha = 0.2f,
+                            .strength = 3.f,
+                    },
             },
     };
 

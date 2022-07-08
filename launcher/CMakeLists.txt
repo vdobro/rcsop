@@ -10,7 +10,7 @@ find_package(COLMAP REQUIRED)
 
 add_executable(rcs-overlay-plotter
         main.cpp
-        tasks/utils/point_scoring.cpp
+        utils/point_scoring.cpp
         tasks/test_task.cpp
         tasks/azimuth_rcs_plotter.cpp
         tasks/rcs_slices.cpp

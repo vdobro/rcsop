@@ -29,8 +29,7 @@ static double calculate_units_per_centimeter(double camera_distance_to_origin,
 }
 
 ObserverProvider::ObserverProvider(const InputDataCollector& input,
-                                   double distance_to_origin,
-                                   CameraCorrectionParams default_observer_correction) {
+                                   const camera_options& default_camera_options) {
     if (!input.data_available<SPARSE_CLOUD_COLMAP>()) {
         throw invalid_argument("No COLMAP model");
     }
@@ -45,8 +44,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
 
         for (const auto& camera: cameras) {
             if (image_name == camera.get_name()) {
-                Observer observer(image.position(), image_path, camera,
-                                  default_observer_correction);
+                Observer observer(image.position(), image_path, camera, default_camera_options);
                 all_observers.push_back(observer);
                 break;
             }
@@ -66,7 +64,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
         }
     }
 
-    this->_units_per_centimeter = calculate_units_per_centimeter(distance_to_origin, _positioned_observers);
+    this->_units_per_centimeter = calculate_units_per_centimeter(default_camera_options.distance_to_origin, _positioned_observers);
     if (_units_per_centimeter == 0) {
         throw invalid_argument("World scale must not be zero");
     }

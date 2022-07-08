@@ -15,8 +15,8 @@ using Point = Kernel::Point_3;
 using SurfaceMesh = CGAL::Surface_mesh<Point>;
 
 PointCloudProvider::PointCloudProvider(const InputDataCollector& input,
-                                       double distance_to_origin)
-        : _distance_to_origin(distance_to_origin) {
+                                       const camera_options& camera_options)
+        : _distance_to_origin(camera_options.distance_to_origin) {
     if (input.data_available<SPARSE_CLOUD_COLMAP>()) {
         this->sparse_cloud = input.data<SPARSE_CLOUD_COLMAP>(false);
         this->sparse_cloud_points = sparse_cloud->get_scored_points();
@@ -25,7 +25,7 @@ PointCloudProvider::PointCloudProvider(const InputDataCollector& input,
                 sparse_cloud->get_point_pairs(), &point_pair::first);
         max_sparse_point_id = *std::max_element(point_ids.begin(), point_ids.end());
 
-        auto observer_provider = ObserverProvider(input, distance_to_origin);
+        auto observer_provider = ObserverProvider(input, camera_options);
         this->_units_per_centimeter = observer_provider.get_units_per_centimeter();
     }
     if (input.data_available<DENSE_MESH_PLY>()) {
@@ -48,7 +48,8 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::get_base_scored_points() con
 shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(
         size_t points_per_meter) const {
     auto base_points = make_shared<vector<Point>>();
-    for (const auto& point: *get_base_scored_points()) {
+    auto raw_points = get_base_scored_points();
+    for (const auto& point: *raw_points) {
         const auto point_pos = point.position();
         base_points->emplace_back(point_pos.x(), point_pos.y(), point_pos.z());
     }

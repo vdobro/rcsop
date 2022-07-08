@@ -10,8 +10,8 @@ static double distance_from_origin(const Vector3d& point) {
 }
 
 static double max_camera_distance(const InputDataCollector& inputs,
-                                  double camera_distance) {
-    auto observer_provider = make_unique<ObserverProvider>(inputs, camera_distance);
+                                  const camera_options& camera_options) {
+    auto observer_provider = make_unique<ObserverProvider>(inputs, camera_options);
     auto observers = observer_provider->observers_with_positions();
     if (observers.empty()) {
         throw std::invalid_argument("No observers found");
@@ -24,7 +24,7 @@ static double max_camera_distance(const InputDataCollector& inputs,
 
 void sparse_filter(const InputDataCollector& inputs,
                    const task_options& options) {
-    auto distance_threshold = 1.1 * max_camera_distance(inputs, options.camera_distance_to_origin);
+    auto distance_threshold = 1.1 * max_camera_distance(inputs, options.camera);
     shared_ptr<SparseCloud> model = inputs.data<SPARSE_CLOUD_COLMAP>(false);
     model->filter_points([distance_threshold](const Vector3d& point) -> bool {
         return distance_from_origin(point) <= distance_threshold;

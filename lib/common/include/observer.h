@@ -11,8 +11,9 @@ using std::optional;
 #include "observer_position.h"
 #include "observed_point.h"
 
-struct CameraCorrectionParams {
-    double pitch = 0.;
+struct camera_options {
+    double pitch_correction = 0.;
+    double distance_to_origin = 750.;
 };
 
 class Observer {
@@ -32,7 +33,7 @@ public:
     explicit Observer(optional<ObserverPosition> camera_position,
                       path filepath,
                       camera camera,
-                      CameraCorrectionParams camera_correction);
+                      camera_options options);
 
     void set_units_per_centimeter(double units);
 

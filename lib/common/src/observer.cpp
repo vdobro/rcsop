@@ -1,19 +1,20 @@
 #include "observer.h"
-#include "observed_point.h"
-#include "utils/mapping.h"
 
-#include <execution>
 #include <utility>
 #include <ranges>
+
+#include "utils/mapping.h"
+
+#include "observed_point.h"
 
 Observer::Observer(optional<ObserverPosition> camera_position,
                    path filepath,
                    camera source_camera,
-                   CameraCorrectionParams camera_correction)
+                   camera_options options)
         : _position(camera_position),
           _source_filepath(std::move(filepath)),
           _camera(std::move(source_camera)) {
-    const double pitch_correction_radians = (camera_correction.pitch * M_PI) / 180.;
+    const double pitch_correction_radians = (options.pitch_correction * M_PI) / 180.;
     this->_correction_transform = Eigen::AngleAxis<double>(pitch_correction_radians, Vector3d::UnitX());
 }
 

@@ -15,7 +15,7 @@ void test_task(const InputDataCollector& inputs,
     }
 
     clog << "Observer positions: " << endl;
-    auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera_distance_to_origin);
+    auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera);
     auto observers = observer_provider->observers_with_positions();
     for (const auto& observer: observers) {
         if (observer.has_position()) {

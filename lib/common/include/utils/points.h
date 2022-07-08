@@ -2,7 +2,8 @@
 #define RCSOP_COMMON_POINTS_H
 
 #include <Eigen/Core>
-#include "types.h"
+
+#include "utils/types.h"
 
 using Eigen::Vector2d;
 using Eigen::Vector3d;

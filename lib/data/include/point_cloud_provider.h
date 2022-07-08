@@ -15,7 +15,8 @@ private:
     double _distance_to_origin = 1.;
     double _units_per_centimeter = 1.;
 public:
-    explicit PointCloudProvider(const InputDataCollector& input, double distance_to_origin);
+    explicit PointCloudProvider(const InputDataCollector& input,
+                                const camera_options& camera_options);
 
     [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_base_scored_points() const;
 
