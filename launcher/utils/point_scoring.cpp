@@ -54,8 +54,8 @@ shared_ptr<scored_cloud_payload> score_points(
     const auto observers = observer_provider->observers_with_positions();
     const auto observer_count = observers.size();
     const shared_ptr<vector<ScoredPoint>> base_points = point_provider
-            ->get_base_scored_points();
-            //->generate_homogenous_cloud(30);
+            //->get_base_scored_points();
+            ->generate_homogenous_cloud(30);
 
     const auto total_time = start_time();
     const vector<ScoredCloud> complete_payload = map_vec<Observer, ScoredCloud, false>(
