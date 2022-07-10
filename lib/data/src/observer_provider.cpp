@@ -42,7 +42,7 @@ static double calculate_units_per_centimeter(double camera_distance_to_origin,
 }
 
 ObserverProvider::ObserverProvider(const InputDataCollector& input,
-                                   const camera_options& default_camera_options) {
+                                   const camera_options& camera_options) {
     if (!input.data_available<SPARSE_CLOUD_COLMAP>()) {
         throw invalid_argument("No COLMAP model");
     }
@@ -50,7 +50,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
     auto cameras = model->get_cameras();
 
     this->_units_per_centimeter = calculate_units_per_centimeter(
-            default_camera_options.distance_to_origin, cameras);
+            camera_options.distance_to_origin, cameras);
 
     auto source_images = input.images();
     vector<Observer> all_observers;
@@ -61,7 +61,7 @@ ObserverProvider::ObserverProvider(const InputDataCollector& input,
 
         for (const auto& camera: cameras) {
             if (image_name == camera.get_name()) {
-                Observer observer(image.position(), image_path, camera, default_camera_options);
+                Observer observer(image.position(), image_path, camera, camera_options);
                 all_observers.push_back(observer);
                 break;
             }

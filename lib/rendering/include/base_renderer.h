@@ -7,26 +7,30 @@
 #include "texture.h"
 #include "observer.h"
 
-struct rendered_point {
-    Vector2d coordinates = Vector2d::Zero();
-    Vector3ub color = Vector3ub::Zero();
-};
+namespace rcsop::rendering {
+    struct rendered_point {
+        Vector2d coordinates = Vector2d::Zero();
+        Vector3ub color = Vector3ub::Zero();
+    };
 
-struct texture_rendering_options {
-    Vector2d coordinates = Vector2d::Zero();
-    Vector2d size = Vector2d::Zero();
-};
+    struct texture_rendering_options {
+        Vector2d coordinates = Vector2d::Zero();
+        Vector2d size = Vector2d::Zero();
+    };
 
-class BaseRendererContext {
-public:
-    virtual void render_point(const rendered_point& point) = 0;
-    virtual void render_texture(const Texture& texture, const texture_rendering_options& options) = 0;
-    virtual void write_to_image(const path& output_path) = 0;
-};
+    class BaseRendererContext {
+    public:
+        virtual void render_point(const rendered_point& point) = 0;
 
-class BaseRenderer {
-public:
-    [[nodiscard]] virtual shared_ptr<BaseRendererContext> create_context(const Observer& observer) const = 0;
-};
+        virtual void render_texture(const Texture& texture, const texture_rendering_options& options) = 0;
+
+        virtual void write_to_image(const path& output_path) = 0;
+    };
+
+    class BaseRenderer {
+    public:
+        [[nodiscard]] virtual shared_ptr<BaseRendererContext> create_context(const Observer& observer) const = 0;
+    };
+}
 
 #endif //RCSOP_RENDERING_BASE_RENDERER_H

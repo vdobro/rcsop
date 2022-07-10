@@ -8,8 +8,7 @@
 #include "point_cloud_provider.h"
 #include "observer_renderer.h"
 #include "utils/logging.h"
-
-using namespace sfm::rendering;
+#include "default_options.h"
 
 static inline Vector2d flat_down_from_above(const Vector3d& point) {
     auto res = Vector2d();
@@ -51,8 +50,13 @@ static inline bool is_within_camera_slice(
     return is_in_triangle(point, midpoint_to_previous, midpoint_to_next, origin);
 }
 
-void rcs_slices(const InputDataCollector& inputs,
-                const task_options& options) {
+using namespace rcsop::launcher::utils;
+using rcsop::rendering::coloring::construct_colormap_function;
+using rcsop::rendering::coloring::color_values;
+using rcsop::rendering::ObserverRenderer;
+
+void rcsop::launcher::tasks::rcs_slices(const InputDataCollector& inputs,
+                                        const task_options& options) {
     const auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera);
     const auto point_provider = make_shared<PointCloudProvider>(inputs, options.camera);
 
@@ -62,13 +66,16 @@ void rcs_slices(const InputDataCollector& inputs,
     const auto flattened_image_positions = map_vec<Vector3d, Vector2d>(image_positions, flat_down_from_above);
     const auto image_count = image_positions.size();
 
-    const auto base_points = point_provider->get_base_scored_points();
+    const size_t take_every_nth = options.rendering.use_gpu_rendering ? 1 : 5;
+    const auto base_points = point_provider->get_base_scored_points(take_every_nth);
 
     const auto origin = Vector2d(0, 0);
+    const height_t default_height = options.camera.default_height;
     const auto data = inputs.data<SIMPLE_RCS_MAT>(false)
-            ->at_height(40)
+            ->at_height(default_height)
             ->rcs();
-    const auto rcs_colors = color_values(data, map_turbo);
+    const vector<height_t> heights { default_height };
+    const auto rcs_colors = color_values(data, rcsop::rendering::coloring::map_turbo);
 
     const auto points = map_vec_shared<ScoredPoint, ScoredPoint>(
             *base_points,
@@ -93,9 +100,5 @@ void rcs_slices(const InputDataCollector& inputs,
                 return ObserverRenderer(payload, color_map, options.rendering);
             });
 
-    size_t index = 0;
-    size_t last = renderers.size();
-    for (auto& renderer: renderers) {
-        renderer.render(options.output_path, construct_log_prefix(index++, last));
-    }
+    rcsop::launcher::utils::batch_render(renderers, options, heights);
 }

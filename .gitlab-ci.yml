@@ -32,7 +32,7 @@ Test task "Azimuth RCS":
   stage: test
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" --software-rendering -I input -O output
+    - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" --software-rendering -I input -O output --pitch-correction -2.0 --default-height 40
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:
@@ -51,7 +51,7 @@ Test task "RCS slices":
   stage: test
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" --software-rendering -I input -O output
+    - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" --software-rendering -I input -O output --default-height 40
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:
@@ -70,7 +70,7 @@ Test dummy task:
   stage: test
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter -T "test-task" --software-rendering -I input -O output
+    - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:

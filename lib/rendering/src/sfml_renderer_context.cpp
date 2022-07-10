@@ -1,5 +1,7 @@
 #include "sfml_renderer_context.h"
 
+using rcsop::rendering::SfmlRendererContext;
+
 static const float RGB = 256.f;
 
 static inline void fill_background(

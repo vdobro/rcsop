@@ -72,8 +72,7 @@ void AzimuthRcsDataSet::determine_step_sizes() {
 }
 
 void AzimuthRcsDataSet::filter_peaks() {
-    for (const auto& angle_to_data: _raw_values) {
-        const auto& raw_column = angle_to_data.second;
+    for (const auto& [angle, raw_column]: _raw_values) {
         double max_value = *std::max_element(raw_column.cbegin(), raw_column.cend());
 
         vector<double> filtered_column = map_vec<double, double>(raw_column, [&max_value]
@@ -83,7 +82,7 @@ void AzimuthRcsDataSet::filter_peaks() {
             }
             return value;
         });
-        _filtered_values.insert(make_pair(angle_to_data.first, filtered_column));
+        _filtered_values.insert(make_pair(angle, filtered_column));
     }
 }
 

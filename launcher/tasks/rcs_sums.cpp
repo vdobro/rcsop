@@ -7,13 +7,12 @@
 #include "utils/point_scoring.h"
 
 #include "observed_point.h"
+#include "sparse_cloud.h"
 #include "point_cloud_provider.h"
 #include "default_options.h"
 #include "observer_provider.h"
 #include "scored_cloud.h"
 #include "observer_renderer.h"
-
-using namespace sfm::rendering;
 
 #define HORIZONTAL_ANGLE 25
 #define VERTICAL_ANGLE 15
@@ -29,13 +28,15 @@ const static gauss_options distribution_options = {
         .y_scale = VERTICAL_SPREAD,
 };
 
-void accumulate_rcs(const InputDataCollector& input,
-                    const task_options& options) {
+using rcsop::launcher::utils::task_options;
+
+void rcsop::launcher::tasks::accumulate_rcs(const InputDataCollector& input,
+                                            const task_options& options) {
     //TODO: WIP
 }
 
-void accumulate_azimuth(const InputDataCollector& inputs,
-                        const task_options& options) {
+void rcsop::launcher::tasks::accumulate_azimuth(const InputDataCollector& inputs,
+                                                const task_options& options) {
     /*
      //TODO WIP: adapter for BasicRcsMap or refactoring
     const shared_ptr<BasicRcsMap> rcs_data = inputs->data<SIMPLE_RCS_MAT>(false);

@@ -11,9 +11,10 @@ private:
     vector<Observer> _positioned_observers;
     vector<Observer> _auxiliary_observers;
     double _units_per_centimeter;
+
 public:
     explicit ObserverProvider(const InputDataCollector& input,
-                              const camera_options& default_camera_options);
+                              const camera_options& camera_options);
 
     [[nodiscard]] vector<Observer> observers_with_positions() const;
     [[nodiscard]] vector<Observer> all_observers() const;

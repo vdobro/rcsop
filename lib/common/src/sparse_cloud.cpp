@@ -8,8 +8,8 @@ SparseCloud::SparseCloud(const path& model_path) {
     reload();
 
     vector<Image> images;
-    for (auto& image: reconstruction->Images()) {
-        images.push_back(image.second);
+    for (auto& [_, image]: reconstruction->Images()) {
+        images.push_back(image);
     }
     std::sort(std::execution::par_unseq,
               images.begin(), images.end(),
@@ -50,8 +50,8 @@ std::vector<point_pair> SparseCloud::get_point_pairs() const {
     auto point_map = reconstruction->Points3D();
 
     vector<point_pair> point_pairs;
-    for (const auto& item: point_map) {
-        auto pair = make_pair(item.first, item.second.XYZ());
+    for (const auto& [point_id, point]: point_map) {
+        auto pair = make_pair(point_id, point.XYZ());
         point_pairs.push_back(pair);
     }
 
@@ -63,9 +63,7 @@ std::vector<point_pair> SparseCloud::get_point_pairs() const {
 shared_ptr<vector<ScoredPoint>> SparseCloud::get_scored_points() const {
     auto model_points = get_point_pairs();
     auto result = make_shared<vector<ScoredPoint>>();
-    for (const auto& point_pair: model_points) {
-        auto point_id = point_pair.first;
-        auto point = point_pair.second;
+    for (const auto& [point_id, point]: model_points) {
         result->emplace_back(point, point_id, 0);
     }
     return result;
@@ -74,9 +72,7 @@ shared_ptr<vector<ScoredPoint>> SparseCloud::get_scored_points() const {
 void SparseCloud::filter_points(const std::function<bool(const Vector3d&)>& predicate_to_keep) {
     auto points = reconstruction->Points3D();
 
-    for (const auto& point_with_id: points) {
-        auto point_id = point_with_id.first;
-        auto point = point_with_id.second;
+    for (const auto& [point_id, point]: points) {
         if (!predicate_to_keep(point.XYZ())) {
             reconstruction->DeletePoint3D(point_id);
         }

@@ -12,8 +12,9 @@ using std::optional;
 #include "observed_point.h"
 
 struct camera_options {
-    double pitch_correction = 0.;
-    double distance_to_origin = 750.;
+    double pitch_correction;
+    double distance_to_origin;
+    height_t default_height;
 };
 
 class Observer {

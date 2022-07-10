@@ -2,6 +2,9 @@
 
 #include "sfml_renderer_context.h"
 
+using rcsop::rendering::SfmlRenderer;
+using rcsop::rendering::BaseRendererContext;
+
 static const char* FRAGMENT_SHADER =
         "uniform vec2 screen_res; "
         "uniform vec2 p_center; "

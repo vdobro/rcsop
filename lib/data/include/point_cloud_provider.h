@@ -18,7 +18,7 @@ public:
     explicit PointCloudProvider(const InputDataCollector& input,
                                 const camera_options& camera_options);
 
-    [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_base_scored_points() const;
+    [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_base_scored_points(size_t take_every_nth = 1) const;
 
     [[nodiscard]] shared_ptr<vector<ScoredPoint>> generate_homogenous_cloud(size_t points_per_meter) const;
 };

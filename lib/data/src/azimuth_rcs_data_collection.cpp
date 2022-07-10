@@ -23,13 +23,13 @@ const AbstractDataSet* AzimuthRcsDataCollection::get_for_exact_position(
 }
 
 void AzimuthRcsDataCollection::use_filtered_peaks() {
-    for (auto& height_pair: _data) {
-        for (auto& azimuth_pair: height_pair.second) {
-            azimuth_pair.second.use_filtered_peaks();
+    for (auto& [height, azimuth_data]: _data) {
+        for (auto& [azimuth, data]: azimuth_data) {
+            data.use_filtered_peaks();
         }
     }
 }
 
-const vector<height_t> AzimuthRcsDataCollection::heights() const {
+vector<height_t> AzimuthRcsDataCollection::heights() const {
     return this->_heights;
 }

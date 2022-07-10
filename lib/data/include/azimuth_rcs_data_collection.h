@@ -16,7 +16,7 @@ public:
 
     [[nodiscard]] const AbstractDataSet* get_for_exact_position(const Observer& observer) const override;
 
-    [[nodiscard]] const vector<height_t> heights() const;
+    [[nodiscard]] vector<height_t> heights() const;
 };
 
 #endif //RCSOP_DATA_AZIMUTH_RCS_MAP_H

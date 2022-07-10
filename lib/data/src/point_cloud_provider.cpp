@@ -34,7 +34,10 @@ PointCloudProvider::PointCloudProvider(const InputDataCollector& input,
     }
 }
 
-shared_ptr<vector<ScoredPoint>> PointCloudProvider::get_base_scored_points() const {
+shared_ptr<vector<ScoredPoint>> PointCloudProvider::get_base_scored_points(
+        size_t take_every_nth) const {
+    assert(take_every_nth >= 1);
+
     auto result = make_shared<vector<ScoredPoint>>(*sparse_cloud_points);
     auto dense_point_id = max_sparse_point_id + 1;
     for (const auto& point: *dense_cloud_points) {
@@ -42,7 +45,13 @@ shared_ptr<vector<ScoredPoint>> PointCloudProvider::get_base_scored_points() con
         dense_point_id++;
     }
 
-    return result;
+    if (take_every_nth == 1) return result;
+
+    auto filtered_result = make_shared<vector<ScoredPoint>>();
+    for (size_t i = 0; i < result->size(); i += take_every_nth) {
+        filtered_result->push_back(result->at(i));
+    }
+    return filtered_result;
 }
 
 shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(

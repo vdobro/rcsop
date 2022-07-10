@@ -10,12 +10,13 @@ find_package(COLMAP REQUIRED)
 
 add_executable(rcs-overlay-plotter
         main.cpp
+        launcher.cpp
         utils/point_scoring.cpp
         tasks/test_task.cpp
         tasks/azimuth_rcs_plotter.cpp
         tasks/rcs_slices.cpp
         tasks/rcs_sums.cpp
-        tasks/sparse_filter.cpp)
+        tasks/sparse_filter.cpp utils/task_utils.cpp)
 
 target_include_directories(rcs-overlay-plotter PRIVATE ${PROJECT_SOURCE_DIR})
 set_target_properties(rcs-overlay-plotter PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE} -s")

@@ -22,8 +22,9 @@ static double max_camera_distance(const InputDataCollector& inputs,
     return *std::max_element(distances.begin(), distances.end());
 }
 
-void sparse_filter(const InputDataCollector& inputs,
-                   const task_options& options) {
+using rcsop::launcher::utils::task_options;
+void rcsop::launcher::tasks::sparse_filter(const InputDataCollector& inputs,
+                                           const task_options& options) {
     auto distance_threshold = 1.1 * max_camera_distance(inputs, options.camera);
     shared_ptr<SparseCloud> model = inputs.data<SPARSE_CLOUD_COLMAP>(false);
     model->filter_points([distance_threshold](const Vector3d& point) -> bool {

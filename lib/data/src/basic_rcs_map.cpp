@@ -149,10 +149,7 @@ BasicRcsMap::BasicRcsMap(const path& path) {
     auto table = get_table(mat_file_handle);
     auto height_row_indices = get_heights(table);
 
-    for (auto& height_row_index: height_row_indices) {
-        auto height = height_row_index.first;
-        auto index = height_row_index.second;
-
+    for (auto& [height, index]: height_row_indices) {
         auto rcs = make_shared<BasicRcsDataSet>(BasicRcsDataSet(index, table));
         this->_rows.insert(make_pair(height, rcs));
     }
@@ -167,8 +164,8 @@ shared_ptr<BasicRcsDataSet> BasicRcsMap::at_height(long height) const {
 
 vector<long> BasicRcsMap::available_heights() const {
     vector<long> heights;
-    for (auto& row: _rows) {
-        heights.push_back(row.first);
+    for (auto& [row, _]: _rows) {
+        heights.push_back(row);
     }
     std::sort(heights.begin(), heights.end());
     return heights;

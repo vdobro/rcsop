@@ -7,7 +7,7 @@
 
 #include "scored_point.h"
 
-namespace sfm::rendering {
+namespace rcsop::rendering::coloring {
     using local_colormap_func = function<Vector3ub(double v, double vmin, double vmax)>;
     using global_colormap_func = function<Vector3ub(double v)>;
 

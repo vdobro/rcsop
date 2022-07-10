@@ -7,8 +7,8 @@
 using std::clog;
 using std::endl;
 
-void test_task(const InputDataCollector& inputs,
-               const task_options& options) {
+void rcsop::launcher::tasks::test_task(const InputDataCollector& inputs,
+                                       const rcsop::launcher::utils::task_options& options) {
     clog << "Image file paths: " << endl;
     for (const auto& image: inputs.images()) {
         clog << image.file_path() << endl;

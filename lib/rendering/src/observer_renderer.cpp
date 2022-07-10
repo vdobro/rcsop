@@ -7,7 +7,10 @@
 using std::isnan;
 using std::cerr;
 
-using namespace sfm::rendering;
+using rcsop::rendering::rendered_point;
+using rcsop::rendering::ObserverRenderer;
+
+using rcsop::rendering::coloring::global_colormap_func;
 
 static vector<rendered_point> project_in_camera_with_color(
         const vector<ImagePoint>& points,
@@ -53,18 +56,19 @@ void ObserverRenderer::render(const path& output_path,
     for (const auto& point: rendered_points) {
         renderer_context->render_point(point);
     }
-    for (const auto& texture_pair: *_textures) {
-        renderer_context->render_texture(texture_pair.second, texture_pair.first);
+    for (const auto& [rendering_options, texture]: *_textures) {
+        renderer_context->render_texture(texture, rendering_options);
     }
 
     renderer_context->write_to_image(output_file_path);
 
-    log_and_start_next(time_measure, log_prefix + "\tRendered image " + output_name);
+    log_and_start_next(time_measure, log_prefix + "\tRendered image " + output_name
+                                     + " with " + std::to_string(rendered_points.size()) + " points");
 }
 
 ObserverRenderer::ObserverRenderer(
         const ScoredCloud& points_with_observer,
-        const sfm::rendering::global_colormap_func& color_map,
+        const global_colormap_func& color_map,
         const rendering_options& options)
         : _observer(points_with_observer.observer()),
           _points(points_with_observer.points()),
@@ -80,4 +84,14 @@ ObserverRenderer::ObserverRenderer(
 void ObserverRenderer::add_texture(Texture texture,
                                    texture_rendering_options coordinates) {
     this->_textures->push_back(make_pair(coordinates, texture));
+}
+
+bool ObserverRenderer::observer_has_position() const {
+    return this->_observer.has_position();
+}
+
+height_t ObserverRenderer::observer_height() const {
+    assert(this->observer_has_position());
+
+    return this->_observer.position().height;
 }

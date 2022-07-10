@@ -1,5 +1,7 @@
 #include "cairo_renderer_context.h"
 
+using rcsop::rendering::CairoRendererContext;
+
 CairoRendererContext::CairoRendererContext(
         const Observer& observer,
         const gradient_options& options)

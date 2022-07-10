@@ -22,6 +22,8 @@ static inline shared_ptr<vector<ScoredPoint>> filter_points(
     return filtered_points;
 }
 
+using rcsop::launcher::utils::observed_factor_func;
+
 static inline shared_ptr<vector<ScoredPoint>> value_observed_points(
         const vector<observed_point>& observed_points,
         const AbstractDataSet& data_for_observer,
@@ -41,7 +43,11 @@ static inline shared_ptr<vector<ScoredPoint>> value_observed_points(
             });
 }
 
-shared_ptr<scored_cloud_payload> score_points(
+using rcsop::launcher::utils::scored_cloud_payload;
+using rcsop::launcher::utils::task_options;
+using rcsop::rendering::coloring::global_colormap_func;
+
+shared_ptr<scored_cloud_payload> rcsop::launcher::utils::score_points(
         const InputDataCollector& inputs,
         const AbstractDataCollection& data,
         const task_options& task_options,
@@ -53,9 +59,7 @@ shared_ptr<scored_cloud_payload> score_points(
 
     const auto observers = observer_provider->observers_with_positions();
     const auto observer_count = observers.size();
-    const shared_ptr<vector<ScoredPoint>> base_points = point_provider
-            //->get_base_scored_points();
-            ->generate_homogenous_cloud(30);
+    const shared_ptr<vector<ScoredPoint>> base_points = point_provider->generate_homogenous_cloud(30);
 
     const auto total_time = start_time();
     const vector<ScoredCloud> complete_payload = map_vec<Observer, ScoredCloud, false>(
@@ -83,6 +87,6 @@ shared_ptr<scored_cloud_payload> score_points(
     });
 }
 
-double identity_factor(const observed_point& point) {
+double rcsop::launcher::utils::identity_factor(const observed_point& point) {
     return 1;
 }
