@@ -66,7 +66,7 @@ void rcsop::launcher::tasks::rcs_slices(const InputDataCollector& inputs,
     const auto flattened_image_positions = map_vec<Vector3d, Vector2d>(image_positions, flat_down_from_above);
     const auto image_count = image_positions.size();
 
-    const size_t take_every_nth = options.rendering.use_gpu_rendering ? 1 : 5;
+    const size_t take_every_nth = options.rendering.use_gpu_rendering ? 20 : 15;
     const auto base_points = point_provider->get_base_scored_points(take_every_nth);
 
     const auto origin = Vector2d(0, 0);

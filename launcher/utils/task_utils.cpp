@@ -28,10 +28,13 @@ void rcsop::launcher::utils::batch_render(vector<ObserverRenderer>& renderers,
             [&options, &renderers, &height_folders](const auto renderer_index) {
                 ObserverRenderer& renderer = renderers.at(renderer_index);
 
-                path output_path = renderer.observer_has_position()
+                const auto place_in_separate_folder =
+                        height_folders.size() > 1 && renderer.observer_has_position();
+
+                path output_path = place_in_separate_folder
                                    ? height_folders.at(renderer.observer_height())
                                    : options.output_path;
-                renderer.render(options.output_path, construct_log_prefix(
+                renderer.render(output_path, construct_log_prefix(
                         renderer_index + 1,
                         renderers.size() + 1));
             });
