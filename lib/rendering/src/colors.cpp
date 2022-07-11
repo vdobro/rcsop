@@ -502,25 +502,27 @@ const static unsigned char turbo_srgb_bytes[256][3] = {{48,  18,  59},
                                                        {185, 30,  2},
                                                        {183, 29,  2},
                                                        {180, 27,  1},
-                                                       {178, 26,  1},
-                                                       {175, 24,  1},
-                                                       {172, 23,  1},
-                                                       {169, 22,  1},
-                                                       {167, 20,  1},
-                                                       {164, 19,  1},
-                                                       {161, 18,  1},
-                                                       {158, 16,  1},
-                                                       {155, 15,  1},
-                                                       {152, 14,  1},
-                                                       {149, 13,  1},
-                                                       {146, 11,  1},
-                                                       {142, 10,  1},
-                                                       {139, 9,   2},
-                                                       {136, 8,   2},
-                                                       {133, 7,   2},
-                                                       {129, 6,   2},
-                                                       {126, 5,   2},
-                                                       {122, 4,   3}};
+                                                       {178, 26, 1},
+                                                       {175, 24, 1},
+                                                       {172, 23, 1},
+                                                       {169, 22, 1},
+                                                       {167, 20, 1},
+                                                       {164, 19, 1},
+                                                       {161, 18, 1},
+                                                       {158, 16, 1},
+                                                       {155, 15, 1},
+                                                       {152, 14, 1},
+                                                       {149, 13, 1},
+                                                       {146, 11, 1},
+                                                       {142, 10, 1},
+                                                       {139, 9,  2},
+                                                       {136, 8,  2},
+                                                       {133, 7,  2},
+                                                       {129, 6,  2},
+                                                       {126, 5,  2},
+                                                       {122, 4,  3}};
+
+using rcsop::common::utils::sparse::Vector3ub;
 
 static Vector3ub to_vec(const unsigned char* color) {
     Vector3ub vec;
@@ -637,6 +639,7 @@ global_colormap_func rcsop::rendering::coloring::construct_colormap_function(
     return construct_colormap_function(colormap, min_value, max_value);
 }
 
+using rcsop::common::utils::map_vec;
 vector<Vector3ub> rcsop::rendering::coloring::color_values(
         const vector<double>& values,
         const local_colormap_func& colormap) {

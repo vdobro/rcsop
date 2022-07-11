@@ -8,6 +8,9 @@
 #include "rendering_options.h"
 
 namespace rcsop::rendering {
+    using rcsop::common::Observer;
+    using rcsop::common::Texture;
+
     class CairoRendererContext : public BaseRendererContext {
     private:
         const gradient_options _options;

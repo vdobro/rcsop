@@ -10,6 +10,14 @@
 namespace rcsop::launcher::utils {
     using std::filesystem::path;
 
+    using rcsop::common::ScoreRange;
+    using rcsop::common::camera_options;
+    using rcsop::common::height_t;
+
+    using rcsop::data::InputDataCollector;
+
+    using rcsop::rendering::ObserverRenderer;
+
     struct task_options {
         path input_path;
         path output_path;
@@ -20,7 +28,7 @@ namespace rcsop::launcher::utils {
 
     using launcher_task = std::function<void(const InputDataCollector&, const task_options&)>;
 
-    void batch_render(vector<rcsop::rendering::ObserverRenderer>& renderers,
+    void batch_render(vector<ObserverRenderer>& renderers,
                       const task_options& options,
                       const vector<height_t>& observer_heights);
 }

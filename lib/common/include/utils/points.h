@@ -5,10 +5,12 @@
 
 #include "utils/types.h"
 
-using Eigen::Vector2d;
-using Eigen::Vector3d;
+namespace rcsop::common::utils::points {
+    using Eigen::Vector2d;
+    using Eigen::Vector3d;
 
-typedef ulong point_id_t;
-typedef pair<point_id_t, Vector3d> point_pair;
+    using point_id_t = ulong;
+    using point_pair = pair<point_id_t, Vector3d>;
+}
 
 #endif //RCSOP_COMMON_POINTS_H

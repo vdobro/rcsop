@@ -1,72 +1,74 @@
 #include "input_data_collector.h"
 
-using std::filesystem::directory_iterator;
-using std::filesystem::recursive_directory_iterator;
+namespace rcsop::data {
+    using std::filesystem::directory_iterator;
+    using std::filesystem::recursive_directory_iterator;
 
-InputDataCollector::InputDataCollector(const path& root_path) {
-    this->_root_path = root_path;
-    this->_image_path = path{this->_root_path / "images"};
+    InputDataCollector::InputDataCollector(const path& root_path) {
+        this->_root_path = root_path;
+        this->_image_path = path{this->_root_path / "images"};
 
-    this->collect_images();
-    this->collect_models();
-    this->collect_rcs_data();
-}
-
-void InputDataCollector::collect_images() {
-    if (!exists(_image_path)) {
-        std::clog << "WARNING: no folder 'images' found, images will not be collected" << std::endl;
-        return;
+        this->collect_images();
+        this->collect_models();
+        this->collect_rcs_data();
     }
-    for (auto const& image_dir_entry : recursive_directory_iterator{_image_path}) {
-        const path& file_path = image_dir_entry.path();
-        const path file_name = file_path.filename();
-        if (file_name.extension().string() != ".png") {
-            continue;
+
+    void InputDataCollector::collect_images() {
+        if (!exists(_image_path)) {
+            std::clog << "WARNING: no folder 'images' found, images will not be collected" << std::endl;
+            return;
         }
-        const CameraInputImage image(file_path);
-        this->_images.push_back(image);
+        for (auto const& image_dir_entry: recursive_directory_iterator{_image_path}) {
+            const path& file_path = image_dir_entry.path();
+            const path file_name = file_path.filename();
+            if (file_name.extension().string() != ".png") {
+                continue;
+            }
+            const CameraInputImage image(file_path);
+            this->_images.push_back(image);
+        }
+        std::sort(this->_images.begin(), this->_images.end(),
+                  [](const CameraInputImage& a, const CameraInputImage& b) -> bool {
+                      return a.file_path() < b.file_path();
+                  });
     }
-    std::sort(this->_images.begin(), this->_images.end(),
-              [](const CameraInputImage& a, const CameraInputImage& b) -> bool {
-                  return a.file_path() < b.file_path();
-              });
-}
 
-void InputDataCollector::collect_models() {
-    const path models_path{this->_root_path / "models"};
-    if (!exists(models_path)) {
-        std::clog << "WARNING: no folder 'models' found, point cloud data will not be imported" << std::endl;
-        return;
-    }
-    for (auto const& dir_entry: directory_iterator{models_path}) {
-        const path& entry_path = dir_entry.path();
-        if (std::filesystem::is_directory(entry_path)) {
-            this->_asset_paths.at(InputAssetType::SPARSE_CLOUD_COLMAP).push_back(entry_path);
+    void InputDataCollector::collect_models() {
+        const path models_path{this->_root_path / "models"};
+        if (!exists(models_path)) {
+            std::clog << "WARNING: no folder 'models' found, point cloud data will not be imported" << std::endl;
+            return;
         }
-        if (std::filesystem::is_regular_file(entry_path)) {
-            this->_asset_paths.at(InputAssetType::DENSE_MESH_PLY).push_back(entry_path);
-        }
-    }
-}
-
-void InputDataCollector::collect_rcs_data() {
-    const path rcs_data_path{this->_root_path / "data"};
-    if (!exists(rcs_data_path)) {
-        std::clog << "WARNING: no folder 'data' found, RCS data will not be imported" << std::endl;
-        return;
-    }
-    for (auto const& dir_entry: directory_iterator{rcs_data_path}) {
-        const path& entry_path = dir_entry.path();
-        if (std::filesystem::is_directory(entry_path)) {
-            this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MAT).push_back(entry_path);
-            this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MINIMAP).push_back(entry_path);
-        }
-        if (std::filesystem::is_regular_file(entry_path)) {
-            this->_asset_paths.at(InputAssetType::SIMPLE_RCS_MAT).push_back(entry_path);
+        for (auto const& dir_entry: directory_iterator{models_path}) {
+            const path& entry_path = dir_entry.path();
+            if (std::filesystem::is_directory(entry_path)) {
+                this->_asset_paths.at(InputAssetType::SPARSE_CLOUD_COLMAP).push_back(entry_path);
+            }
+            if (std::filesystem::is_regular_file(entry_path)) {
+                this->_asset_paths.at(InputAssetType::DENSE_MESH_PLY).push_back(entry_path);
+            }
         }
     }
-}
 
-vector<CameraInputImage> InputDataCollector::images() const {
-    return this->_images;
+    void InputDataCollector::collect_rcs_data() {
+        const path rcs_data_path{this->_root_path / "data"};
+        if (!exists(rcs_data_path)) {
+            std::clog << "WARNING: no folder 'data' found, RCS data will not be imported" << std::endl;
+            return;
+        }
+        for (auto const& dir_entry: directory_iterator{rcs_data_path}) {
+            const path& entry_path = dir_entry.path();
+            if (std::filesystem::is_directory(entry_path)) {
+                this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MAT).push_back(entry_path);
+                this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MINIMAP).push_back(entry_path);
+            }
+            if (std::filesystem::is_regular_file(entry_path)) {
+                this->_asset_paths.at(InputAssetType::SIMPLE_RCS_MAT).push_back(entry_path);
+            }
+        }
+    }
+
+    vector<CameraInputImage> InputDataCollector::images() const {
+        return this->_images;
+    }
 }

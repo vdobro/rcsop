@@ -4,21 +4,24 @@
 #include "utils/types.h"
 #include "utils/points.h"
 
-class ImagePoint {
-private:
-    Vector2d _coordinates = Vector2d::Zero();
-    double _distance = 0;
-    double _score = 0;
-public:
-    explicit ImagePoint() = default;
+namespace rcsop::common {
+    using rcsop::common::utils::points::Vector2d;
 
-    explicit ImagePoint(Vector2d coordinates, double distance, double score);
+    class ImagePoint {
+    private:
+        Vector2d _coordinates = Vector2d::Zero();
+        double _distance = 0;
+        double _score = 0;
+    public:
+        explicit ImagePoint() = default;
 
-    [[nodiscard]] double score() const;
+        explicit ImagePoint(Vector2d coordinates, double distance, double score);
 
-    [[nodiscard]] double distance() const;
+        [[nodiscard]] double score() const;
 
-    [[nodiscard]] Vector2d coordinates() const;
-};
+        [[nodiscard]] double distance() const;
 
+        [[nodiscard]] Vector2d coordinates() const;
+    };
+}
 #endif //RCSOP_COMMON_IMAGE_POINT_H

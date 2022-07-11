@@ -4,45 +4,56 @@
 #include "matio.h"
 
 #include "utils/types.h"
+#include "observer_position.h"
 
-class BasicRcsDataSet {
-private:
-    vector<double> _rcs;
-    vector<double> _rcs_dbs;
-    vector<long> _angles;
-    vector<long> _ranges;
-    map<long, vector<double>> _azimuth;
-    map<long, vector<double>> _azimuth_db;
+namespace rcsop::data {
 
-    BasicRcsDataSet() = default;
+    using rcsop::common::height_t;
+    using range_t = long;
+    using angle_t = long;
+    using rcs_t = double;
 
-    map<long, vector<double>> reconstruct_azimuth_table(const vector<double>& raw_values);
+    class BasicRcsDataSet {
+    private:
+        vector<rcs_t> _rcs;
+        vector<rcs_t> _rcs_dbs;
 
-    map<long, vector<double>> get_azimuth(size_t index, matvar_t* table);
+        vector<angle_t> _angles;
+        vector<range_t> _ranges;
 
-    map<long, vector<double>> get_azimuth_db(size_t index, matvar_t* table);
+        map<angle_t, vector<rcs_t>> _azimuth;
+        map<angle_t, vector<rcs_t>> _azimuth_db;
 
-public:
-    explicit BasicRcsDataSet(size_t row_index, matvar_t* table);
+        BasicRcsDataSet() = default;
 
-    [[nodiscard]] vector<double> rcs() const;
+        map<angle_t, vector<rcs_t>> reconstruct_azimuth_table(const vector<double>& raw_values);
 
-    [[nodiscard]] map<long, vector<double>> azimuth() const;
+        map<angle_t, vector<rcs_t>> get_azimuth(size_t index, matvar_t* table);
 
-    [[nodiscard]] vector<long> ranges() const;
+        map<angle_t, vector<rcs_t>> get_azimuth_db(size_t index, matvar_t* table);
 
-    [[nodiscard]] vector<long> angles() const;
-};
+    public:
+        explicit BasicRcsDataSet(size_t row_index, matvar_t* table);
 
-class BasicRcsMap {
-private:
-    map<long, shared_ptr<BasicRcsDataSet>> _rows;
-public:
-    explicit BasicRcsMap(const path& path);
+        [[nodiscard]] vector<double> rcs() const;
 
-    [[nodiscard]] shared_ptr<BasicRcsDataSet> at_height(long height) const;
+        [[nodiscard]] map<angle_t, vector<double>> azimuth() const;
 
-    [[nodiscard]] vector<long> available_heights() const;
-};
+        [[nodiscard]] vector<range_t> ranges() const;
+
+        [[nodiscard]] vector<angle_t> angles() const;
+    };
+
+    class BasicRcsMap {
+    private:
+        map<height_t, shared_ptr<BasicRcsDataSet>> _rows;
+    public:
+        explicit BasicRcsMap(const path& path);
+
+        [[nodiscard]] shared_ptr<BasicRcsDataSet> at_height(height_t height) const;
+
+        [[nodiscard]] vector<height_t> available_heights() const;
+    };
+}
 
 #endif //RCSOP_DATA_RCS_DATA_H

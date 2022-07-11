@@ -6,18 +6,20 @@
 #include "scored_point.h"
 #include "observer.h"
 
-class ScoredCloud {
-private:
-    const Observer _observer;
-    const shared_ptr<vector<ScoredPoint>> _points;
-public:
-    explicit ScoredCloud(Observer observer,
-                         shared_ptr<vector<ScoredPoint>> points);
+namespace rcsop::common {
 
-    [[nodiscard]] const Observer& observer() const;
+    class ScoredCloud {
+    private:
+        const Observer _observer;
+        const shared_ptr<vector<ScoredPoint>> _points;
+    public:
+        explicit ScoredCloud(Observer observer,
+                             shared_ptr<vector<ScoredPoint>> points);
 
-    [[nodiscard]] shared_ptr<vector<ScoredPoint>> points() const;
-};
+        [[nodiscard]] const Observer& observer() const;
 
+        [[nodiscard]] shared_ptr<vector<ScoredPoint>> points() const;
+    };
+}
 
 #endif //RCSOP_COMMON_OBSERVED_SCORED_CLOUD_H

@@ -11,6 +11,11 @@
 #include "base_renderer.h"
 
 namespace rcsop::rendering {
+    using rcsop::common::ScoredCloud;
+    using rcsop::common::ScoredPoint;
+    using rcsop::common::Texture;
+    using rcsop::common::height_t;
+
     class ObserverRenderer {
     private:
         Observer _observer;

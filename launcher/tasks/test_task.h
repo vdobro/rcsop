@@ -4,7 +4,10 @@
 #include "utils/task_utils.h"
 
 namespace rcsop::launcher::tasks {
+    using rcsop::data::InputDataCollector;
+    using rcsop::launcher::utils::task_options;
+
     void test_task(const InputDataCollector& inputs,
-                   const rcsop::launcher::utils::task_options& options);
+                   const task_options& options);
 }
 #endif //RCSOP_LAUNCHER_TEST_TASK_H

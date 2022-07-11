@@ -8,6 +8,11 @@
 #include "observer.h"
 
 namespace rcsop::rendering {
+    using rcsop::common::utils::points::Vector2d;
+    using rcsop::common::utils::sparse::Vector3ub;
+    using rcsop::common::Observer;
+    using rcsop::common::Texture;
+
     struct rendered_point {
         Vector2d coordinates = Vector2d::Zero();
         Vector3ub color = Vector3ub::Zero();
@@ -22,7 +27,8 @@ namespace rcsop::rendering {
     public:
         virtual void render_point(const rendered_point& point) = 0;
 
-        virtual void render_texture(const Texture& texture, const texture_rendering_options& options) = 0;
+        virtual void render_texture(const Texture& texture,
+                                    const texture_rendering_options& options) = 0;
 
         virtual void write_to_image(const path& output_path) = 0;
     };

@@ -14,34 +14,43 @@
 #include "observed_point.h"
 #include "abstract_rcs_map.h"
 
-using az_value_map_t = map<double, vector<double>>;
-class AzimuthRcsDataSet : public AbstractDataSet {
-private:
-    ObserverPosition _position{};
-    vector<long> _ranges;
-    long _range_step{};
+namespace rcsop::data {
+    using rcsop::common::ObserverPosition;
 
-    vector<double> _angles;
-    double _angle_step{};
+    using az_angle_t = double;
+    using az_range_t = long;
 
-    az_value_map_t _raw_values;
-    az_value_map_t _filtered_values;
-    bool use_filtered = false;
+    using az_value_map_t = map<az_angle_t, vector<rcs_value_t>>;
 
-    az_value_map_t reconstruct_value_table(const vector<double>& raw_values);
+    class AzimuthRcsDataSet : public AbstractDataSet {
+    private:
+        ObserverPosition _position{};
+        vector<az_range_t> _ranges;
+        az_range_t _range_step{};
 
-    void determine_step_sizes();
+        vector<az_angle_t> _angles;
+        az_angle_t _angle_step{};
 
-    void filter_peaks();
-public:
-    AzimuthRcsDataSet(const path& filename,
-                      const ObserverPosition& position);
+        az_value_map_t _raw_values;
+        az_value_map_t _filtered_values;
+        bool use_filtered = false;
 
-    ~AzimuthRcsDataSet() = default;
+        az_value_map_t reconstruct_value_table(const vector<double>& raw_values);
 
-    [[nodiscard]] double map_to_nearest(const observed_point& point) const override;
+        void determine_step_sizes();
 
-    void use_filtered_peaks();
-};
+        void filter_peaks();
+
+    public:
+        AzimuthRcsDataSet(const path& filename,
+                          const ObserverPosition& position);
+
+        ~AzimuthRcsDataSet() = default;
+
+        [[nodiscard]] rcs_value_t map_to_nearest(const observed_point& point) const override;
+
+        void use_filtered_peaks();
+    };
+}
 
 #endif //RCSOP_DATA_AZ_DATA_H

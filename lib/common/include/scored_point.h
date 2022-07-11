@@ -4,45 +4,50 @@
 #include "utils/types.h"
 #include "utils/points.h"
 
-struct ScoreRange {
-    double min;
-    double max;
-};
+namespace rcsop::common {
+    using rcsop::common::utils::points::point_id_t;
+    using rcsop::common::utils::points::Vector3d;
 
-class ScoredPoint {
+    struct ScoreRange {
+        double min;
+        double max;
+    };
 
-private:
-    point_id_t _point_id = -1;
-    Vector3d _position = Vector3d::Zero();
-    double _score = 0;
+    class ScoredPoint {
 
-public:
-    ScoredPoint() = default;
+    private:
+        point_id_t _point_id = -1;
+        Vector3d _position = Vector3d::Zero();
+        double _score = 0;
 
-    ScoredPoint(Vector3d position, point_id_t id, double score = 0);
+    public:
+        ScoredPoint() = default;
 
-    ScoredPoint(const ScoredPoint& other) : ScoredPoint(other.position(), other.id(), other.score()) {}
+        ScoredPoint(Vector3d position, point_id_t id, double score = 0);
 
-    ScoredPoint& operator=(const ScoredPoint& other) {
-        if (this == &other)
+        ScoredPoint(const ScoredPoint& other) : ScoredPoint(other.position(), other.id(), other.score()) {}
+
+        ScoredPoint& operator=(const ScoredPoint& other) {
+            if (this == &other)
+                return *this;
+            this->_point_id = other.id();
+            this->_position = other.position();
+            this->_score = other.score();
             return *this;
-        this->_point_id = other.id();
-        this->_position = other.position();
-        this->_score = other.score();
-        return *this;
-    }
+        }
 
-    [[nodiscard]] Vector3d position() const;
+        [[nodiscard]] Vector3d position() const;
 
-    [[nodiscard]] double score() const;
+        [[nodiscard]] double score() const;
 
-    [[nodiscard]] point_id_t id() const;
+        [[nodiscard]] point_id_t id() const;
 
-    [[nodiscard]] double score_to_dB() const;
+        [[nodiscard]] double score_to_dB() const;
 
-    static ScoreRange get_score_range(const vector<ScoredPoint>& points);
+        static ScoreRange get_score_range(const vector<ScoredPoint>& points);
 
-    virtual ~ScoredPoint() = default;
-};
+        virtual ~ScoredPoint() = default;
+    };
+}
 
 #endif //RCSOP_COMMON_SCORED_POINT_H

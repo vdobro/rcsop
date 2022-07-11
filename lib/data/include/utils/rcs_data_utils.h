@@ -13,98 +13,109 @@
 #include "input_image.h"
 #include "texture.h"
 
-using std::filesystem::recursive_directory_iterator;
-using std::regex;
-using std::smatch;
+namespace rcsop::data::utils {
+    using std::filesystem::recursive_directory_iterator;
+    using std::regex;
+    using std::smatch;
 
-struct mat_path_with_azimuth {
-    path file_path;
-    azimuth_t azimuth;
-};
+    using rcsop::common::height_t;
+    using rcsop::common::azimuth_t;
 
-struct height_data_folder {
-    path folder_path;
-    height_t height;
-};
+    using rcsop::common::ObserverPosition;
 
-vector<mat_path_with_azimuth> find_mat_files_in_folder(const path& folder_for_height,
-                                                       const regex& data_file_regex);
+    using rcsop::common::utils::time::start_time;
+    using rcsop::common::utils::time::log_and_start_next;
 
-vector<height_data_folder> parse_available_heights(const path& data_path);
+    struct mat_path_with_azimuth {
+        path file_path;
+        azimuth_t azimuth;
+    };
 
-enum AzimuthInput {
-    RCS_MAT = 0,
-    MINIMAP = 1,
-};
+    struct height_data_folder {
+        path folder_path;
+        height_t height;
+    };
 
-static const char* azimuthInputTypeDescriptions[2] = {
-        "azimuth-specific RCS .mat data",
-        "RCS preview minimap",
-};
+    vector<mat_path_with_azimuth> find_mat_files_in_folder(
+            const path& folder_for_height,
+            const regex& data_file_regex);
 
-template<AzimuthInput T>
-struct AzimuthAssetTrait {
-};
+    vector<height_data_folder> parse_available_heights(const path& data_path);
 
-template<>
-struct AzimuthAssetTrait<RCS_MAT> {
-    using type = AzimuthRcsDataSet;
-};
+    enum AzimuthInput {
+        RCS_MAT = 0,
+        MINIMAP = 1,
+    };
 
-template<>
-struct AzimuthAssetTrait<MINIMAP> {
-    using type = Texture;
-};
+    static const char* azimuthInputTypeDescriptions[2] = {
+            "azimuth-specific RCS .mat data",
+            "RCS preview minimap",
+    };
 
-template<AzimuthInput T>
-using AzimuthInputType = typename AzimuthAssetTrait<T>::type;
+    template<AzimuthInput T>
+    struct AzimuthAssetTrait {
+    };
 
-template<AzimuthInput T>
-map<azimuth_t, AzimuthInputType<T>> map_azimuth_angles_to_data(
-        const height_data_folder& height_folder,
-        const regex& data_file_regex) {
-    using AT = AzimuthInputType<T>;
+    template<>
+    struct AzimuthAssetTrait<RCS_MAT> {
+        using type = AzimuthRcsDataSet;
+    };
 
-    const height_t height = height_folder.height;
+    template<>
+    struct AzimuthAssetTrait<MINIMAP> {
+        using type = rcsop::common::Texture;
+    };
 
-    map<azimuth_t, AT> azimuth_to_data;
+    template<AzimuthInput T>
+    using AzimuthInputType = typename AzimuthAssetTrait<T>::type;
 
-    auto file_paths = find_mat_files_in_folder(height_folder.folder_path, data_file_regex);
-    std::mutex map_mutex;
-    std::for_each(std::execution::par_unseq,
-                  begin(file_paths), end(file_paths),
-                  [&map_mutex, &azimuth_to_data, &height]
-                          (const auto& mat_file_entry) {
-                      auto data = AT(
-                              mat_file_entry.file_path,
-                              ObserverPosition{
-                                      .height = height,
-                                      .azimuth = mat_file_entry.azimuth,
-                              });
+    template<AzimuthInput T>
+    map<azimuth_t, AzimuthInputType<T>> map_azimuth_angles_to_data(
+            const height_data_folder& height_folder,
+            const regex& data_file_regex) {
+        using AT = AzimuthInputType<T>;
 
-                      const std::lock_guard<std::mutex> lock(map_mutex);
-                      azimuth_to_data.insert(make_pair(mat_file_entry.azimuth, data));
-                  });
-    return azimuth_to_data;
-}
+        const height_t height = height_folder.height;
 
-template<AzimuthInput T>
-map<height_t, map<azimuth_t, AzimuthInputType<T>>> collect_all_heights(
-        const path& data_path,
-        const regex& data_filename_pattern) {
-    using AT = AzimuthInputType<T>;
-    using azimuth_map_t = map<azimuth_t, AT>;
-    using result_map_t = map<height_t, azimuth_map_t>;
+        map<azimuth_t, AT> azimuth_to_data;
 
-    auto start = start_time();
-    auto heights = parse_available_heights(data_path);
-    result_map_t result;
-    for (auto height_folder: heights) {
-        azimuth_map_t angle_mapping = map_azimuth_angles_to_data<T>(height_folder, data_filename_pattern);
-        result.insert(make_pair(height_folder.height, angle_mapping));
+        auto file_paths = find_mat_files_in_folder(height_folder.folder_path, data_file_regex);
+        std::mutex map_mutex;
+        std::for_each(std::execution::par_unseq,
+                      begin(file_paths), end(file_paths),
+                      [&map_mutex, &azimuth_to_data, &height]
+                              (const auto& mat_file_entry) {
+                          auto data = AT(
+                                  mat_file_entry.file_path,
+                                  ObserverPosition{
+                                          .height = height,
+                                          .azimuth = mat_file_entry.azimuth,
+                                  });
+
+                          const std::lock_guard<std::mutex> lock(map_mutex);
+                          azimuth_to_data.insert(make_pair(mat_file_entry.azimuth, data));
+                      });
+        return azimuth_to_data;
     }
-    log_and_start_next(start, "Reading " + string(azimuthInputTypeDescriptions[T]) + " finished");
-    return result;
+
+    template<AzimuthInput T>
+    map<height_t, map<azimuth_t, AzimuthInputType<T>>> collect_all_heights(
+            const path& data_path,
+            const regex& data_filename_pattern) {
+        using AT = AzimuthInputType<T>;
+        using azimuth_map_t = map<azimuth_t, AT>;
+        using result_map_t = map<height_t, azimuth_map_t>;
+
+        auto start = start_time();
+        auto heights = parse_available_heights(data_path);
+        result_map_t result;
+        for (auto height_folder: heights) {
+            azimuth_map_t angle_mapping = map_azimuth_angles_to_data<T>(height_folder, data_filename_pattern);
+            result.insert(make_pair(height_folder.height, angle_mapping));
+        }
+        log_and_start_next(start, "Reading " + string(azimuthInputTypeDescriptions[T]) + " finished");
+        return result;
+    }
 }
 
 #endif //RCSOP_RCS_DATA_UTILS_H

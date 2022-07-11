@@ -10,21 +10,16 @@
 #include "colors.h"
 
 namespace rcsop::launcher::utils {
+    using rcsop::common::ScoredCloud;
+    using rcsop::common::observed_point;
+    using rcsop::data::AbstractDataCollection;
+    using rcsop::rendering::coloring::global_colormap_func;
 
     struct scored_cloud_payload {
         vector<ScoredCloud> point_clouds;
-        rcsop::rendering::coloring::global_colormap_func colormap;
+        global_colormap_func colormap;
 
-        [[nodiscard]] vector<height_t> observer_heights() const {
-            std::set<height_t> heights;
-            for (auto cloud: point_clouds) {
-                if (cloud.observer().has_position())
-                    heights.insert(cloud.observer().position().height);
-            }
-            vector<height_t> result;
-            std::copy(heights.begin(), heights.end(), std::back_inserter(result));
-            return result;
-        }
+        [[nodiscard]] vector<height_t> observer_heights() const;
     };
 
     using observed_factor_func = function<double(const observed_point&)>;
@@ -35,8 +30,9 @@ namespace rcsop::launcher::utils {
             const InputDataCollector& inputs,
             const AbstractDataCollection& data,
             const task_options& task_options,
-            const rcsop::rendering::coloring::global_colormap_func& colormap_func,
+            const global_colormap_func& colormap_func,
             const observed_factor_func& factor_func = &identity_factor);
 
 }
+
 #endif //RCSOP_LAUNCHER_POINT_SCORING_H

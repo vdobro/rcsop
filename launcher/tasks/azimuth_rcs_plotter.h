@@ -4,9 +4,11 @@
 #include "utils/task_utils.h"
 
 namespace rcsop::launcher::tasks {
+    using rcsop::data::InputDataCollector;
+    using rcsop::launcher::utils::task_options;
 
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
-                             const rcsop::launcher::utils::task_options& options);
+                             const task_options& options);
 
 }
 #endif //RCSOP_LAUNCHER_AZIMUTH_RCS_PLOTTER_H

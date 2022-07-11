@@ -2,12 +2,15 @@
 #define RCSOP_RENDERING_COLORS_H
 
 #include "utils/types.h"
-#include "utils/colmap.h"
+#include "utils/sparse.h"
 #include "utils/mapping.h"
 
 #include "scored_point.h"
 
 namespace rcsop::rendering::coloring {
+    using rcsop::common::utils::sparse::Vector3ub;
+    using rcsop::common::ScoreRange;
+
     using local_colormap_func = function<Vector3ub(double v, double vmin, double vmax)>;
     using global_colormap_func = function<Vector3ub(double v)>;
 

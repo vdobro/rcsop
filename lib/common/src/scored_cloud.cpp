@@ -2,15 +2,17 @@
 
 #include <utility>
 
-ScoredCloud::ScoredCloud(Observer observer,
-                         shared_ptr<vector<ScoredPoint>> points) :
-        _observer(std::move(observer)),
-        _points(std::move(points)) {}
+namespace rcsop::common {
+    ScoredCloud::ScoredCloud(Observer observer,
+                             shared_ptr<vector<ScoredPoint>> points) :
+            _observer(std::move(observer)),
+            _points(std::move(points)) {}
 
-const Observer& ScoredCloud::observer() const {
-    return _observer;
-}
+    const Observer& ScoredCloud::observer() const {
+        return _observer;
+    }
 
-shared_ptr<vector<ScoredPoint>> ScoredCloud::points() const {
-    return this->_points;
+    shared_ptr<vector<ScoredPoint>> ScoredCloud::points() const {
+        return this->_points;
+    }
 }

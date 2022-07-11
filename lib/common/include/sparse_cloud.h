@@ -5,33 +5,44 @@
 
 #include "utils/types.h"
 #include "utils/points.h"
-#include "utils/colmap.h"
+#include "utils/sparse.h"
 
 #include "camera.h"
 #include "scored_point.h"
 
-class SparseCloud {
-private:
-    path model_path;
-    shared_ptr<Reconstruction> reconstruction;
+namespace rcsop::common {
+    using rcsop::common::utils::sparse::Reconstruction;
+    using rcsop::common::utils::sparse::Vector3ub;
+    using rcsop::common::utils::points::point_pair;
 
-    vector<camera> cameras;
-    map<camera_id_t, camera> camera_map;
+    class SparseCloud {
+    private:
+        path model_path;
+        shared_ptr<Reconstruction> reconstruction;
 
-public:
-    explicit SparseCloud(const path& model_path);
+        vector<camera> cameras;
+        map<camera_id_t, camera> camera_map;
 
-    [[nodiscard]] vector<camera> get_cameras() const;
+    public:
+        explicit SparseCloud(const path& model_path);
 
-    [[nodiscard]] vector<point_pair> get_point_pairs() const;
-    [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_scored_points() const;
+        [[nodiscard]] vector<camera> get_cameras() const;
 
-    void reload();
-    void save(const path& output_path);
+        [[nodiscard]] vector<point_pair> get_point_pairs() const;
 
-    void filter_points(const function<bool(const Vector3d&)>& predicate_to_keep);
-    void add_point(const Vector3d& point, const Vector3ub& color);
-    void set_point_color(point_id_t point_id, const Vector3ub& color);
-};
+        [[nodiscard]] shared_ptr<vector<ScoredPoint>> get_scored_points() const;
+
+        void reload();
+
+        void save(const path& output_path);
+
+        void filter_points(const function<bool(const Vector3d&)>& predicate_to_keep);
+
+        void add_point(const Vector3d& point, const Vector3ub& color);
+
+        void set_point_color(point_id_t point_id, const Vector3ub& color);
+    };
+
+}
 
 #endif //RCSOP_COMMON_SPARSE_CLOUD_H

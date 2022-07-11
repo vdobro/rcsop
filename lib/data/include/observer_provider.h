@@ -6,20 +6,25 @@
 #include "input_data_collector.h"
 #include "observer.h"
 
-class ObserverProvider {
-private:
-    vector<Observer> _positioned_observers;
-    vector<Observer> _auxiliary_observers;
-    double _units_per_centimeter;
+namespace rcsop::data {
+    using rcsop::common::camera_options;
 
-public:
-    explicit ObserverProvider(const InputDataCollector& input,
-                              const camera_options& camera_options);
+    class ObserverProvider {
+    private:
+        vector<Observer> _positioned_observers;
+        vector<Observer> _auxiliary_observers;
+        double _units_per_centimeter;
 
-    [[nodiscard]] vector<Observer> observers_with_positions() const;
-    [[nodiscard]] vector<Observer> all_observers() const;
+    public:
+        explicit ObserverProvider(const InputDataCollector& input,
+                                  const camera_options& camera_options);
 
-    [[nodiscard]] double get_units_per_centimeter() const;
-};
+        [[nodiscard]] vector<Observer> observers_with_positions() const;
+
+        [[nodiscard]] vector<Observer> all_observers() const;
+
+        [[nodiscard]] double get_units_per_centimeter() const;
+    };
+}
 
 #endif //RCSOP_DATA_CAMERA_PROVIDER_H

@@ -9,38 +9,43 @@
 #include "image_point.h"
 #include "scored_point.h"
 
-typedef size_t camera_id_t;
+namespace rcsop::common {
+    using camera_id_t = size_t;
 
-class camera {
-private:
-    colmap::Camera model_camera;
-    colmap::Image model_image;
+    using rcsop::common::utils::points::Vector2d;
+    using rcsop::common::utils::points::Vector3d;
 
-public:
-    camera(const colmap::Image& image,
-           const colmap::Reconstruction& model);
+    class camera {
+    private:
+        colmap::Camera model_camera;
+        colmap::Image model_image;
 
-    [[nodiscard]] camera_id_t id() const;
+    public:
+        camera(const colmap::Image& image,
+               const colmap::Reconstruction& model);
 
-    /**
-     * Converts point from camera coordinate system to world coordinates
-     * @param local_coordinates xyz in the local coordinate system of this camera
-     */
-    [[nodiscard]] Vector3d transform_to_world(const Vector3d& local_coordinates) const;
+        [[nodiscard]] camera_id_t id() const;
 
-    [[nodiscard]] Vector3d position() const;
+        /**
+         * Converts point from camera coordinate system to world coordinates
+         * @param local_coordinates xyz in the local coordinate system of this camera
+         */
+        [[nodiscard]] Vector3d transform_to_world(const Vector3d& local_coordinates) const;
 
-    [[nodiscard]] Vector3d direction() const;
+        [[nodiscard]] Vector3d position() const;
 
-    [[nodiscard]] Vector2d project_from_image(const Vector2d& point) const;
+        [[nodiscard]] Vector3d direction() const;
 
-    [[nodiscard]] size_t image_width() const;
+        [[nodiscard]] Vector2d project_from_image(const Vector2d& point) const;
 
-    [[nodiscard]] size_t image_height() const;
+        [[nodiscard]] size_t image_width() const;
 
-    [[nodiscard]] string get_name() const;
+        [[nodiscard]] size_t image_height() const;
 
-    [[nodiscard]] vector<ImagePoint> project_to_image(const vector<ScoredPoint>& points) const;
-};
+        [[nodiscard]] string get_name() const;
+
+        [[nodiscard]] vector<ImagePoint> project_to_image(const vector<ScoredPoint>& points) const;
+    };
+}
 
 #endif //RCSOP_COMMON_CAMERA_H

@@ -3,13 +3,15 @@
 
 #include <chrono>
 #include <string>
-using std::string;
 
-typedef std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<double>> timer_seconds;
-timer_seconds start_time();
+namespace rcsop::common::utils::time {
+    using std::string;
+    using timer_seconds = std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<double>>;
 
-double get_time_seconds(timer_seconds timer);
+    timer_seconds start_time();
 
-timer_seconds log_and_start_next(timer_seconds last_timer, const string& message);
+    double get_time_seconds(timer_seconds timer);
 
+    timer_seconds log_and_start_next(timer_seconds last_timer, const string& message);
+}
 #endif //RCSOP_COMMON_CHRONOMETER_H
