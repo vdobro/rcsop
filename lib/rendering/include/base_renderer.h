@@ -9,13 +9,13 @@
 
 namespace rcsop::rendering {
     using rcsop::common::utils::points::Vector2d;
-    using rcsop::common::utils::sparse::Vector3ub;
+    using rcsop::common::utils::sparse::color_vec;
     using rcsop::common::Observer;
     using rcsop::common::Texture;
 
     struct rendered_point {
         Vector2d coordinates = Vector2d::Zero();
-        Vector3ub color = Vector3ub::Zero();
+        color_vec color = color_vec::Zero();
     };
 
     struct texture_rendering_options {

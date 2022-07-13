@@ -82,11 +82,15 @@ namespace rcsop::common {
         }
     }
 
-    void SparseCloud::add_point(const Vector3d& point, const Vector3ub& color) {
-        reconstruction->AddPoint3D(point, colmap::Track(), color);
+    static Eigen::Vector3ub convert_color(const color_vec& color) {
+        return color.head(3);
     }
 
-    void SparseCloud::set_point_color(point_id_t point_id, const Vector3ub& color) {
-        reconstruction->Point3D(point_id).Color() = color;
+    void SparseCloud::add_point(const Vector3d& point, const color_vec& color) {
+        reconstruction->AddPoint3D(point, colmap::Track(), convert_color(color));
+    }
+
+    void SparseCloud::set_point_color(point_id_t point_id, const color_vec& color) {
+        reconstruction->Point3D(point_id).Color() = convert_color(color);
     }
 }

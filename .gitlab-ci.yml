@@ -28,11 +28,30 @@ Fetch sample input data:
     paths:
       - input/
 
-Test task "Azimuth RCS":
+Test task "aRCS - jet 0.3":
   stage: test
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter -T "azimuth-rcs" --software-rendering -I input -O output --pitch-correction -2.0 --default-height 40
+    - ./build/launcher/rcs-overlay-plotter --pitch-correction -2.0 --default-height 40 --color-map jet --alpha 0.3 -T "azimuth-rcs" --software-rendering -I input -O output
+  cache:
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+    - key: "$CI_PIPELINE_ID-input"
+      paths:
+        - input/
+      policy: pull
+  artifacts:
+    paths:
+      - output
+    expire_in: never
+
+Test task "aRCS - red 0.6":
+  stage: test
+  script:
+    - mkdir output
+    - ./build/launcher/rcs-overlay-plotter --pitch-correction -2.0 --default-height 40 --color-map jet --alpha 0.6 -T "azimuth-rcs" --software-rendering -I input -O output
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:

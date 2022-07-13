@@ -16,11 +16,13 @@ namespace rcsop::rendering {
     using rcsop::common::Texture;
     using rcsop::common::height_t;
 
+    using rcsop::rendering::coloring::global_colormap_func;
+
     class ObserverRenderer {
     private:
         Observer _observer;
         shared_ptr<vector<ScoredPoint>> _points;
-        rcsop::rendering::coloring::global_colormap_func _color_map;
+        global_colormap_func _color_map;
 
         shared_ptr<BaseRenderer> _renderer = nullptr;
 
@@ -30,7 +32,7 @@ namespace rcsop::rendering {
 
     public:
         explicit ObserverRenderer(const ScoredCloud& pointsWithObserver,
-                                  const rcsop::rendering::coloring::global_colormap_func& color_map,
+                                  const global_colormap_func& color_map,
                                   const rendering_options& options);
 
         bool observer_has_position() const;

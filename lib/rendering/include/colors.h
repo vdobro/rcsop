@@ -8,17 +8,19 @@
 #include "scored_point.h"
 
 namespace rcsop::rendering::coloring {
-    using rcsop::common::utils::sparse::Vector3ub;
+    using rcsop::common::utils::sparse::color_vec;
     using rcsop::common::ScoreRange;
 
-    using local_colormap_func = function<Vector3ub(double v, double vmin, double vmax)>;
-    using global_colormap_func = function<Vector3ub(double v)>;
+    using local_colormap_func = function<color_vec(double v, double vmin, double vmax)>;
+    using global_colormap_func = function<color_vec(double v)>;
 
-    Vector3ub map_turbo(double v, double vmin, double vmax);
+    color_vec map_turbo(double v, double vmin, double vmax);
 
-    Vector3ub map_jet(double v, double vmin, double vmax);
+    color_vec map_jet(double v, double vmin, double vmax);
 
-    Vector3ub map_red(double v, double vmin, double vmax);
+    color_vec map_red(double v, double vmin, double vmax);
+
+    local_colormap_func resolve_map_by_name(const string& name);
 
     global_colormap_func construct_colormap_function(
             const local_colormap_func& colormap,
@@ -33,7 +35,7 @@ namespace rcsop::rendering::coloring {
             const local_colormap_func& colormap,
             const vector<double>& values);
 
-    vector<Vector3ub> color_values(const vector<double>& value,
+    vector<color_vec> color_values(const vector<double>& value,
                                    const local_colormap_func& colormap);
 
 }

@@ -4,6 +4,8 @@
 #include "colors.h"
 
 namespace rcsop::rendering {
+    using rcsop::rendering::coloring::local_colormap_func;
+
     struct gradient_options {
         float radius;
         float center_alpha;
@@ -11,8 +13,8 @@ namespace rcsop::rendering {
 
     struct rendering_options {
         bool use_gpu_rendering;
-        rcsop::rendering::coloring::local_colormap_func color_map;
-        rcsop::rendering::gradient_options gradient;
+        local_colormap_func color_map;
+        gradient_options gradient;
     };
 }
 

@@ -10,7 +10,7 @@ namespace rcsop::common::utils::sparse {
     using colmap::Point3D;
     using colmap::Camera;
 
-    using Eigen::Vector3ub;
+    using color_vec = Eigen::Vector4ub;
 }
 
 #endif //RCSOP_COMMON_COLMAP_H

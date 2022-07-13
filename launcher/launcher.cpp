@@ -42,6 +42,8 @@ namespace rcsop::launcher {
     const char* PARAM_CAMERA_DISTANCE = "camera-distance";
     const char* PARAM_PITCH_CORRECTION = "pitch-correction";
     const char* PARAM_DEFAULT_HEIGHT = "default-height";
+    const char* PARAM_COLOR_MAP = "color-map";
+    const char* PARAM_ALPHA = "alpha";
 
     const static char* DEFAULT_TASK = "azimuth-rcs";
     const static map<string, rcsop::launcher::utils::launcher_task> available_tasks = {
@@ -61,11 +63,9 @@ namespace rcsop::launcher {
         return ss.str();
     }
 
-    static void validate_options(const path& input_path,
-                                 const path& output_path,
-                                 const string& task,
-                                 const double camera_distance,
-                                 const height_t default_height) {
+    static void validate_options(const path& input_path, const path& output_path,
+                                 const string& task, const double camera_distance,
+                                 const height_t default_height, const float alpha) {
         if (!available_tasks.contains(task)) {
             cerr << "Could not find task '" << task << "', consult documentation for available options" << endl;
             exit(EXIT_FAILURE);
@@ -84,6 +84,10 @@ namespace rcsop::launcher {
         }
         if (default_height <= 0) {
             cerr << "Default camera height must be non-negative" << endl;
+            exit(EXIT_FAILURE);
+        }
+        if (alpha > 1. || alpha <= 0.) {
+            cerr << "Alpha must be in range (0, 1]" << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -106,7 +110,12 @@ namespace rcsop::launcher {
                 (PARAM_PITCH_CORRECTION, po::value<double>()->default_value(DEFAULT_CAMERA_PITCH_CORRECTION),
                  "camera pitch correction")
                 (PARAM_DEFAULT_HEIGHT, po::value<height_t>()->default_value(DEFAULT_HEIGHT),
-                 "default camera height, used if not specified in point cloud data or source image names");
+                 "default camera height, used if not specified in point cloud data or source image names")
+                (PARAM_COLOR_MAP, po::value<string>()->default_value(DEFAULT_COLOR_MAP),
+                 "default color map to use")
+                (PARAM_ALPHA, po::value<float>()->default_value(0.3),
+                 "base alpha value/factor to apply and full color intensity");
+
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
@@ -120,7 +129,13 @@ namespace rcsop::launcher {
         const string task{vm.at(PARAM_TASK).as<string>()};
         const double camera_distance{vm.at(PARAM_CAMERA_DISTANCE).as<double>()};
         const height_t default_camera_height{vm.at(PARAM_DEFAULT_HEIGHT).as<height_t>()};
-        validate_options(input_path, output_path, task, camera_distance, default_camera_height);
+        const float base_alpha = vm.at(PARAM_ALPHA).as<float>();
+        validate_options(input_path,
+                         output_path,
+                         task,
+                         camera_distance,
+                         default_camera_height,
+                         base_alpha);
 
         const double pitch_correction{vm.at(PARAM_PITCH_CORRECTION).as<double>()};
 
@@ -140,6 +155,8 @@ namespace rcsop::launcher {
         }
         create_directories(task_output_path);
 
+        auto color_map = rcsop::rendering::coloring::resolve_map_by_name(vm.at(PARAM_COLOR_MAP).as<string>());
+
         const task_options options{
                 .input_path = input_path,
                 .output_path = task_output_path,
@@ -154,10 +171,10 @@ namespace rcsop::launcher {
                 },
                 .rendering = {
                         .use_gpu_rendering = !use_software_rendering,
-                        .color_map = COLOR_MAP,
+                        .color_map = color_map,
                         .gradient = {
                                 .radius = 25.f,
-                                .center_alpha = 0.3f,
+                                .center_alpha = base_alpha,
                         },
                 },
         };

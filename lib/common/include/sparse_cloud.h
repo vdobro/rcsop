@@ -12,7 +12,7 @@
 
 namespace rcsop::common {
     using rcsop::common::utils::sparse::Reconstruction;
-    using rcsop::common::utils::sparse::Vector3ub;
+    using rcsop::common::utils::sparse::color_vec;
     using rcsop::common::utils::points::point_pair;
 
     class SparseCloud {
@@ -38,9 +38,9 @@ namespace rcsop::common {
 
         void filter_points(const function<bool(const Vector3d&)>& predicate_to_keep);
 
-        void add_point(const Vector3d& point, const Vector3ub& color);
+        void add_point(const Vector3d& point, const color_vec& color);
 
-        void set_point_color(point_id_t point_id, const Vector3ub& color);
+        void set_point_color(point_id_t point_id, const color_vec& color);
     };
 
 }

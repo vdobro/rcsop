@@ -18,11 +18,12 @@ namespace rcsop::rendering {
                 y = coordinates.y();
         const double r = static_cast<double>(point.color.x()) / RGB,
                 g = static_cast<double>(point.color.y()) / RGB,
-                b = static_cast<double>(point.color.z()) / RGB;
+                b = static_cast<double>(point.color.z()) / RGB,
+                a = static_cast<double>(point.color.w()) / RGB;
 
         const auto& radius = _options.radius;
         auto radial_pattern = Cairo::RadialGradient::create(x, y, 0, x, y, radius);
-        radial_pattern->add_color_stop_rgba(0, r, g, b, _options.center_alpha);
+        radial_pattern->add_color_stop_rgba(0, r, g, b, a * _options.center_alpha);
         radial_pattern->add_color_stop_rgba(1, r, g, b, 0);
 
         _cairo_context->save();
@@ -40,7 +41,8 @@ namespace rcsop::rendering {
 
         _cairo_context->save();
         _cairo_context->translate(coordinates.x(), coordinates.y());
-        _cairo_context->scale(size.x() / texture_surface->get_width(), size.y() / texture_surface->get_height());
+        _cairo_context->scale(size.x() / texture_surface->get_width(),
+                              size.y() / texture_surface->get_height());
         _cairo_context->set_source(texture_surface, 0, 0);
         _cairo_context->rectangle(0, 0, size.x(), size.y());
         _cairo_context->paint();

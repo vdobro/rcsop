@@ -15,7 +15,6 @@ namespace rcsop::rendering {
     using rcsop::common::ImagePoint;
 
     using rcsop::rendering::rendered_point;
-    using rcsop::rendering::coloring::global_colormap_func;
 
     static vector<rendered_point> project_in_camera_with_color(
             const vector<ImagePoint>& points,
