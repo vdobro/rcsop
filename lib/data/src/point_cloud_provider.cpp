@@ -74,7 +74,7 @@ namespace rcsop::data {
         const double step_size_meters = 1. / static_cast<double>(points_per_meter);
         const double step_size = step_size_meters * units_per_meter;
 
-        const Vector3d middle_point = Vector3d::Zero();
+        const vec3 middle_point = vec3::Zero();
         const double radius_limit = _distance_to_origin * _units_per_centimeter;
         const double begin_x = std::max(middle_point.x() - radius_limit, bound.xmin());
         const double begin_y = std::max(middle_point.y() - radius_limit, bound.ymin());
@@ -110,7 +110,7 @@ namespace rcsop::data {
             while (y < end_y) {
                 auto z = begin_z;
                 while (z < end_z) {
-                    const Vector3d point_vector(x + dist(e2), y + dist(e2), z + dist(e2));
+                    const vec3 point_vector(x + dist(e2), y + dist(e2), z + dist(e2));
                     const double distance_from_origin = (middle_point - point_vector).norm();
                     if (distance_from_origin <= distance_threshold) {
                         result->emplace_back(point_vector, index, 0);

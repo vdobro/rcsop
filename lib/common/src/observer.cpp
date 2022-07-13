@@ -18,22 +18,22 @@ namespace rcsop::common {
               _source_filepath(std::move(filepath)),
               _camera(std::move(source_camera)) {
         const double pitch_correction_radians = (options.pitch_correction * M_PI) / 180.;
-        this->_correction_transform = Eigen::AngleAxis<double>(pitch_correction_radians, Vector3d::UnitX());
+        this->_correction_transform = Eigen::AngleAxis<double>(pitch_correction_radians, vec3::UnitX());
     }
 
-    Vector3d Observer::get_right() const {
-        Vector3d camera_right;
+    vec3 Observer::get_right() const {
+        vec3 camera_right;
         camera_right.setZero();
         camera_right.x() = 1;
-        Vector3d direction = _camera.transform_to_world(camera_right) - _camera.position();
+        vec3 direction = _camera.transform_to_world(camera_right) - _camera.position();
         return direction.normalized();
     }
 
-    Vector3d Observer::get_up() const {
-        Vector3d camera_up;
+    vec3 Observer::get_up() const {
+        vec3 camera_up;
         camera_up.setZero();
         camera_up.y() = -1;
-        Vector3d direction =
+        vec3 direction =
                 _camera.transform_to_world(camera_up.transpose() * this->_correction_transform.rotation()) -
                 _camera.position();
         return direction.normalized();
@@ -53,14 +53,14 @@ namespace rcsop::common {
 
     static inline observed_point observe_point(
             const ScoredPoint& point,
-            const Vector3d& observer_position,
-            const Vector3d& direction_right,
-            const Vector3d& direction_up,
+            const vec3& observer_position,
+            const vec3& direction_right,
+            const vec3& direction_up,
             const plane& vertical_plane,
             const plane& horizontal_plane,
             const double& units_per_centimeter) {
 
-        const Vector3d point_position = point.position();
+        const vec3 point_position = point.position();
 
         auto distance_to_vertical_plane = vertical_plane.absDistance(point_position);
         auto distance_to_horizontal_plane = horizontal_plane.absDistance(point_position);

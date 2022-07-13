@@ -4,7 +4,7 @@
 #include "utils/points.h"
 
 namespace rcsop::data {
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec3;
     using rcsop::common::utils::map_vec;
     using rcsop::common::camera;
 
@@ -22,7 +22,7 @@ namespace rcsop::data {
     static double calculate_units_per_centimeter(double camera_distance_to_origin,
                                                  const vector<camera>& cameras) {
         auto positioned_cameras = filter_with_positions(cameras);
-        auto observer_positions = map_vec<camera, Vector3d, true>(positioned_cameras, [](const auto& camera) {
+        auto observer_positions = map_vec<camera, vec3, true>(positioned_cameras, [](const auto& camera) {
             return camera.position();
         });
 

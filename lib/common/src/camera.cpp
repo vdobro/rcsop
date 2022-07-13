@@ -7,25 +7,25 @@ namespace rcsop::common {
 
     using rcsop::common::utils::sparse::Image;
     using rcsop::common::utils::sparse::Reconstruction;
-    using rcsop::common::utils::points::Vector2d;
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec2;
+    using rcsop::common::utils::points::vec3;
 
     camera::camera(const Image& image, const Reconstruction& model) {
         this->model_image = image;
         this->model_camera = model.Camera(image.CameraId());
     }
 
-    Vector3d camera::transform_to_world(const Vector3d& local_coordinates) const {
+    vec3 camera::transform_to_world(const vec3& local_coordinates) const {
         return model_image.InverseProjectionMatrix() * local_coordinates.homogeneous();
     }
 
-    Vector3d camera::position() const {
-        Vector3d origin = Vector3d();
+    vec3 camera::position() const {
+        vec3 origin = vec3();
         origin.setZero();
         return transform_to_world(origin);
     }
 
-    Vector3d camera::direction() const {
+    vec3 camera::direction() const {
         return model_image.ViewingDirection();
     }
 
@@ -33,7 +33,7 @@ namespace rcsop::common {
         return model_camera.CameraId();
     }
 
-    Vector2d camera::project_from_image(const Vector2d& point) const {
+    vec2 camera::project_from_image(const vec2& point) const {
         return model_camera.WorldToImage(point);
     }
 
@@ -55,7 +55,7 @@ namespace rcsop::common {
 
         return utils::map_vec<ScoredPoint, ImagePoint>(points, [camera_position, image_projection_matrix]
                 (const ScoredPoint& point) -> ImagePoint {
-            Vector2d position_normalized = (image_projection_matrix * point.position().homogeneous()).hnormalized();
+            vec2 position_normalized = (image_projection_matrix * point.position().homogeneous()).hnormalized();
             double distance_to_camera = (camera_position - point.position()).norm();
             ImagePoint projected_point = ImagePoint(position_normalized, distance_to_camera, point.score_to_dB());
             return projected_point;

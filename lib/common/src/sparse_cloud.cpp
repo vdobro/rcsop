@@ -72,7 +72,7 @@ namespace rcsop::common {
         return result;
     }
 
-    void SparseCloud::filter_points(const std::function<bool(const Vector3d&)>& predicate_to_keep) {
+    void SparseCloud::filter_points(const std::function<bool(const vec3&)>& predicate_to_keep) {
         auto points = reconstruction->Points3D();
 
         for (const auto& [point_id, point]: points) {
@@ -86,7 +86,7 @@ namespace rcsop::common {
         return color.head(3);
     }
 
-    void SparseCloud::add_point(const Vector3d& point, const color_vec& color) {
+    void SparseCloud::add_point(const vec3& point, const color_vec& color) {
         reconstruction->AddPoint3D(point, colmap::Track(), convert_color(color));
     }
 

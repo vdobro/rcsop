@@ -8,19 +8,19 @@
 #include "observer.h"
 
 namespace rcsop::rendering {
-    using rcsop::common::utils::points::Vector2d;
+    using rcsop::common::utils::points::vec2;
     using rcsop::common::utils::sparse::color_vec;
     using rcsop::common::Observer;
     using rcsop::common::Texture;
 
     struct rendered_point {
-        Vector2d coordinates = Vector2d::Zero();
+        vec2 coordinates = vec2::Zero();
         color_vec color = color_vec::Zero();
     };
 
     struct texture_rendering_options {
-        Vector2d coordinates = Vector2d::Zero();
-        Vector2d size = Vector2d::Zero();
+        vec2 coordinates = vec2::Zero();
+        vec2 size = vec2::Zero();
     };
 
     class BaseRendererContext {

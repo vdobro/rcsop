@@ -12,7 +12,7 @@
 
 namespace rcsop::launcher::tasks {
     using rcsop::common::utils::gauss::rcs_gaussian_vertical;
-    using rcsop::common::utils::points::Vector2d;
+    using rcsop::common::utils::points::vec2;
     using rcsop::common::utils::map_vec;
 
     using rcsop::common::ScoreRange;
@@ -35,8 +35,8 @@ namespace rcsop::launcher::tasks {
             const auto color_map = construct_colormap_function(options.rendering.color_map, range);
             const auto scored_payload = score_points(inputs, *azimuth_data, options, color_map, rcs_gaussian_vertical);
             const texture_rendering_options minimap_position = {
-                    .coordinates= Vector2d(915., 420.),
-                    .size = Vector2d(400., 300.),
+                    .coordinates= vec2(915., 420.),
+                    .size = vec2(400., 300.),
             };
 
             const auto& point_clouds = scored_payload->point_clouds;

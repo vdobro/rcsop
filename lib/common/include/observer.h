@@ -11,7 +11,7 @@
 
 namespace rcsop::common {
     using std::optional;
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec3;
 
     struct camera_options {
         double pitch_correction{};
@@ -28,9 +28,9 @@ namespace rcsop::common {
         double _units_per_centimeter = 1;
         Eigen::Transform<double, 3, Eigen::Affine> _correction_transform;
 
-        [[nodiscard]] Vector3d get_right() const;
+        [[nodiscard]] vec3 get_right() const;
 
-        [[nodiscard]] Vector3d get_up() const;
+        [[nodiscard]] vec3 get_up() const;
 
     public:
         explicit Observer(optional<ObserverPosition> camera_position,

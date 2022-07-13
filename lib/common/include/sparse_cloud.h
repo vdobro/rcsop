@@ -36,9 +36,9 @@ namespace rcsop::common {
 
         void save(const path& output_path);
 
-        void filter_points(const function<bool(const Vector3d&)>& predicate_to_keep);
+        void filter_points(const function<bool(const vec3&)>& predicate_to_keep);
 
-        void add_point(const Vector3d& point, const color_vec& color);
+        void add_point(const vec3& point, const color_vec& color);
 
         void set_point_color(point_id_t point_id, const color_vec& color);
     };

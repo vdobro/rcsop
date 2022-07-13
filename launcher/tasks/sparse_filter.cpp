@@ -12,12 +12,12 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::camera_options;
 
     using rcsop::common::utils::map_vec;
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec3;
 
     using rcsop::data::ObserverProvider;
     using rcsop::data::SPARSE_CLOUD_COLMAP;
 
-    static double distance_from_origin(const Vector3d& point) {
+    static double distance_from_origin(const vec3& point) {
         return point.norm();
     }
 
@@ -29,8 +29,8 @@ namespace rcsop::launcher::tasks {
             throw std::invalid_argument("No observers found");
         }
         auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
-        auto positions = map_vec<camera, Vector3d>(cameras, &camera::position);
-        auto distances = map_vec<Vector3d, double>(positions, distance_from_origin);
+        auto positions = map_vec<camera, vec3>(cameras, &camera::position);
+        auto distances = map_vec<vec3, double>(positions, distance_from_origin);
         return *std::max_element(distances.begin(), distances.end());
     }
 
@@ -38,7 +38,7 @@ namespace rcsop::launcher::tasks {
                        const task_options& options) {
         auto distance_threshold = 1.1 * max_camera_distance(inputs, options.camera);
         shared_ptr<SparseCloud> model = inputs.data<SPARSE_CLOUD_COLMAP>(false);
-        model->filter_points([distance_threshold](const Vector3d& point) -> bool {
+        model->filter_points([distance_threshold](const vec3& point) -> bool {
             return distance_from_origin(point) <= distance_threshold;
         });
         model->save(options.output_path);

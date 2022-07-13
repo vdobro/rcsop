@@ -8,7 +8,7 @@
 
 namespace rcsop::data {
     using rcsop::common::utils::points::point_id_t;
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec3;
 
     using rcsop::common::SparseCloud;
     using rcsop::common::ScoredPoint;
@@ -22,7 +22,7 @@ namespace rcsop::data {
         point_id_t max_sparse_point_id = 0;
 
         shared_ptr<DenseCloud> dense_mesh = nullptr;
-        shared_ptr<vector<Vector3d>> dense_cloud_points = make_shared<vector<Vector3d>>();
+        shared_ptr<vector<vec3>> dense_cloud_points = make_shared<vector<vec3>>();
 
         double _distance_to_origin = 1.;
         double _units_per_centimeter = 1.;

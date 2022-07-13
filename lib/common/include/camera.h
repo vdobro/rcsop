@@ -12,8 +12,8 @@
 namespace rcsop::common {
     using camera_id_t = size_t;
 
-    using rcsop::common::utils::points::Vector2d;
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec2;
+    using rcsop::common::utils::points::vec3;
 
     class camera {
     private:
@@ -30,13 +30,13 @@ namespace rcsop::common {
          * Converts point from camera coordinate system to world coordinates
          * @param local_coordinates xyz in the local coordinate system of this camera
          */
-        [[nodiscard]] Vector3d transform_to_world(const Vector3d& local_coordinates) const;
+        [[nodiscard]] vec3 transform_to_world(const vec3& local_coordinates) const;
 
-        [[nodiscard]] Vector3d position() const;
+        [[nodiscard]] vec3 position() const;
 
-        [[nodiscard]] Vector3d direction() const;
+        [[nodiscard]] vec3 direction() const;
 
-        [[nodiscard]] Vector2d project_from_image(const Vector2d& point) const;
+        [[nodiscard]] vec2 project_from_image(const vec2& point) const;
 
         [[nodiscard]] size_t image_width() const;
 

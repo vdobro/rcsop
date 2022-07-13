@@ -20,15 +20,15 @@ namespace rcsop::common {
     using InsideTriangleMesh = CGAL::Side_of_triangle_mesh<SurfaceMesh, Kernel>;
     using VertexDescriptor = SurfaceMesh::Vertex_index;
 
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec3;
 
     class DenseCloud {
     public:
         explicit DenseCloud(const path& ply_file_path);
 
-        [[nodiscard]] bool is_inside(const Vector3d& point) const;
+        [[nodiscard]] bool is_inside(const vec3& point) const;
 
-        [[nodiscard]] shared_ptr<vector<Vector3d>> points() const;
+        [[nodiscard]] shared_ptr<vector<vec3>> points() const;
 
     private:
         shared_ptr<SurfaceMesh> mesh;

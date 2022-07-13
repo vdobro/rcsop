@@ -6,14 +6,14 @@
 namespace rcsop::common {
     using rcsop::common::utils::map_vec;
 
-    ScoredPoint::ScoredPoint(Vector3d position, point_id_t id, double score) :
+    ScoredPoint::ScoredPoint(vec3 position, point_id_t id, double score) :
             _point_id(id),
             _position(std::move(position)),
             _score(score) {}
 
     point_id_t ScoredPoint::id() const { return _point_id; }
 
-    Vector3d ScoredPoint::position() const {
+    vec3 ScoredPoint::position() const {
         return _position;
     }
 

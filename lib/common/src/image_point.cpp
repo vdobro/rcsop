@@ -1,7 +1,7 @@
 #include "image_point.h"
 
 namespace rcsop::common {
-    ImagePoint::ImagePoint(Vector2d coordinates,
+    ImagePoint::ImagePoint(vec2 coordinates,
                            double distance,
                            double score)
             : _coordinates(std::move(coordinates)),
@@ -16,7 +16,7 @@ namespace rcsop::common {
         return _distance;
     }
 
-    Vector2d ImagePoint::coordinates() const {
+    vec2 ImagePoint::coordinates() const {
         return _coordinates;
     }
 }

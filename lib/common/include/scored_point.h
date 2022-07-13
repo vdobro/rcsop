@@ -6,7 +6,7 @@
 
 namespace rcsop::common {
     using rcsop::common::utils::points::point_id_t;
-    using rcsop::common::utils::points::Vector3d;
+    using rcsop::common::utils::points::vec3;
 
     struct ScoreRange {
         double min;
@@ -17,13 +17,13 @@ namespace rcsop::common {
 
     private:
         point_id_t _point_id = -1;
-        Vector3d _position = Vector3d::Zero();
+        vec3 _position = vec3::Zero();
         double _score = 0;
 
     public:
         ScoredPoint() = default;
 
-        ScoredPoint(Vector3d position, point_id_t id, double score = 0);
+        ScoredPoint(vec3 position, point_id_t id, double score = 0);
 
         ScoredPoint(const ScoredPoint& other) : ScoredPoint(other.position(), other.id(), other.score()) {}
 
@@ -36,7 +36,7 @@ namespace rcsop::common {
             return *this;
         }
 
-        [[nodiscard]] Vector3d position() const;
+        [[nodiscard]] vec3 position() const;
 
         [[nodiscard]] double score() const;
 
