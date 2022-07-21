@@ -40,7 +40,7 @@ Fetch sample input data:
     paths:
       - input/
 
-Task aRCS (jet 0.3)":
+Task aRCS (jet 0.3):
   stage: test
   script:
     - mkdir output
@@ -59,7 +59,7 @@ Task aRCS (jet 0.3)":
       - output
     expire_in: never
 
-Task aRCS (red 0.6)":
+Task aRCS (red 0.6):
   stage: test
   script:
     - mkdir output
