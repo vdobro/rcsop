@@ -3,7 +3,7 @@ FROM registry.git.fh-aachen.de/ba-vd/sfm-pipeline/colmap:generic
 ENV DEBIAN_FRONTEND=noninteractive
 USER root
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
-    curl xz-utils cmake git build-essential \
+    curl xz-utils cmake git build-essential clang \
     libboost-program-options-dev \
     libboost-filesystem-dev \
     libboost-graph-dev \
@@ -16,6 +16,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     libglew-dev \
     qtbase5-dev \
     libqt5opengl5-dev \
+    libomp-dev \
     libgmp-dev \
     libmpfr-dev \
     libmetis-dev \

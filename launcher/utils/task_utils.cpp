@@ -20,7 +20,7 @@ namespace rcsop::launcher::utils {
                 create_directories(path);
             });
         }
-        std::ranges::iota_view renderer_indexes(0ul, renderers.size());
+        auto renderer_indexes = common::utils::get_indices(renderers);
         std::for_each(
                 std::execution::seq,
                 renderer_indexes.begin(),

@@ -1,28 +1,50 @@
 #!/bin/bash
 set -euo pipefail
 
+if [[ $# -ne 1 ]]; then
+  echo "Error: no compiler chosen, exiting."
+  exit 1
+else
+  COMPILER_CHOICE="$1"
+fi
+
 git submodule update --init --recursive -q
 
 CPU_CORES=$(nproc)
 
-pwd=$(pwd)
-INSTALL_DIR="$pwd/build"
+WORK_DIR=$(pwd)
+INSTALL_DIR="$WORK_DIR/build"
 mkdir -p "${INSTALL_DIR}"
 
-BUILD_DIR="$pwd/cmake_build"
+BUILD_DIR="$WORK_DIR/cmake_build"
 mkdir -p "$BUILD_DIR"
 
 export CMAKE_BUILD_TYPE="Release"
+
+case "$COMPILER_CHOICE" in
+  "gcc")
+    export CC=/usr/bin/gcc
+    export CXX=/usr/bin/g++
+    ;;
+  "clang")
+    export CC=/usr/bin/clang
+    export CXX=/usr/bin/clang++
+    ;;
+  *)
+    echo "Unsupported compiler choice, exiting"
+    exit 1
+    ;;
+esac
 
 # eigen
 EIGEN_BUILD_DIR="$BUILD_DIR/eigen"
 mkdir -p "$EIGEN_BUILD_DIR"
 cd "$EIGEN_BUILD_DIR"
-cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" "$pwd/eigen"
+cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" "$WORK_DIR/eigen"
 make install
 
 # flann
-FLANN_SOURCE_DIR="$pwd/flann"
+FLANN_SOURCE_DIR="$WORK_DIR/flann"
 cd "$FLANN_SOURCE_DIR"
 touch src/cpp/empty.cpp
 sed -e '/add_library(flann_cpp SHARED/ s/""/empty.cpp/' \
@@ -59,13 +81,13 @@ cmake -DCMAKE_BUILD_TYPE="Release" \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
-    "$pwd/ceres"
+    "$WORK_DIR/ceres"
 make -j "$CPU_CORES"
 make install
 
 # cgal
 CGAL_BUILD_DIR="$BUILD_DIR/cgal"
-CGAL_SOURCE_DIR="$pwd/cgal"
+CGAL_SOURCE_DIR="$WORK_DIR/cgal"
 mkdir -p "$CGAL_BUILD_DIR"
 cd "$CGAL_BUILD_DIR"
 cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
@@ -76,7 +98,7 @@ cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
 make install
 
 # colmap
-COLMAP_SRC_DIR="$pwd/colmap"
+COLMAP_SRC_DIR="$WORK_DIR/colmap"
 cd "$COLMAP_SRC_DIR"
 rm -f "cmake/FindEigen3.cmake"
 
@@ -95,14 +117,4 @@ make install
 cd "$COLMAP_SRC_DIR"
 git reset --hard
 
-# pcl
-#PCL_BUILD_DIR="$BUILD_DIR/pcl"
-#mkdir -p "$PCL_BUILD_DIR"
-#cd "$PCL_BUILD_DIR"
-#cmake -DCMAKE_BUILD_TYPE="Release" \
-#    -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
-#    "$pwd/pcl"
-#make -j 4
-#make install
-
-cd "$pwd"
+cd "$WORK_DIR"

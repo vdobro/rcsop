@@ -4,17 +4,29 @@ stages:
   - build
   - test
 
-Build launcher:
+Compile - GCC 12:
   stage: build
   script:
+    - export CC=/usr/bin/gcc
+    - export CXX=/usr/bin/g++
     - mkdir build
     - cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
-    - make -j 16
+    - make -j 8
   cache:
     key: "$CI_PIPELINE_ID-build"
     policy: push
     paths:
       - build/
+
+Compile - Clang 14:
+  stage: build
+  allow_failure: true
+  script:
+    - export CC=/usr/bin/clang
+    - export CXX=/usr/bin/clang++
+    - mkdir build
+    - cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
+    - make -j 8
 
 Fetch sample input data:
   stage: build

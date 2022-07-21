@@ -31,11 +31,15 @@ namespace rcsop::rendering {
                                     const texture_rendering_options& options) = 0;
 
         virtual void write_to_image(const path& output_path) = 0;
+
+        virtual ~BaseRendererContext() = default;
     };
 
     class BaseRenderer {
     public:
         [[nodiscard]] virtual shared_ptr<BaseRendererContext> create_context(const Observer& observer) const = 0;
+
+        virtual ~BaseRenderer() = default;
     };
 }
 

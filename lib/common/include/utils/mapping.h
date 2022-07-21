@@ -10,12 +10,22 @@
 
 #include "utils/logging.h"
 
-#define PARALLEL_EXECUTOR std::execution::par_unseq
+#define PARALLEL_EXECUTOR std::execution::par
 
 namespace rcsop::common::utils {
 
     using std::vector;
     using std::function;
+
+    template<typename T>
+    vector<size_t> get_indices(const vector<T>& source) {
+        vector<size_t> result;
+        result.resize(source.size());
+        for (size_t i = 0; i < source.size(); i++) {
+            result[i] = i;
+        }
+        return result;
+    }
 
     template<typename Source, typename Target, bool Parallel = false>
     vector<Target> map_vec(const vector<Source>& source,
@@ -70,8 +80,7 @@ namespace rcsop::common::utils {
     vector<Target> map_vec(
             const vector<Source>& source,
             const function<Target(const size_t, const Source&)>& mapper) {
-        std::ranges::iota_view index_range(0ul, source.size());
-        const vector<size_t> indexes(index_range.begin(), index_range.end());
+        const vector<size_t> indexes = get_indices(source);
 
         return map_vec<size_t, Target, Parallel>(indexes, [&source, &mapper](const size_t index) {
             const auto& value = source[index];

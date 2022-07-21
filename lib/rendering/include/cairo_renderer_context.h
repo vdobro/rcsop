@@ -21,6 +21,8 @@ namespace rcsop::rendering {
         explicit CairoRendererContext(const Observer& observer,
                                       const gradient_options& options);
 
+        ~CairoRendererContext() = default;
+
         void render_point(const rendered_point& point) override;
 
         void render_texture(const Texture& texture, const texture_rendering_options& options) override;

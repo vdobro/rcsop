@@ -15,11 +15,15 @@ namespace rcsop::data {
     class AbstractDataSet {
     public:
         [[nodiscard]] virtual rcs_value_t map_to_nearest(const observed_point& point) const = 0;
+
+        virtual ~AbstractDataSet() = default;
     };
 
     class AbstractDataCollection {
     public:
         [[nodiscard]] virtual const AbstractDataSet* get_for_exact_position(const Observer& observer) const = 0;
+
+        virtual ~AbstractDataCollection() = default;
     };
 }
 

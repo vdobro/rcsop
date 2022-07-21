@@ -1,6 +1,5 @@
 #include "azimuth_rcs_data_collection.h"
 
-#include <ranges>
 #include <regex>
 
 #include "utils/rcs_data_utils.h"
@@ -15,8 +14,11 @@ namespace rcsop::data {
     AzimuthRcsDataCollection::AzimuthRcsDataCollection(const path& input_path) {
         this->_data = collect_all_heights<AzimuthInput::RCS_MAT>(input_path, mat_file_regex);
 
-        auto data_keys = std::views::keys(_data);
-        this->_heights = vector<height_t>(data_keys.begin(), data_keys.end());
+        this->_heights.clear();
+        for (auto& [height, data]: _data) {
+            this->_heights.push_back(height);
+        }
+        //this->_heights = vector<height_t>(data_keys.begin(), data_keys.end());
     }
 
     const AbstractDataSet* AzimuthRcsDataCollection::get_for_exact_position(

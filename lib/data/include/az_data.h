@@ -45,7 +45,7 @@ namespace rcsop::data {
         AzimuthRcsDataSet(const path& filename,
                           const ObserverPosition& position);
 
-        ~AzimuthRcsDataSet() = default;
+        virtual ~AzimuthRcsDataSet() = default;
 
         [[nodiscard]] rcs_value_t map_to_nearest(const observed_point& point) const override;
 
