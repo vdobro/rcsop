@@ -40,7 +40,7 @@ Fetch sample input data:
     paths:
       - input/
 
-Test task "aRCS - jet 0.3":
+Task aRCS (jet 0.3)":
   stage: test
   script:
     - mkdir output
@@ -59,7 +59,7 @@ Test task "aRCS - jet 0.3":
       - output
     expire_in: never
 
-Test task "aRCS - red 0.6":
+Task aRCS (red 0.6)":
   stage: test
   script:
     - mkdir output
@@ -78,7 +78,7 @@ Test task "aRCS - red 0.6":
       - output
     expire_in: never
 
-Test task "RCS slices":
+Task "RCS slices":
   stage: test
   script:
     - mkdir output
@@ -97,7 +97,7 @@ Test task "RCS slices":
       - output
     expire_in: never
 
-Test dummy task:
+Dummy task:
   stage: test
   script:
     - mkdir output
