@@ -12,7 +12,8 @@ namespace rcsop::common {
         azimuth_t azimuth;
 
         [[nodiscard]] string str() const {
-            return "height = " + std::to_string(height) + ", angle = " + std::to_string(azimuth);
+            return "height = " + std::to_string(height) + ", " +
+                   "angle = " + std::to_string(azimuth);
         }
     };
 }

@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <stdexcept>
+#include <optional>
 
 using std::string;
 using std::shared_ptr;
@@ -19,6 +20,7 @@ using std::pair;
 using std::make_pair;
 using std::vector;
 using std::function;
+using std::optional;
 using std::invalid_argument;
 using std::runtime_error;
 

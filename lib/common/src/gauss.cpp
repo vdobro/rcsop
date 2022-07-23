@@ -3,7 +3,7 @@
 #include <cmath>
 
 namespace rcsop::common::utils::gauss {
-    static const double HORIZONTAL_SPREAD = 45. / 2.;
+    //static const double HORIZONTAL_SPREAD = 45. / 2.;
     static const double VERTICAL_SPREAD = 5. / 2.;
     static const double STIGLER_SIGMA_SQUARED = M_2_SQRTPI * M_SQRT1_2 / 2;
 

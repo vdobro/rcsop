@@ -9,5 +9,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
 endif()
 
+set(CGAL_DATA_DIR ".")
+
 add_subdirectory(lib)
 add_subdirectory(launcher)

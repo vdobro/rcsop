@@ -10,7 +10,7 @@
 #include "scored_point.h"
 
 namespace rcsop::common {
-    using camera_id_t = size_t;
+    using camera_id_t = colmap::camera_t;
 
     using rcsop::common::utils::points::vec2;
     using rcsop::common::utils::points::vec3;

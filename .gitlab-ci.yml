@@ -3,8 +3,9 @@ image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/rcsop-gitlab-ci:generic
 stages:
   - build
   - test
+  - verify
 
-Compile - GCC 12:
+compile-gcc-12:
   stage: build
   script:
     - export CC=/usr/bin/gcc
@@ -18,7 +19,7 @@ Compile - GCC 12:
     paths:
       - build/
 
-Compile - Clang 14:
+compile-clang-14:
   stage: build
   allow_failure: true
   script:
@@ -28,8 +29,21 @@ Compile - Clang 14:
     - cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
     - make -j 8
 
-Fetch sample input data:
-  stage: build
+unit-tests:
+  stage: test
+  needs:
+    - compile-gcc-12
+  script:
+    - cd build && ctest
+  cache:
+    - key: "$CI_PIPELINE_ID-build"
+      paths:
+        - build/
+      policy: pull
+
+fetch-sample-data:
+  stage: test
+  needs: [ ]
   script:
     - curl -L -S -o inputs.tar.xz 'https://dobrovolskis.com/public/sfm/rcsop-input-ci.tar.xz'
     - tar -xf inputs.tar.xz
@@ -40,8 +54,11 @@ Fetch sample input data:
     paths:
       - input/
 
-Task aRCS (jet 0.3):
-  stage: test
+task_a-rcs_jet_0.3:
+  stage: verify
+  needs:
+    - fetch-sample-data
+    - compile-gcc-12
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter --pitch-correction -2.0 --default-height 40 --color-map jet --alpha 0.3 -T "azimuth-rcs" --software-rendering -I input -O output
@@ -59,8 +76,11 @@ Task aRCS (jet 0.3):
       - output
     expire_in: never
 
-Task aRCS (red 0.6):
-  stage: test
+task_a-rcs_red-0.6:
+  stage: verify
+  needs:
+    - fetch-sample-data
+    - compile-gcc-12
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter --pitch-correction -2.0 --default-height 40 --color-map jet --alpha 0.6 -T "azimuth-rcs" --software-rendering -I input -O output
@@ -78,8 +98,11 @@ Task aRCS (red 0.6):
       - output
     expire_in: never
 
-Task "RCS slices":
-  stage: test
+task_rcs-slices:
+  stage: verify
+  needs:
+    - fetch-sample-data
+    - compile-gcc-12
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" --software-rendering -I input -O output --default-height 40
@@ -97,8 +120,11 @@ Task "RCS slices":
       - output
     expire_in: never
 
-Dummy task:
+smoke-test:
   stage: test
+  needs:
+    - fetch-sample-data
+    - compile-gcc-12
   script:
     - mkdir output
     - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output

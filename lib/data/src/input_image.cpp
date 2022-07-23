@@ -21,7 +21,7 @@ namespace rcsop::data {
         this->_camera_position = parse_position_from_file_path(path);
     }
 
-    std::optional<ObserverPosition> CameraInputImage::position() const {
+    optional<ObserverPosition> CameraInputImage::position() const {
         return this->_camera_position;
     }
 
@@ -29,7 +29,7 @@ namespace rcsop::data {
         return this->_file_path;
     }
 
-    std::optional<azimuth_t> CameraInputImage::parse_angle_from_name(const string& filename) {
+    optional<azimuth_t> CameraInputImage::parse_angle_from_name(const string& filename) {
         const optional<ObserverPosition> filename_result = parse_position_from_name(filename);
         if (filename_result.has_value()) {
             return filename_result.value().azimuth;
@@ -41,7 +41,7 @@ namespace rcsop::data {
         return stoi(filename_sm[1]);
     }
 
-    std::optional<ObserverPosition> CameraInputImage::parse_position_from_name(const string& filename) {
+    optional<ObserverPosition> CameraInputImage::parse_position_from_name(const string& filename) {
         smatch filename_sm;
 
         height_t height;
@@ -59,7 +59,7 @@ namespace rcsop::data {
         };
     }
 
-    std::optional<ObserverPosition> CameraInputImage::parse_position_from_file_path(const path& path) {
+    optional<ObserverPosition> CameraInputImage::parse_position_from_file_path(const path& path) {
         const string filename = path.filename().string();
         const string parent_folder_name = path.parent_path().filename().string();
 

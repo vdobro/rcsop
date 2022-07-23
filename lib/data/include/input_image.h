@@ -1,13 +1,10 @@
 #ifndef RCSOP_DATA_INPUT_IMAGE_H
 #define RCSOP_DATA_INPUT_IMAGE_H
 
-#include <optional>
-
 #include "utils/types.h"
 #include "observer_position.h"
 
 namespace rcsop::data {
-    using std::optional;
     using rcsop::common::ObserverPosition;
     using rcsop::common::azimuth_t;
 
@@ -23,11 +20,11 @@ namespace rcsop::data {
 
         [[nodiscard]] path file_path() const;
 
-        static optional<ObserverPosition> parse_position_from_file_path(const path& path);
+        [[nodiscard]] static optional<ObserverPosition> parse_position_from_file_path(const path& path);
 
-        static optional<ObserverPosition> parse_position_from_name(const string& filename);
+        [[nodiscard]] static optional<ObserverPosition> parse_position_from_name(const string& filename);
 
-        static optional<azimuth_t> parse_angle_from_name(const string& filename);
+        [[nodiscard]] static optional<azimuth_t> parse_angle_from_name(const string& filename);
     };
 }
 

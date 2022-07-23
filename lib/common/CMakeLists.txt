@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.22)
 project(RCSOP_COMMON LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
@@ -50,3 +50,5 @@ target_link_libraries(rcsop-common
 
 install(TARGETS rcsop-common
         LIBRARY DESTINATION lib)
+
+add_subdirectory(test)
