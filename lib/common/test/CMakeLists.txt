@@ -12,8 +12,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
-
 add_executable(
         rcsop-common-test
 
@@ -22,7 +20,8 @@ add_executable(
 
 target_link_libraries(
         rcsop-common-test
-        PUBLIC rcsop-common GTest::gtest_main
+        rcsop-common
+        GTest::gtest_main
 )
 
 include(GoogleTest)

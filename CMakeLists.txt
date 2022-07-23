@@ -7,9 +7,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -Wall -Wpedantic"
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
-endif()
+endif ()
 
 set(CGAL_DATA_DIR ".")
+
+enable_testing()
 
 add_subdirectory(lib)
 add_subdirectory(launcher)
