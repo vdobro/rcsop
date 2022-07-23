@@ -34,7 +34,13 @@ unit-tests:
   needs:
     - compile-gcc-12
   script:
-    - cd build && ctest
+    - cd build && ctest --output-junit ../rcsop-spec.xml
+  artifacts:
+    when: always
+    paths:
+      - rcsop-spec.xml
+    reports:
+      junit: rcsop-spec.xml
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:
