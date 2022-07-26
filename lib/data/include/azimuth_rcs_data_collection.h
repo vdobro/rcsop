@@ -16,7 +16,7 @@ namespace rcsop::data {
     public:
         explicit AzimuthRcsDataCollection(const path& input_path);
 
-        virtual ~AzimuthRcsDataCollection() = default;
+        ~AzimuthRcsDataCollection() override = default;
 
         void use_filtered_peaks();
 

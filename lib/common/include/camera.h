@@ -17,8 +17,8 @@ namespace rcsop::common {
 
     class camera {
     private:
-        colmap::Camera model_camera;
-        colmap::Image model_image;
+        colmap::Camera _model_camera;
+        colmap::Image _model_image;
 
     public:
         camera(const colmap::Image& image,
@@ -32,9 +32,9 @@ namespace rcsop::common {
          */
         [[nodiscard]] vec3 transform_to_world(const vec3& local_coordinates) const;
 
-        [[nodiscard]] vec3 position() const;
+        [[nodiscard]] vec3 transform_to_local(const vec3& world_coordinates) const;
 
-        [[nodiscard]] vec3 direction() const;
+        [[nodiscard]] vec3 position() const;
 
         [[nodiscard]] vec2 project_from_image(const vec2& point) const;
 

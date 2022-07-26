@@ -18,7 +18,6 @@ namespace rcsop::data {
         for (auto& [height, data]: _data) {
             this->_heights.push_back(height);
         }
-        //this->_heights = vector<height_t>(data_keys.begin(), data_keys.end());
     }
 
     const AbstractDataSet* AzimuthRcsDataCollection::get_for_exact_position(

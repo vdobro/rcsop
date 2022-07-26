@@ -6,10 +6,10 @@
 #include "camera.h"
 #include "observer_position.h"
 #include "observed_point.h"
+#include "observer_camera.h"
 
 namespace rcsop::common {
     using rcsop::common::utils::points::vec3;
-    using plane = Eigen::Hyperplane<double, 3>;
 
     struct camera_options {
         double pitch_correction{};
@@ -17,42 +17,24 @@ namespace rcsop::common {
         height_t default_height{};
     };
 
-    struct observer_position_props {
-        vec3 observer_position;
-        vec3 direction_right;
-        vec3 direction_up;
-        plane vertical_plane;
-        plane horizontal_plane;
-    };
-
     class Observer {
     private:
         optional<ObserverPosition> _position;
         path _source_filepath;
-        camera _camera;
+        shared_ptr<ObserverCamera const> _camera;
 
         double _units_per_centimeter = 1;
-        Eigen::Transform<double, 3, Eigen::Affine> _correction_transform;
 
-        [[nodiscard]] vec3 get_right() const;
+        [[nodiscard]] observed_point observe_point(const ScoredPoint& point) const;
 
-        [[nodiscard]] vec3 get_up() const;
-
-        [[nodiscard]] observed_point
-        observe_point(const ScoredPoint& point,
-                      const observer_position_props& observer_position_props) const;
-
-        [[nodiscard]] vec3
-        project_position(const observed_point& position,
-                         const observer_position_props& observer_position_props) const;
-
-        [[nodiscard]] observer_position_props get_observer_props() const;
+        [[nodiscard]] vec3 project_position(const observed_point& position) const;
 
     public:
         explicit Observer(optional<ObserverPosition> camera_position,
                           path filepath,
-                          camera camera,
-                          camera_options options);
+                          shared_ptr<ObserverCamera const> observer_camera);
+
+        virtual ~Observer() = default;
 
         void set_units_per_centimeter(double units);
 

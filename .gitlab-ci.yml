@@ -67,7 +67,7 @@ task_a-rcs_jet_0.3:
     - compile-gcc-12
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter --pitch-correction -2.0 --default-height 40 --color-map jet --alpha 0.3 -T "azimuth-rcs" --software-rendering -I input -O output
+    - ./build/launcher/rcs-overlay-plotter --pitch-correction 2.0 --default-height 40 --color-map jet --alpha 0.3 -T "azimuth-rcs" --software-rendering -I input -O output
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:
@@ -89,7 +89,7 @@ task_a-rcs_red-0.6:
     - compile-gcc-12
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter --pitch-correction -2.0 --default-height 40 --color-map jet --alpha 0.6 -T "azimuth-rcs" --software-rendering -I input -O output
+    - ./build/launcher/rcs-overlay-plotter --pitch-correction 2.0 --default-height 40 --color-map jet --alpha 0.6 -T "azimuth-rcs" --software-rendering -I input -O output
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:

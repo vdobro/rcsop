@@ -3,6 +3,10 @@
 #include "utils/mapping.h"
 #include "utils/points.h"
 
+#include "colmap_observer_camera.h"
+
+using rcsop::common::ColmapObserverCamera;
+
 namespace rcsop::data {
     using rcsop::common::utils::points::vec3;
     using rcsop::common::utils::map_vec;
@@ -67,7 +71,8 @@ namespace rcsop::data {
 
             for (const auto& camera: cameras) {
                 if (image_name == camera.get_name()) {
-                    Observer observer(image.position(), image_path, camera, camera_options);
+                    auto observer_camera = make_shared<ColmapObserverCamera>(camera, camera_options.pitch_correction);
+                    Observer observer(image.position(), image_path, observer_camera);
                     all_observers.push_back(observer);
                     break;
                 }

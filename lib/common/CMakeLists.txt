@@ -26,7 +26,8 @@ add_library(rcsop-common SHARED
         src/scored_cloud.cpp
         src/logging.cpp
         src/texture.cpp
-        src/gauss.cpp)
+        src/gauss.cpp
+        src/colmap_observer_camera.cpp)
 
 generate_export_header(rcsop-common)
 

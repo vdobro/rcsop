@@ -21,6 +21,8 @@ add_executable(
 target_link_libraries(
         rcsop-common-test
         rcsop-common
+        GTest::gtest
+        GTest::gmock
         GTest::gtest_main
 )
 
