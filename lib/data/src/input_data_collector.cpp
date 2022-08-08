@@ -6,16 +6,16 @@ namespace rcsop::data {
     using std::filesystem::is_directory;
     using std::filesystem::is_regular_file;
 
-    InputDataCollector::InputDataCollector(const path& root_path) {
+    InputDataCollector::InputDataCollector(const path& root_path, const camera_options& options) {
         this->_root_path = root_path;
         this->_image_path = path{this->_root_path / "images"};
 
-        this->collect_images();
+        this->collect_images(options);
         this->collect_models();
         this->collect_rcs_data();
     }
 
-    void InputDataCollector::collect_images() {
+    void InputDataCollector::collect_images(const camera_options& options) {
         if (!exists(_image_path)) {
             std::clog << "WARNING: no folder 'images' found, images will not be collected" << std::endl;
             return;
@@ -26,7 +26,7 @@ namespace rcsop::data {
             if (file_name.extension().string() != ".png") {
                 continue;
             }
-            this->_images.emplace_back(file_path, _image_path);
+            this->_images.emplace_back(file_path, _image_path, options.default_height);
         }
         std::sort(this->_images.begin(), this->_images.end(),
                   [](const CameraInputImage& a, const CameraInputImage& b) -> bool {

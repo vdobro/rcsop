@@ -30,7 +30,7 @@ namespace rcsop::launcher::tasks {
         clog << "RCS minimap paths: " << endl;
         auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP>(false);
         for (const auto& observer: observers) {
-            clog << minimaps->for_position(observer).file_path() << endl;
+            clog << minimaps->for_position(observer).file_path().filename() << endl;
         }
 
         clog << "Test task done" << endl;

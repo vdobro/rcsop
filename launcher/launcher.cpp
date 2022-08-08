@@ -180,7 +180,7 @@ namespace rcsop::launcher {
         };
 
         try {
-            InputDataCollector input_collector(input_path);
+            InputDataCollector input_collector(input_path, options.camera);
 
             const auto task_executor = available_tasks.at(task);
             task_executor(input_collector, options);

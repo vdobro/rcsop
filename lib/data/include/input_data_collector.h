@@ -12,6 +12,7 @@
 
 namespace rcsop::data {
     using std::domain_error;
+    using rcsop::common::camera_options;
 
     enum InputAssetType {
         SPARSE_CLOUD_COLMAP = 0,
@@ -74,14 +75,14 @@ namespace rcsop::data {
                 {InputAssetType::AZIMUTH_RCS_MINIMAP, vector<path>{}},
         };
 
-        void collect_images();
+        void collect_images(const camera_options& options);
 
         void collect_models();
 
         void collect_rcs_data();
 
     public:
-        explicit InputDataCollector(const path& root_path);
+        explicit InputDataCollector(const path& root_path, const camera_options& options);
 
         [[nodiscard]] vector<CameraInputImage> images() const;
 

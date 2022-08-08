@@ -7,6 +7,7 @@
 namespace rcsop::data {
     using rcsop::common::ObserverPosition;
     using rcsop::common::azimuth_t;
+    using rcsop::common::height_t;
 
     class CameraInputImage {
     private:
@@ -15,7 +16,7 @@ namespace rcsop::data {
         optional<ObserverPosition> _camera_position;
 
     public:
-        explicit CameraInputImage(const path& file_path, path image_root);
+        explicit CameraInputImage(const path& file_path, path image_root, height_t default_height);
 
         [[nodiscard]] optional<ObserverPosition> position() const;
 
@@ -23,7 +24,8 @@ namespace rcsop::data {
 
         [[nodiscard]] string image_name() const;
 
-        [[nodiscard]] static optional<ObserverPosition> parse_position_from_file_path(const path& path);
+        [[nodiscard]] static optional<ObserverPosition>
+        parse_position_from_file_path(const path& path, height_t default_height);
 
         [[nodiscard]] static optional<ObserverPosition> parse_position_from_name(const string& filename);
 

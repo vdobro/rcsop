@@ -16,11 +16,13 @@ namespace rcsop::data {
 
     static const regex image_filename_pattern("^.*(\\d{1,3})cm_(\\d{3})°\\.png$");
 
-    CameraInputImage::CameraInputImage(const path& file_path, path image_root)
+    CameraInputImage::CameraInputImage(const path& file_path,
+                                       path image_root,
+                                       height_t default_height)
             : _file_path(file_path),
               _image_root_folder(std::move(image_root)),
               _camera_position(std::nullopt) {
-        this->_camera_position = parse_position_from_file_path(file_path);
+        this->_camera_position = parse_position_from_file_path(file_path, default_height);
     }
 
     optional<ObserverPosition> CameraInputImage::position() const {
@@ -65,7 +67,10 @@ namespace rcsop::data {
         };
     }
 
-    optional<ObserverPosition> CameraInputImage::parse_position_from_file_path(const path& path) {
+    optional<ObserverPosition> CameraInputImage::parse_position_from_file_path(
+            const path& path,
+            height_t default_height) {
+
         const string filename = path.filename().string();
         const string parent_folder_name = path.parent_path().filename().string();
 
@@ -79,7 +84,10 @@ namespace rcsop::data {
         }
         smatch parent_folder_sm;
         if (!regex_match(parent_folder_name, parent_folder_sm, fallback_folder_name_pattern)) {
-            return std::nullopt;
+            return ObserverPosition{
+                    .height = default_height,
+                    .azimuth = angle.value(),
+            };
         }
 
         const height_t height = stoi(parent_folder_sm[1]);
