@@ -3,6 +3,8 @@
 namespace rcsop::data {
     using std::filesystem::directory_iterator;
     using std::filesystem::recursive_directory_iterator;
+    using std::filesystem::is_directory;
+    using std::filesystem::is_regular_file;
 
     InputDataCollector::InputDataCollector(const path& root_path) {
         this->_root_path = root_path;
@@ -24,12 +26,11 @@ namespace rcsop::data {
             if (file_name.extension().string() != ".png") {
                 continue;
             }
-            const CameraInputImage image(file_path);
-            this->_images.push_back(image);
+            this->_images.emplace_back(file_path, _image_path);
         }
         std::sort(this->_images.begin(), this->_images.end(),
                   [](const CameraInputImage& a, const CameraInputImage& b) -> bool {
-                      return a.file_path() < b.file_path();
+                      return a.image_name() < b.image_name();
                   });
     }
 
@@ -41,10 +42,10 @@ namespace rcsop::data {
         }
         for (auto const& dir_entry: directory_iterator{models_path}) {
             const path& entry_path = dir_entry.path();
-            if (std::filesystem::is_directory(entry_path)) {
+            if (is_directory(entry_path)) {
                 this->_asset_paths.at(InputAssetType::SPARSE_CLOUD_COLMAP).push_back(entry_path);
             }
-            if (std::filesystem::is_regular_file(entry_path)) {
+            if (is_regular_file(entry_path)) {
                 this->_asset_paths.at(InputAssetType::DENSE_MESH_PLY).push_back(entry_path);
             }
         }
@@ -58,11 +59,11 @@ namespace rcsop::data {
         }
         for (auto const& dir_entry: directory_iterator{rcs_data_path}) {
             const path& entry_path = dir_entry.path();
-            if (std::filesystem::is_directory(entry_path)) {
+            if (is_directory(entry_path)) {
                 this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MAT).push_back(entry_path);
                 this->_asset_paths.at(InputAssetType::AZIMUTH_RCS_MINIMAP).push_back(entry_path);
             }
-            if (std::filesystem::is_regular_file(entry_path)) {
+            if (is_regular_file(entry_path)) {
                 this->_asset_paths.at(InputAssetType::SIMPLE_RCS_MAT).push_back(entry_path);
             }
         }

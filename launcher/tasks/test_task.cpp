@@ -15,7 +15,7 @@ namespace rcsop::launcher::tasks {
                    const rcsop::launcher::utils::task_options& options) {
         clog << "Image file paths: " << endl;
         for (const auto& image: inputs.images()) {
-            clog << image.file_path() << endl;
+            clog << image.image_name() << endl;
         }
 
         clog << "Observer positions: " << endl;

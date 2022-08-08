@@ -66,16 +66,15 @@ namespace rcsop::data {
         vector<Observer> all_observers;
 
         for (const auto& image: source_images) {
-            auto image_path = image.file_path();
-            auto image_name = image_path.filename().string();
+            const auto image_name = image.image_name();
 
             for (const auto& camera: cameras) {
-                if (image_name == camera.get_name()) {
-                    auto observer_camera = make_shared<ColmapObserverCamera>(camera, camera_options.pitch_correction);
-                    Observer observer(image.position(), image_path, observer_camera);
-                    all_observers.push_back(observer);
-                    break;
+                if (!(image_name == camera.get_name())) {
+                    continue;
                 }
+
+                auto observer_camera = make_shared<ColmapObserverCamera>(camera, camera_options.pitch_correction);
+                all_observers.emplace_back(image.position(), image.file_path(), observer_camera);
             }
         }
         std::sort(std::execution::par_unseq,

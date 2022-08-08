@@ -83,8 +83,7 @@ namespace rcsop::data::utils {
         std::mutex map_mutex;
         std::for_each(std::execution::par_unseq,
                       begin(file_paths), end(file_paths),
-                      [&map_mutex, &azimuth_to_data, &height]
-                              (const auto& mat_file_entry) {
+                      [&map_mutex, &azimuth_to_data, &height](const mat_path_with_azimuth& mat_file_entry) {
                           auto data = AT(
                                   mat_file_entry.file_path,
                                   ObserverPosition{

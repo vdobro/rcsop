@@ -17,8 +17,8 @@ namespace rcsop::launcher::tasks {
     using rcsop::data::ObserverProvider;
     using rcsop::data::SPARSE_CLOUD_COLMAP;
 
-    static double distance_from_origin(const vec3& point) {
-        return point.norm();
+    static double distance_from_origin(const vec3& point, const vec3& origin) {
+        return (point - origin).norm();
     }
 
     static double max_camera_distance(const InputDataCollector& inputs,
@@ -30,16 +30,24 @@ namespace rcsop::launcher::tasks {
         }
         auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
         auto positions = map_vec<camera, vec3>(cameras, &camera::position);
-        auto distances = map_vec<vec3, double>(positions, distance_from_origin);
-        return *std::max_element(distances.begin(), distances.end());
+
+        const auto origin = vec3::Zero(); //TODO: filter outliers and approximate the average origin point (iteratively)
+        auto distances = map_vec<vec3, double>(positions, [origin](const vec3& point) {
+            return distance_from_origin(point, origin);
+        });
+        auto max = *std::max_element(distances.begin(), distances.end());
+        auto min = *std::min_element(distances.begin(), distances.end());
+        return std::min(min * 1.1, max);
     }
 
     void sparse_filter(const InputDataCollector& inputs,
                        const task_options& options) {
-        auto distance_threshold = 1.1 * max_camera_distance(inputs, options.camera);
+        auto distance_threshold = max_camera_distance(inputs, options.camera);
         shared_ptr<SparseCloud> model = inputs.data<SPARSE_CLOUD_COLMAP>(false);
-        model->filter_points([distance_threshold](const vec3& point) -> bool {
-            return distance_from_origin(point) <= distance_threshold;
+
+        auto origin = vec3::Zero(); //TODO: filter outliers and approximate the average origin point (iteratively)
+        model->filter_points([distance_threshold, origin](const vec3& point) -> bool {
+            return distance_from_origin(point, origin) <= distance_threshold;
         });
         model->save(options.output_path);
     }

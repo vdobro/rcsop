@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <regex>
+#include <utility>
 
 namespace rcsop::data {
     using std::regex;
@@ -13,12 +14,13 @@ namespace rcsop::data {
     static const regex fallback_folder_name_pattern("^(\\d{1,3})(cm)?$");
     static const regex fallback_image_name_pattern("^(\\d{3})°.*\\.png$");
 
-    static const regex image_filename_pattern("^(\\d{1,3})cm_(\\d{3})°\\.png$");
+    static const regex image_filename_pattern("^.*(\\d{1,3})cm_(\\d{3})°\\.png$");
 
-    CameraInputImage::CameraInputImage(const path& path)
-            : _file_path(path),
+    CameraInputImage::CameraInputImage(const path& file_path, path image_root)
+            : _file_path(file_path),
+              _image_root_folder(std::move(image_root)),
               _camera_position(std::nullopt) {
-        this->_camera_position = parse_position_from_file_path(path);
+        this->_camera_position = parse_position_from_file_path(file_path);
     }
 
     optional<ObserverPosition> CameraInputImage::position() const {
@@ -27,6 +29,10 @@ namespace rcsop::data {
 
     path CameraInputImage::file_path() const {
         return this->_file_path;
+    }
+
+    string CameraInputImage::image_name() const {
+        return std::filesystem::relative(this->_file_path, this->_image_root_folder).string();
     }
 
     optional<azimuth_t> CameraInputImage::parse_angle_from_name(const string& filename) {

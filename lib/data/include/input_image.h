@@ -11,14 +11,17 @@ namespace rcsop::data {
     class CameraInputImage {
     private:
         path _file_path;
+        path _image_root_folder;
         optional<ObserverPosition> _camera_position;
 
     public:
-        explicit CameraInputImage(const path& path);
+        explicit CameraInputImage(const path& file_path, path image_root);
 
         [[nodiscard]] optional<ObserverPosition> position() const;
 
         [[nodiscard]] path file_path() const;
+
+        [[nodiscard]] string image_name() const;
 
         [[nodiscard]] static optional<ObserverPosition> parse_position_from_file_path(const path& path);
 
