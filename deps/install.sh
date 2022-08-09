@@ -100,7 +100,11 @@ make install
 # colmap
 COLMAP_SRC_DIR="$WORK_DIR/colmap"
 cd "$COLMAP_SRC_DIR"
-rm -f "cmake/FindEigen3.cmake"
+
+COLMAP_PATCH="$WORK_DIR/colmap.patch"
+if git apply --check "$COLMAP_PATCH"; then
+    git apply "$COLMAP_PATCH"
+fi
 
 COLMAP_BUILD_DIR="$BUILD_DIR/colmap"
 mkdir -p "$COLMAP_BUILD_DIR"
