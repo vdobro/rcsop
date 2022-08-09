@@ -17,7 +17,15 @@ namespace rcsop::data {
         std::copy_if(cameras.cbegin(), cameras.cend(),
                      std::back_inserter(result),
                      [](const camera& camera) {
-                         const optional<azimuth_t> angle = CameraInputImage::parse_angle_from_name(camera.get_name());
+                         auto full_name = camera.get_name();
+                         std::stringstream name_stream(full_name);
+                         vector<string> segment_list;
+                         string segment;
+                         while (std::getline(name_stream, segment, std::filesystem::path::preferred_separator)) {
+                             segment_list.push_back(segment);
+                         }
+                         auto last_segment = segment_list.at(segment_list.size() - 1);
+                         const optional<azimuth_t> angle = CameraInputImage::parse_angle_from_name(last_segment);
                          return angle.has_value(); // a camera is positioned if at least its angle can be identified by its name
                      });
         return result;

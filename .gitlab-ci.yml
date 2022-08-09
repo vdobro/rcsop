@@ -133,7 +133,7 @@ smoke-test:
     - compile-gcc-12
   script:
     - mkdir output
-    - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output
+    - ./build/launcher/rcs-overlay-plotter -T "test-task" -I input -O output --default-height 40
   cache:
     - key: "$CI_PIPELINE_ID-build"
       paths:

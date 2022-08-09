@@ -14,7 +14,7 @@ namespace rcsop::data {
     static const regex fallback_folder_name_pattern("^(\\d{1,3})(cm)?$");
     static const regex fallback_image_name_pattern("^(\\d{3})°.*\\.png$");
 
-    static const regex image_filename_pattern("^.*(\\d{1,3})cm_(\\d{3})°\\.png$");
+    static const regex image_filename_pattern("^(\\d{1,3})cm_(\\d{3})°\\.png$");
 
     CameraInputImage::CameraInputImage(const path& file_path,
                                        path image_root,
