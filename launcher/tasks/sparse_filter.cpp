@@ -37,7 +37,7 @@ namespace rcsop::launcher::tasks {
         });
         auto max = *std::max_element(distances.begin(), distances.end());
         auto min = *std::min_element(distances.begin(), distances.end());
-        return std::min(min * 1.1, max);
+        return std::min(min * 1.5, max);
     }
 
     void sparse_filter(const InputDataCollector& inputs,

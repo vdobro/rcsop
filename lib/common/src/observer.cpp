@@ -25,47 +25,49 @@ namespace rcsop::common {
         return *this->_position;
     }
 
-    struct vec3_spherical {
-        double radial{};
-        double azimuthal{};
-        double polar{};
-    };
-
-    static vec3_spherical cartesian_to_polar(const vec3& point) {
+    vec3_spherical Observer::cartesian_to_spherical(const vec3& point) {
         const double distance = point.norm();
         const double
                 x = point.x(),
                 y = point.y(),
                 z = point.z();
 
-        double theta;
         double phi;
+        double theta;
 
         if (x > 0) {
-            theta = atan(y / x);
+            phi = atan(y / x);
         } else if (x == 0) {
             if (y >= 0) {
-                theta = M_PI_2; // y = 0 undefined by definition, but pi/2 is okay as a fallback here
+                phi = M_PI_2; // y = 0 undefined by definition, but pi/2 is okay as a fallback here
             } else { // y < 0
-                theta = -M_PI_2;
+                phi = -M_PI_2;
             }
         } else { // x < 0
             if (y >= 0) {
-                theta = atan(y / x) + M_PI;
+                phi = atan(y / x) + M_PI;
             } else { // y < 0
-                theta = atan(y / x) - M_PI;
+                phi = atan(y / x) - M_PI;
             }
         }
-        phi = (distance != 0) ? acos(z / distance) : M_PI_2;
-
-        theta = theta * 180. / M_PI;
-        phi = phi * 180. / M_PI;
+        theta = (distance != 0) ? acos(z / distance) : M_PI_2;
 
         return {
                 .radial = distance,
-                .azimuthal = theta,
-                .polar = phi,
+                .azimuthal = phi * 180. / M_PI,
+                .polar = theta * 180. / M_PI,
         };
+    }
+
+    vec3 Observer::spherical_to_cartesian(const vec3_spherical& point) {
+        const auto& [radial, azimuthal, polar] = point;
+        const auto phi = azimuthal * M_PI / 180.;
+        const auto theta = polar * M_PI / 180.;
+
+        const auto x = radial * cos(phi) * sin(theta);
+        const auto y = radial * sin(phi) * sin(theta);
+        const auto z = radial * cos(theta);
+        return {x, y, z};
     }
 
     observed_point Observer::observe_point(const ScoredPoint& point) const {
@@ -73,7 +75,7 @@ namespace rcsop::common {
         const auto distance = _camera->distance_to_camera(world_point);
         const auto local_point = _camera->map_to_observer_local(world_point);
 
-        const auto& [_, azimuthal, polar] = cartesian_to_polar(local_point);
+        const auto& [_, azimuthal, polar] = cartesian_to_spherical(local_point);
 
         double horizontal_angle, vertical_angle;
         if (distance == 0.) {
@@ -93,6 +95,19 @@ namespace rcsop::common {
         return point_info;
     }
 
+    vec3 Observer::project_position(const observed_point& observed_point) const {
+        const auto& [position, _, distance_in_world, vertical_angle, horizontal_angle] = observed_point;
+        if (distance_in_world == 0) {
+            return this->_camera->native_camera().position();
+        }
+        auto radial = distance_in_world * this->_units_per_centimeter;
+        auto azimuthal = 90 - horizontal_angle;
+        auto polar = 90 - vertical_angle;
+
+        const auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});
+        return _camera->map_to_world(cartesian_local);
+    }
+
     shared_ptr<vector<observed_point>> Observer::observe_points(
             const vector<ScoredPoint>& camera_points) const {
         auto result = map_vec_shared<ScoredPoint, observed_point, true>(
@@ -102,11 +117,6 @@ namespace rcsop::common {
                 });
 
         return result;
-    }
-
-    vec3 Observer::project_position(const observed_point& position) const {
-        //TODO
-        return vec3::Zero();
     }
 
     shared_ptr<vector<vec3>> Observer::project_observed_positions(

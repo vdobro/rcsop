@@ -34,9 +34,7 @@ namespace rcsop::launcher::utils {
                     path output_path = place_in_separate_folder
                                        ? height_folders.at(renderer.observer_height())
                                        : options.output_path;
-                    renderer.render(output_path, construct_log_prefix(
-                            renderer_index + 1,
-                            renderers.size() + 1));
+                    renderer.render(output_path, construct_log_prefix(renderer_index + 1, renderers.size()));
                 });
     }
 }

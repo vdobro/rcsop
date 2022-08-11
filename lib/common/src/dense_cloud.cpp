@@ -9,10 +9,17 @@ namespace rcsop::common {
 
         PMP::triangulate_faces(*mesh);
 
-        inside = make_shared<InsideTriangleMesh>(*mesh);
+        if (CGAL::is_closed(*mesh)) {
+            inside = make_shared<InsideTriangleMesh>(*mesh);
+        } else {
+            inside = nullptr;
+        }
     }
 
     bool DenseCloud::is_inside(const vec3& point) const {
+        if (inside == nullptr) {
+            throw std::runtime_error("Dense mesh not closed, hence cannot determine whether any point is inside.");
+        }
         Point cgalPoint(point.x(), point.y(), point.z());
         CGAL::Bounded_side res = (*this->inside)(cgalPoint);
 

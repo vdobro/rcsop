@@ -19,6 +19,13 @@ namespace rcsop::common {
         return rotated_point;
     }
 
+    vec3 ColmapObserverCamera::map_to_world(const vec3& observer_local) const {
+        vec3 local_point = observer_local.transpose()
+                           * _correction.rotation().transpose()
+                           * _colmap_camera_rotation_fix.rotation().transpose();
+        return _camera.transform_to_world(local_point);
+    }
+
     double ColmapObserverCamera::distance_to_camera(const vec3& world_coordinates) const {
         return (world_coordinates - _position).norm();
     }

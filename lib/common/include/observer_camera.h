@@ -12,6 +12,8 @@ namespace rcsop::common {
 
         [[nodiscard]] virtual vec3 map_to_observer_local(const vec3& world_coordinates) const = 0;
 
+        [[nodiscard]] virtual vec3 map_to_world(const vec3& observer_local) const = 0;
+
         [[nodiscard]] virtual double distance_to_camera(const vec3& world_coordinates) const = 0;
 
         [[nodiscard]] virtual camera native_camera() const = 0;

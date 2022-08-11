@@ -9,6 +9,12 @@ namespace rcsop::common::utils::points {
     using vec2 = Eigen::Vector2d;
     using vec3 = Eigen::Vector3d;
 
+    struct vec3_spherical {
+        double radial{};
+        double azimuthal{};
+        double polar{};
+    };
+
     using point_id_t = ulong;
     using point_pair = pair<point_id_t, vec3>;
 }

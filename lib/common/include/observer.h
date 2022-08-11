@@ -10,6 +10,7 @@
 
 namespace rcsop::common {
     using rcsop::common::utils::points::vec3;
+    using rcsop::common::utils::points::vec3_spherical;
 
     struct camera_options {
         double pitch_correction{};
@@ -24,8 +25,6 @@ namespace rcsop::common {
         shared_ptr<ObserverCamera const> _camera;
 
         double _units_per_centimeter = 1;
-
-        [[nodiscard]] observed_point observe_point(const ScoredPoint& point) const;
 
         [[nodiscard]] vec3 project_position(const observed_point& position) const;
 
@@ -46,11 +45,17 @@ namespace rcsop::common {
 
         [[nodiscard]] camera native_camera() const;
 
+        [[nodiscard]] observed_point observe_point(const ScoredPoint& point) const;
+
         [[nodiscard]] shared_ptr<vector<observed_point>>
         observe_points(const vector<ScoredPoint>& camera_points) const;
 
         [[nodiscard]] shared_ptr<vector<vec3>>
         project_observed_positions(const vector<observed_point>& position) const;
+
+        static vec3_spherical cartesian_to_spherical(const vec3& point);
+
+        static vec3 spherical_to_cartesian(const vec3_spherical& point);
     };
 }
 

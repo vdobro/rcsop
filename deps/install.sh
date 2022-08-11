@@ -99,9 +99,9 @@ make install
 
 # colmap
 COLMAP_SRC_DIR="$WORK_DIR/colmap"
-cd "$COLMAP_SRC_DIR"
-
 COLMAP_PATCH="$WORK_DIR/colmap.patch"
+
+cd "$COLMAP_SRC_DIR"
 if git apply --check "$COLMAP_PATCH"; then
     git apply "$COLMAP_PATCH"
 fi

@@ -16,7 +16,9 @@ add_executable(
         rcsop-common-test
 
         hello_test.cc
-        observer_test.cc)
+        observer_test.cc
+        colmap_observer_camera_test.cc
+)
 
 target_link_libraries(
         rcsop-common-test

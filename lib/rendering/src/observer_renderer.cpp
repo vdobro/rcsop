@@ -64,6 +64,7 @@ namespace rcsop::rendering {
             renderer_context->render_texture(texture, rendering_options);
         }
 
+        create_directories(output_file_path.parent_path());
         renderer_context->write_to_image(output_file_path);
 
         log_and_start_next(time_measure, log_prefix + "\tRendered image " + output_name

@@ -20,6 +20,8 @@ namespace rcsop::common {
 
         [[nodiscard]] vec3 map_to_observer_local(const vec3& world_coordinates) const override;
 
+        [[nodiscard]] vec3 map_to_world(const vec3& observer_local) const override;
+
         [[nodiscard]] double distance_to_camera(const vec3& world_coordinates) const override;
 
         [[nodiscard]] camera native_camera() const override;
