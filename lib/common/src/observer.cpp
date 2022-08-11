@@ -120,9 +120,9 @@ namespace rcsop::common {
     }
 
     shared_ptr<vector<vec3>> Observer::project_observed_positions(
-            const vector<observed_point>& position) const {
+            const vector<observed_point>& positions) const {
         auto result = map_vec_shared<observed_point, vec3, true>(
-                position, [this](const auto& position) {
+                positions, [this](const auto& position) {
                     return project_position(position);
                 });
         return result;

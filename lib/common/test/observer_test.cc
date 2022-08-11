@@ -65,7 +65,7 @@ protected:
             .azimuth = 20,
     };
 
-    const vec3 _observer_position{2, 3, 4};
+    const vec3 _observer_position{10, 20, 30};
 
     const vector<vec3> POINTS_PLANE_CENTER{
             {-1., 0,   0.},     // left
@@ -76,7 +76,7 @@ protected:
             {0.,  0,   1.},     // above
     };
 
-    const vector<observation> POSITIONS_FACE_CENTER{
+    const vector<observation> OBSERVATIONS_FACE_CENTER{
             {0.,   -90., UNIT_DISTANCE},
             {0.,   90.,  UNIT_DISTANCE},
             {0.,   0.,   UNIT_DISTANCE},
@@ -101,7 +101,7 @@ protected:
             {R,  0., R},   // right above
     };
 
-    const vector<observation> POSITIONS_EDGE_CENTER{
+    const vector<observation> OBSERVATIONS_EDGE_CENTER{
             {0.,   -45., UNIT_DISTANCE},
             {0.,   -45., UNIT_DISTANCE},
             {0.,   45.,  UNIT_DISTANCE},
@@ -127,7 +127,7 @@ protected:
             {R,  R,  1},    // right front above
     };
 
-    const vector<observation> POSITIONS_EDGE_VERTICES{
+    const vector<observation> OBSERVATIONS_EDGE_VERTICES{
             {-45., -45., DIAGONAL_DISTANCE},
             {45.,  -45., DIAGONAL_DISTANCE},
             {-45., -45., DIAGONAL_DISTANCE},
@@ -139,6 +139,7 @@ protected:
     };
 
     vector<vec3> ALL_POINTS;
+    vector<observation> ALL_OBSERVATIONS;
 
     shared_ptr<MockObserverCamera> _mock_camera = make_shared<MockObserverCamera>();
 
@@ -188,6 +189,13 @@ protected:
         ALL_POINTS.insert(ALL_POINTS.end(), POINTS_PLANE_CENTER.begin(), POINTS_PLANE_CENTER.end());
         ALL_POINTS.insert(ALL_POINTS.end(), POINTS_EDGE_CENTER.begin(), POINTS_EDGE_CENTER.end());
         ALL_POINTS.insert(ALL_POINTS.end(), POINTS_VERTICES.begin(), POINTS_VERTICES.end());
+
+        ALL_OBSERVATIONS.insert(ALL_OBSERVATIONS.end(), OBSERVATIONS_FACE_CENTER.begin(),
+                                OBSERVATIONS_FACE_CENTER.end());
+        ALL_OBSERVATIONS.insert(ALL_OBSERVATIONS.end(), OBSERVATIONS_EDGE_CENTER.begin(),
+                                OBSERVATIONS_EDGE_CENTER.end());
+        ALL_OBSERVATIONS.insert(ALL_OBSERVATIONS.end(), OBSERVATIONS_EDGE_VERTICES.begin(),
+                                OBSERVATIONS_EDGE_VERTICES.end());
     };
 
     shared_ptr<vector<observed_point>> observe_points(
@@ -200,9 +208,9 @@ protected:
 
     void observe_and_check(
             const vector<vec3>& test_input,
-            const observed_point_property_selector& selector,
+            const observed_point_property_selector& input_selector,
             const vector<observation>& expected_values,
-            const observation_property_selector& observation_selector
+            const observation_property_selector& result_selector
     ) {
         const auto offset_inputs = map_vec<vec3, vec3>(
                 test_input, [this](const vec3& x) {
@@ -210,22 +218,39 @@ protected:
                 });
         const auto result = observe_points(offset_inputs);
         for (size_t i = 0; i < result->size(); i++) {
-            const auto result_value = selector(result->at(i));
-            const auto expected_value = observation_selector(expected_values.at(i));
+            const auto result_value = input_selector(result->at(i));
+            const auto expected_value = result_selector(expected_values.at(i));
             EXPECT_NEAR(result_value, expected_value, STANDARD_ERROR);
         }
     }
 
+    static vector<observed_point> observations_to_observed_points(
+            const vector<observation>& observations) {
+        return map_vec<observation, observed_point>(
+                observations, [](const observation& observation) {
+                    return observed_point{
+                            .position = vec3::Zero(),
+                            .id = 42,
+                            .distance_in_world = observation.distance,
+                            .vertical_angle = observation.vertical_angle,
+                            .horizontal_angle = observation.horizontal_angle};
+                });
+    }
+
     void project_and_check(
-            const vector<observed_point>& test_input,
-            const projected_point_property_selector& selector,
-            const vector<vec3>& expected_values
-    ) {
-        const auto result = _sut->project_observed_positions(test_input);
+            const vector<observation>& test_input,
+            const vector<vec3>& expected_values,
+            const projected_point_property_selector& value_mapper) {
+        const auto observed_points = observations_to_observed_points(test_input);
+        const auto result = _sut->project_observed_positions(observed_points);
         for (size_t i = 0; i < result->size(); i++) {
-            const auto result_value = selector(result->at(i));
-            const auto expected_value = expected_values.at(i) - this->_observer_position;
-            EXPECT_NEAR(result_value, selector(expected_value), STANDARD_ERROR);
+            const auto result_value = result->at(i);
+            const auto expected_value = value_mapper(expected_values.at(i));
+
+            const auto result = value_mapper(result_value);
+            const auto expected = expected_value + value_mapper(this->_observer_position);
+
+            EXPECT_NEAR(result, expected, STANDARD_ERROR);
         }
     }
 };
@@ -237,18 +262,23 @@ TEST_F(ObserverShould, SetPropertiesCorrectly) {
     EXPECT_EQ(position.height, _position.height);
 }
 
-TEST_F(ObserverShould, OutputAsManyPointsAsInput) {
+TEST_F(ObserverShould, ObserveAsManyPointsAsSupplied) {
     const auto& points = ALL_POINTS;
-    auto result = observe_points(points);
+    const auto result = observe_points(points);
     EXPECT_THAT(result->size(), points.size());
 }
 
+TEST_F(ObserverShould, ProjectAsManyProjectionsAsSupplied) {
+    const auto observations = observations_to_observed_points(ALL_OBSERVATIONS);
+    const auto result = _sut->project_observed_positions(observations);
+    EXPECT_THAT(result->size(), observations.size());
+}
 
 TEST_F(ObserverShould, CalculateVerticalAngleToFaceCenter) {
     observe_and_check(
             POINTS_PLANE_CENTER,
             &observed_point::vertical_angle,
-            POSITIONS_FACE_CENTER,
+            OBSERVATIONS_FACE_CENTER,
             &observation::vertical_angle
     );
 }
@@ -257,7 +287,7 @@ TEST_F(ObserverShould, CalculateHorizontalAngleToFaceCenter) {
     observe_and_check(
             POINTS_PLANE_CENTER,
             &observed_point::horizontal_angle,
-            POSITIONS_FACE_CENTER,
+            OBSERVATIONS_FACE_CENTER,
             &observation::horizontal_angle
     );
 }
@@ -266,7 +296,7 @@ TEST_F(ObserverShould, CalculateVerticalAngleToEdgeCenter) {
     observe_and_check(
             POINTS_EDGE_CENTER,
             &observed_point::vertical_angle,
-            POSITIONS_EDGE_CENTER,
+            OBSERVATIONS_EDGE_CENTER,
             &observation::vertical_angle
     );
 }
@@ -275,7 +305,7 @@ TEST_F(ObserverShould, CalculateHorizontalAngleToEdgeCenter) {
     observe_and_check(
             POINTS_EDGE_CENTER,
             &observed_point::horizontal_angle,
-            POSITIONS_EDGE_CENTER,
+            OBSERVATIONS_EDGE_CENTER,
             &observation::horizontal_angle
     );
 }
@@ -284,7 +314,7 @@ TEST_F(ObserverShould, CalculateVerticalAngleToEdgeVertices) {
     observe_and_check(
             POINTS_VERTICES,
             &observed_point::vertical_angle,
-            POSITIONS_EDGE_VERTICES,
+            OBSERVATIONS_EDGE_VERTICES,
             &observation::vertical_angle
     );
 }
@@ -293,7 +323,7 @@ TEST_F(ObserverShould, CalculateHorizontalAngleToEdgeVertices) {
     observe_and_check(
             POINTS_VERTICES,
             &observed_point::horizontal_angle,
-            POSITIONS_EDGE_VERTICES,
+            OBSERVATIONS_EDGE_VERTICES,
             &observation::horizontal_angle
     );
 }
@@ -319,13 +349,97 @@ TEST_F(ObserverShould, CalculateHorizontalAngleToOrigin) {
 
 TEST_F(ObserverShould, CalculateDistance) {
     observe_and_check(POINTS_PLANE_CENTER, &observed_point::distance_in_world,
-                      POSITIONS_FACE_CENTER, &observation::distance);
+                      OBSERVATIONS_FACE_CENTER, &observation::distance);
 
     observe_and_check(POINTS_EDGE_CENTER, &observed_point::distance_in_world,
-                      POSITIONS_EDGE_CENTER, &observation::distance);
+                      OBSERVATIONS_EDGE_CENTER, &observation::distance);
 
     observe_and_check(POINTS_VERTICES, &observed_point::distance_in_world,
-                      POSITIONS_EDGE_VERTICES, &observation::distance);
+                      OBSERVATIONS_EDGE_VERTICES, &observation::distance);
+}
+
+static double select_x(const vec3& point) {
+    return point.x();
+}
+
+static double select_y(const vec3& point) {
+    return abs(point.y());
+}
+
+static double select_z(const vec3& point) {
+    return point.z();
+}
+
+TEST_F(ObserverShould, ProjectToFaceCenterX) {
+    project_and_check(
+            OBSERVATIONS_FACE_CENTER,
+            POINTS_PLANE_CENTER,
+            select_x
+    );
+}
+
+TEST_F(ObserverShould, ProjectToFaceCenterY) {
+    project_and_check(
+            OBSERVATIONS_FACE_CENTER,
+            POINTS_PLANE_CENTER,
+            select_y
+    );
+}
+
+TEST_F(ObserverShould, ProjectToFaceCenterZ) {
+    project_and_check(
+            OBSERVATIONS_FACE_CENTER,
+            POINTS_PLANE_CENTER,
+            select_z
+    );
+}
+
+TEST_F(ObserverShould, ProjectToEdgeCenterX) {
+    project_and_check(
+            OBSERVATIONS_EDGE_CENTER,
+            POINTS_EDGE_CENTER,
+            select_x
+    );
+}
+
+TEST_F(ObserverShould, ProjectToEdgeCenterY) {
+    project_and_check(
+            OBSERVATIONS_EDGE_CENTER,
+            POINTS_EDGE_CENTER,
+            select_y
+    );
+}
+
+TEST_F(ObserverShould, ProjectToEdgeCenterZ) {
+    project_and_check(
+            OBSERVATIONS_EDGE_CENTER,
+            POINTS_EDGE_CENTER,
+            select_z
+    );
+}
+
+TEST_F(ObserverShould, ProjectToEdgeVerticesX) {
+    project_and_check(
+            OBSERVATIONS_EDGE_VERTICES,
+            POINTS_VERTICES,
+            select_x
+    );
+}
+
+TEST_F(ObserverShould, ProjectToEdgeVerticesY) {
+    project_and_check(
+            OBSERVATIONS_EDGE_VERTICES,
+            POINTS_VERTICES,
+            select_y
+    );
+}
+
+TEST_F(ObserverShould, ProjectToEdgeVerticesZ) {
+    project_and_check(
+            OBSERVATIONS_EDGE_VERTICES,
+            POINTS_VERTICES,
+            select_z
+    );
 }
 
 TEST_F(ObserverShould, CalculateDistanceEqualToSphericalRadialComponent) {
@@ -382,8 +496,4 @@ TEST_F(ObserverShould, ConvertCartesianToSphericalToCartesian) {
         EXPECT_NEAR(input.y(), result.y(), STANDARD_ERROR);
         EXPECT_NEAR(input.z(), result.z(), STANDARD_ERROR);
     }
-}
-
-TEST_F(ObserverShould, ProjectPointToFaceCenter) {
-
 }
