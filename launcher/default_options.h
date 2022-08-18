@@ -7,8 +7,8 @@
 namespace rcsop::launcher {
     using rcsop::common::height_t;
 
-    using rcsop::rendering::coloring::local_colormap_func;
-    using rcsop::rendering::coloring::map_jet;
+    using rcsop::common::coloring::local_colormap_func;
+    using rcsop::common::coloring::map_jet;
 
     const string DEFAULT_COLOR_MAP = "jet";
     const double DEFAULT_CAMERA_DISTANCE = 750.0;

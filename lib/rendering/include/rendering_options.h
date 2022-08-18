@@ -4,7 +4,7 @@
 #include "colors.h"
 
 namespace rcsop::rendering {
-    using rcsop::rendering::coloring::local_colormap_func;
+    using rcsop::common::coloring::local_colormap_func;
 
     struct gradient_options {
         float radius;

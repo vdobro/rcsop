@@ -22,7 +22,7 @@ namespace rcsop::common {
     vec3 ColmapObserverCamera::map_to_world(const vec3& observer_local) const {
         auto camera_test_to_world = _camera.transform_to_world(observer_local);
         auto camera_test_to_local = _camera.transform_to_local(camera_test_to_world);
-        assert(camera_test_to_local == observer_local);
+        //assert(camera_test_to_local == observer_local);
         vec3 local_point = observer_local.transpose()
                            * _correction.rotation().transpose()
                            * _colmap_camera_rotation_fix.rotation().transpose();

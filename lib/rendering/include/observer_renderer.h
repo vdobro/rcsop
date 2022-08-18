@@ -16,7 +16,7 @@ namespace rcsop::rendering {
     using rcsop::common::Texture;
     using rcsop::common::height_t;
 
-    using rcsop::rendering::coloring::global_colormap_func;
+    using rcsop::common::coloring::global_colormap_func;
 
     class ObserverRenderer {
     private:

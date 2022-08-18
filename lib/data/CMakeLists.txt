@@ -25,7 +25,8 @@ add_library(rcsop-data SHARED
         src/observer_provider.cpp
         src/utils/rcs_data_utils.cpp
         src/azimuth_minimap_provider.cpp
-        src/data_point_projector.cpp)
+        src/data_point_projector.cpp
+        src/model_writer.cpp)
 
 generate_export_header(rcsop-data)
 

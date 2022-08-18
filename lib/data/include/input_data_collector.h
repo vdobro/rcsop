@@ -87,7 +87,7 @@ namespace rcsop::data {
         [[nodiscard]] vector<CameraInputImage> images() const;
 
         template<InputAssetType AssetType>
-        shared_ptr<InputAssetDataType<AssetType>> data(bool allow_multiple) const {
+        shared_ptr<InputAssetDataType<AssetType>> data(bool allow_multiple = false) const {
             const string asset_description = inputAssetTypeDescriptions[AssetType];
 
             vector<path> asset_paths = _asset_paths.at(AssetType);

@@ -29,9 +29,9 @@ namespace rcsop::launcher::utils {
     using rcsop::data::ObserverProvider;
     using rcsop::data::DataPointProjector;
 
-    using rcsop::rendering::coloring::global_colormap_func;
+    using rcsop::common::coloring::global_colormap_func;
 
-    using rcsop::launcher::utils::scored_cloud_payload;
+    using rcsop::launcher::utils::multiple_scored_cloud_payload;
     using rcsop::launcher::utils::task_options;
 
     using dB_range_filter = function<bool(const double)>;
@@ -82,7 +82,7 @@ namespace rcsop::launcher::utils {
             const AbstractDataCollection& data,
             const task_options& task_options,
             const global_colormap_func& colormap_func,
-            const observed_factor_func& factor_func) -> shared_ptr<scored_cloud_payload> {
+            const observed_factor_func& factor_func) -> shared_ptr<multiple_scored_cloud_payload> {
         const auto dB_range = task_options.db_range;
         const auto observer_provider = make_shared<ObserverProvider>(inputs, task_options.camera);
         const auto projector = make_shared<DataPointProjector>();
@@ -122,7 +122,7 @@ namespace rcsop::launcher::utils {
                                        " for a total of " +  std::to_string(observer_count) +
                                        " observers.");
 
-        return make_shared<scored_cloud_payload>(scored_cloud_payload{
+        return make_shared<multiple_scored_cloud_payload>(multiple_scored_cloud_payload{
                 .point_clouds = complete_payload,
                 .colormap = colormap_func,
         });
@@ -130,16 +130,5 @@ namespace rcsop::launcher::utils {
 
     auto identity_factor(const observed_point& point) -> double {
         return 1;
-    }
-
-    auto scored_cloud_payload::observer_heights() const -> vector<height_t> {
-        std::set<height_t> heights;
-        for (const auto& cloud: point_clouds) {
-            if (cloud.observer().has_position())
-                heights.insert(cloud.observer().position().height);
-        }
-        vector<height_t> result;
-        std::copy(heights.begin(), heights.end(), std::back_inserter(result));
-        return result;
     }
 }

@@ -16,6 +16,7 @@ find_package(COLMAP 3.8 CONFIG REQUIRED)
 include(GenerateExportHeader)
 add_library(rcsop-common SHARED
         $<INSTALL_INTERFACE:include>
+        src/colors.cpp
         src/camera.cpp
         src/image_point.cpp
         src/scored_point.cpp

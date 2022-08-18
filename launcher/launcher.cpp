@@ -155,7 +155,7 @@ namespace rcsop::launcher {
         }
         create_directories(task_output_path);
 
-        auto color_map = rcsop::rendering::coloring::resolve_map_by_name(vm.at(PARAM_COLOR_MAP).as<string>());
+        auto color_map = rcsop::common::coloring::resolve_map_by_name(vm.at(PARAM_COLOR_MAP).as<string>());
 
         const task_options options{
                 .input_path = input_path,

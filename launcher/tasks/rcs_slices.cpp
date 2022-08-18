@@ -27,8 +27,8 @@ namespace rcsop::launcher::tasks {
     using rcsop::data::PointCloudProvider;
     using rcsop::data::SIMPLE_RCS_MAT;
 
-    using rcsop::rendering::coloring::construct_colormap_function;
-    using rcsop::rendering::coloring::color_values;
+    using rcsop::common::coloring::construct_colormap_function;
+    using rcsop::common::coloring::color_values;
     using rcsop::rendering::ObserverRenderer;
 
     using rcsop::launcher::utils::batch_render;
@@ -94,7 +94,7 @@ namespace rcsop::launcher::tasks {
                 ->at_height(default_height)
                 ->rcs();
         const vector<height_t> heights{default_height};
-        const auto rcs_colors = color_values(data, rcsop::rendering::coloring::map_turbo);
+        const auto rcs_colors = color_values(data, rcsop::common::coloring::map_turbo);
 
         const auto points = map_vec_shared<ScoredPoint, ScoredPoint>(
                 *base_points,

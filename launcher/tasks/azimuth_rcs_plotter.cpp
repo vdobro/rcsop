@@ -5,6 +5,7 @@
 #include "utils/point_scoring.h"
 
 #include "colors.h"
+#include "model_writer.h"
 #include "observer_renderer.h"
 #include "scored_cloud.h"
 #include "azimuth_minimap_provider.h"
@@ -20,10 +21,11 @@ namespace rcsop::launcher::tasks {
 
     using rcsop::data::AZIMUTH_RCS_MAT;
     using rcsop::data::AZIMUTH_RCS_MINIMAP;
+    using rcsop::data::ModelWriter;
 
     using rcsop::rendering::texture_rendering_options;
     using rcsop::rendering::ObserverRenderer;
-    using rcsop::rendering::coloring::construct_colormap_function;
+    using rcsop::common::coloring::construct_colormap_function;
 
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
                              const task_options& options) {
@@ -42,8 +44,10 @@ namespace rcsop::launcher::tasks {
         const auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP>(false);
         auto renderers = map_vec<ScoredCloud, ObserverRenderer, true>(
                 point_clouds,
-                [&color_map, &options, &minimaps, &minimap_position]
+                [&color_map, &options, &inputs, &minimaps, &minimap_position]
                         (const ScoredCloud& scored_cloud) {
+                    ModelWriter model_writer(inputs, false);
+
                     ObserverRenderer renderer(scored_cloud, color_map, options.rendering);
                     Texture minimap = minimaps->for_position(scored_cloud.observer());
 

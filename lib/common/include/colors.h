@@ -7,7 +7,7 @@
 
 #include "scored_point.h"
 
-namespace rcsop::rendering::coloring {
+namespace rcsop::common::coloring {
     using rcsop::common::utils::sparse::color_vec;
     using rcsop::common::ScoreRange;
 

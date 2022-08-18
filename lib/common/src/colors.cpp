@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace rcsop::rendering::coloring {
+namespace rcsop::common::coloring {
     using rcsop::common::utils::map_vec;
 
     // Copyright 2019 Google LLC.
@@ -399,9 +399,9 @@ namespace rcsop::rendering::coloring {
     }
 
     const static map<string, local_colormap_func> COLOR_MAPS = {
-            {"jet",   rcsop::rendering::coloring::map_jet},
-            {"turbo", rcsop::rendering::coloring::map_turbo},
-            {"red",   rcsop::rendering::coloring::map_red},
+            {"jet",   rcsop::common::coloring::map_jet},
+            {"turbo", rcsop::common::coloring::map_turbo},
+            {"red",   rcsop::common::coloring::map_red},
     };
 
     local_colormap_func resolve_map_by_name(const string& name) {
