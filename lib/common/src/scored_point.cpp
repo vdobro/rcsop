@@ -1,9 +1,12 @@
 #include "scored_point.h"
-#include "utils/mapping.h"
 
 #include <utility>
 
+#include "utils/mapping.h"
+#include "utils/rcs.h"
+
 namespace rcsop::common {
+    using rcsop::common::utils::rcs::raw_rcs_to_dB;
     using rcsop::common::utils::map_vec;
 
     ScoredPoint::ScoredPoint(vec3 position, point_id_t id, double score) :
@@ -22,7 +25,7 @@ namespace rcsop::common {
     }
 
     double ScoredPoint::score_to_dB() const {
-        return 10.0 * log10(this->score());
+        return raw_rcs_to_dB(score());
     }
 
     ScoreRange ScoredPoint::get_score_range(const vector<ScoredPoint>& points) {

@@ -33,7 +33,7 @@ namespace rcsop::launcher::tasks {
 
     using rcsop::launcher::utils::batch_render;
 
-    static inline vec2 flat_down_from_above(const vec3& point) {
+    static inline auto flat_down_from_above(const vec3& point) -> vec2 {
         auto res = vec2();
         res.x() = point.x();
         res.y() = point.z();
@@ -41,28 +41,28 @@ namespace rcsop::launcher::tasks {
     }
 
 
-    static inline double get_sign(const vec2& p1,
+    static inline auto get_sign(const vec2& p1,
                                   const vec2& p2,
-                                  const vec2& p3) {
+                                  const vec2& p3) -> double {
         return (p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y());
     }
 
-    static inline bool is_in_triangle(const vec2& point,
+    static inline auto is_in_triangle(const vec2& point,
                                       const vec2& v1,
                                       const vec2& v2,
-                                      const vec2& v3) {
+                                      const vec2& v3) -> bool {
         auto b1 = get_sign(point, v1, v2) < 0.0;
         auto b2 = get_sign(point, v2, v3) < 0.0;
         auto b3 = get_sign(point, v3, v1) < 0.0;
         return (b1 == b2) && (b2 == b3);
     }
 
-    static inline bool is_within_camera_slice(
+    static inline auto is_within_camera_slice(
             const vec2& point,
             const vec2& origin,
             const size_t& image_id,
             const size_t& image_count,
-            const vector<vec2>& image_positions) {
+            const vector<vec2>& image_positions) -> bool {
         auto previous_camera_id = image_id == 0 ? image_count - 1 : (image_id - 1);
         const auto& previous_camera = image_positions[previous_camera_id];
         const auto& next_camera = image_positions[(image_id + 1) % image_count];

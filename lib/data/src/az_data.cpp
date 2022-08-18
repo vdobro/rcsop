@@ -10,8 +10,15 @@ namespace rcsop::data {
     using rcsop::common::utils::find_interval_match;
     using rcsop::common::utils::find_interval_match_index;
 
+    const size_t ROWS_TO_SKIP = 1; // first row is filled with NaN
+
+    const char* VARIABLE_MAIN = "auswertung";
+    const char* TABLE_RANGES = "vRangeExt";
+    const char* TABLE_ANGLES = "vAngDeg";
+    const char* TABLE_AZIMUTH_VALUES = "JOpt_RCS";
+
     static matvar_t* get_all_variables(mat_t* file) {
-        matvar_t* matvar = Mat_VarReadInfo(file, "auswertung");
+        matvar_t* matvar = Mat_VarReadInfo(file, VARIABLE_MAIN);
         if (nullptr == matvar) {
             throw runtime_error("Could not read variable 'result'");
         }
@@ -38,15 +45,14 @@ namespace rcsop::data {
         return raw_values;
     }
 
-    az_value_map_t AzimuthRcsDataSet::reconstruct_value_table(
-            const vector<double>& raw_values) {
+    az_value_map_t AzimuthRcsDataSet::reconstruct_value_table(const vector<double>& raw_values) {
         az_value_map_t result;
 
         auto angles = _angles.size();
         auto ranges = _ranges.size();
 
         for (size_t angle_i = 0; angle_i < angles; angle_i++) {
-            const az_angle_t angle = _angles[angle_i];
+            const rcs_angle_t angle = _angles[angle_i];
 
             vector<double> range_values;
             range_values.resize(ranges);
@@ -59,8 +65,6 @@ namespace rcsop::data {
         return result;
     }
 
-    const size_t ROWS_TO_SKIP = 1; // first row is filled with NaN
-
     void AzimuthRcsDataSet::determine_step_sizes() {
         vector<long> range_steps;
         for (size_t i = ROWS_TO_SKIP; i < _ranges.size(); i++) {
@@ -69,12 +73,12 @@ namespace rcsop::data {
         _range_step = reduce(range_steps.begin(), range_steps.end())
                       / static_cast<long>(range_steps.size());
 
-        vector<az_angle_t> angle_steps;
+        vector<rcs_angle_t> angle_steps;
         for (size_t i = ROWS_TO_SKIP; i < _angles.size(); i++) {
             angle_steps.push_back(_angles[i] - _angles[i - 1]);
         }
         _angle_step = reduce(angle_steps.begin(), angle_steps.end())
-                      / static_cast<az_angle_t>(angle_steps.size());
+                      / static_cast<rcs_angle_t>(angle_steps.size());
     }
 
     void AzimuthRcsDataSet::filter_peaks() {
@@ -93,18 +97,18 @@ namespace rcsop::data {
     }
 
     AzimuthRcsDataSet::AzimuthRcsDataSet(const path& filename,
-                                         const ObserverPosition& position) : _position(position) {
+                                         const ObserverPosition& position) {
         mat_t* mat_file_handle = Mat_Open(filename.c_str(), MAT_ACC_RDONLY);
         if (nullptr == mat_file_handle) {
             throw runtime_error("Could not open .mat file");
         }
         auto table = get_all_variables(mat_file_handle);
-        _ranges = map_vec<double, az_range_t>(get_raw_values("vRangeExt", table), [](double range) {
+        _ranges = map_vec<double, rcs_distance_t>(get_raw_values(TABLE_RANGES, table), [](double range) {
             return std::lround(range * 100);
         });
 
-        _angles = get_raw_values("vAngDeg", table);
-        auto raw_azimuth = get_raw_values("JOpt_RCS", table);
+        _angles = get_raw_values(TABLE_ANGLES, table);
+        auto raw_azimuth = get_raw_values(TABLE_AZIMUTH_VALUES, table);
         _raw_values = reconstruct_value_table(raw_azimuth);
 
         Mat_VarFree(table);
@@ -116,22 +120,40 @@ namespace rcsop::data {
         filter_peaks();
     }
 
+    rcs_value_t AzimuthRcsDataSet::resolve_value(rcs_angle_t angle,
+                                                 size_t range_index) const {
+        const auto& value_map = (use_filtered) ? _filtered_values : _raw_values;
+        const auto& range_to_values = value_map.at(angle);
+        if (range_index >= range_to_values.size()) {
+            return std::nanf("Distance out of range.");
+        }
+        return range_to_values.at(range_index);
+    }
+
     double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
         const double range_distance = point.distance_in_world;
         const double angle = point.horizontal_angle;
 
-        const auto nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
-        const auto nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
+        const rcs_angle_t nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
+        const size_t nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
 
-        const auto& value_map = (use_filtered) ? _filtered_values : _raw_values;
-        const auto& range_to_values = value_map.at(nearest_angle);
-        if (nearest_range_index >= range_to_values.size()) {
-            return std::nanf("out of distance range");
-        }
-        return range_to_values.at(nearest_range_index);
+        return resolve_value(nearest_angle, nearest_range_index);
     }
 
     void AzimuthRcsDataSet::use_filtered_peaks() {
         this->use_filtered = true;
+    }
+
+    rcs_value_t AzimuthRcsDataSet::map_exact(rcs_distance_t distance, rcs_angle_t angle) const {
+        const size_t nearest_range_index = find_interval_match_index(distance, _ranges[0], _range_step / 2);
+        return resolve_value(angle, nearest_range_index);
+    }
+
+    vector<rcs_distance_t> AzimuthRcsDataSet::distances() const {
+        return this->_ranges;
+    }
+
+    vector<rcs_angle_t> AzimuthRcsDataSet::angles() const {
+        return this->_angles;
     }
 }

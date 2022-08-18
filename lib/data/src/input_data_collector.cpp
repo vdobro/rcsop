@@ -45,7 +45,7 @@ namespace rcsop::data {
             if (is_directory(entry_path)) {
                 this->_asset_paths.at(InputAssetType::SPARSE_CLOUD_COLMAP).push_back(entry_path);
             }
-            if (is_regular_file(entry_path)) {
+            if (is_regular_file(entry_path) && entry_path.extension().string() == ".ply") {
                 this->_asset_paths.at(InputAssetType::DENSE_MESH_PLY).push_back(entry_path);
             }
         }
@@ -69,7 +69,7 @@ namespace rcsop::data {
         }
     }
 
-    vector<CameraInputImage> InputDataCollector::images() const {
+    auto InputDataCollector::images() const -> vector<CameraInputImage> {
         return this->_images;
     }
 }

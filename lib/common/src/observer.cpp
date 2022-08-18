@@ -17,7 +17,7 @@ namespace rcsop::common {
               _source_filepath(std::move(filepath)),
               _camera(std::move(observer_camera)) {}
 
-    ObserverPosition Observer::position() const {
+    auto Observer::position() const -> ObserverPosition {
         if (!this->has_position()) {
             throw std::logic_error("Observer for " + this->source_image_path().filename().string()
                                    + " does not have a predefined position");
@@ -25,7 +25,7 @@ namespace rcsop::common {
         return *this->_position;
     }
 
-    vec3_spherical Observer::cartesian_to_spherical(const vec3& point) {
+    auto Observer::cartesian_to_spherical(const vec3& point) -> vec3_spherical {
         const double distance = point.norm();
         const double
                 x = point.x(),
@@ -59,7 +59,7 @@ namespace rcsop::common {
         };
     }
 
-    vec3 Observer::spherical_to_cartesian(const vec3_spherical& point) {
+    auto Observer::spherical_to_cartesian(const vec3_spherical& point) -> vec3 {
         const auto& [radial, azimuthal, polar] = point;
         const auto phi = azimuthal * M_PI / 180.;
         const auto theta = polar * M_PI / 180.;
@@ -70,10 +70,12 @@ namespace rcsop::common {
         return {x, y, z};
     }
 
-    observed_point Observer::observe_point(const ScoredPoint& point) const {
+    auto Observer::observe_point(const ScoredPoint& point) const -> observed_point {
         const auto world_point = point.position();
         const auto distance = _camera->distance_to_camera(world_point);
         const auto local_point = _camera->map_to_observer_local(world_point);
+        auto point_check = _camera->map_to_world(local_point);
+        assert(point_check == world_point);
 
         const auto& [_, azimuthal, polar] = cartesian_to_spherical(local_point);
 
@@ -95,21 +97,21 @@ namespace rcsop::common {
         return point_info;
     }
 
-    vec3 Observer::project_position(const observed_point& observed_point) const {
-        const auto& [position, _, distance_in_world, vertical_angle, horizontal_angle] = observed_point;
+    auto Observer::project_position(const observed_point& observed_point) const -> vec3 {
+        const auto& [_p, _id, distance_in_world, vertical_angle, horizontal_angle] = observed_point;
         if (distance_in_world == 0) {
             return this->_camera->native_camera().position();
         }
         auto radial = distance_in_world * this->_units_per_centimeter;
-        auto azimuthal = 90 - horizontal_angle;
+        auto azimuthal = -(horizontal_angle - 90);
         auto polar = 90 - vertical_angle;
 
         const auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});
         return _camera->map_to_world(cartesian_local);
     }
 
-    shared_ptr<vector<observed_point>> Observer::observe_points(
-            const vector<ScoredPoint>& camera_points) const {
+    auto Observer::observe_points(
+            const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>> {
         auto result = map_vec_shared<ScoredPoint, observed_point, true>(
                 camera_points,
                 [this](const auto& point) {
@@ -119,8 +121,8 @@ namespace rcsop::common {
         return result;
     }
 
-    shared_ptr<vector<vec3>> Observer::project_observed_positions(
-            const vector<observed_point>& positions) const {
+    auto Observer::project_observed_positions(
+            const vector<observed_point>& positions) const -> shared_ptr<vector<vec3>> {
         auto result = map_vec_shared<observed_point, vec3, true>(
                 positions, [this](const auto& position) {
                     return project_position(position);
@@ -128,15 +130,15 @@ namespace rcsop::common {
         return result;
     }
 
-    path Observer::source_image_path() const {
+    auto Observer::source_image_path() const -> path {
         return this->_source_filepath;
     }
 
-    camera Observer::native_camera() const {
+    auto Observer::native_camera() const -> camera {
         return this->_camera->native_camera();
     }
 
-    bool Observer::has_position() const {
+    auto Observer::has_position() const -> bool {
         return this->_position.has_value();
     }
 

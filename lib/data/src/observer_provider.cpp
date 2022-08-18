@@ -103,15 +103,15 @@ namespace rcsop::data {
         for (auto& observer: _auxiliary_observers) observer.set_units_per_centimeter(_units_per_centimeter);
     }
 
-    vector<Observer> ObserverProvider::observers_with_positions() const {
+    auto ObserverProvider::observers_with_positions() const -> vector<Observer> {
         return this->_positioned_observers;
     }
 
-    vector<Observer> ObserverProvider::all_observers() const {
+    auto ObserverProvider::all_observers() const -> vector<Observer> {
         return this->_auxiliary_observers;
     }
 
-    double ObserverProvider::get_units_per_centimeter() const {
+    auto ObserverProvider::get_units_per_centimeter() const -> double {
         return this->_units_per_centimeter;
     }
 }

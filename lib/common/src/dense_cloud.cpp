@@ -17,9 +17,10 @@ namespace rcsop::common {
     }
 
     bool DenseCloud::is_inside(const vec3& point) const {
-        if (inside == nullptr) {
+        if (!CGAL::is_closed(*mesh)) {
             throw std::runtime_error("Dense mesh not closed, hence cannot determine whether any point is inside.");
         }
+        assert(inside != nullptr);
         Point cgalPoint(point.x(), point.y(), point.z());
         CGAL::Bounded_side res = (*this->inside)(cgalPoint);
 

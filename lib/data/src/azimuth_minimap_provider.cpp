@@ -17,7 +17,7 @@ namespace rcsop::data {
                 minimap_filename_pattern);
     }
 
-    const Texture& AzimuthMinimapProvider::for_position(const Observer& observer) const {
+    auto AzimuthMinimapProvider::for_position(const Observer& observer) const -> const Texture& {
         const auto position = observer.position();
         return this->_data.at(position.height).at(position.azimuth);
     }

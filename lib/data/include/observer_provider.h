@@ -19,11 +19,11 @@ namespace rcsop::data {
         explicit ObserverProvider(const InputDataCollector& input,
                                   const camera_options& camera_options);
 
-        [[nodiscard]] vector<Observer> observers_with_positions() const;
+        [[nodiscard]] auto observers_with_positions() const -> vector<Observer>;
 
-        [[nodiscard]] vector<Observer> all_observers() const;
+        [[nodiscard]] auto all_observers() const -> vector<Observer>;
 
-        [[nodiscard]] double get_units_per_centimeter() const;
+        [[nodiscard]] auto get_units_per_centimeter() const -> double;
     };
 }
 

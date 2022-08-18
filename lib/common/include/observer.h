@@ -25,9 +25,6 @@ namespace rcsop::common {
         shared_ptr<ObserverCamera const> _camera;
 
         double _units_per_centimeter = 1;
-
-        [[nodiscard]] vec3 project_position(const observed_point& position) const;
-
     public:
         explicit Observer(optional<ObserverPosition> camera_position,
                           path filepath,
@@ -37,25 +34,27 @@ namespace rcsop::common {
 
         void set_units_per_centimeter(double units);
 
-        [[nodiscard]] ObserverPosition position() const;
+        [[nodiscard]] auto position() const -> ObserverPosition;
 
-        [[nodiscard]] bool has_position() const;
+        [[nodiscard]] auto has_position() const -> bool;
 
-        [[nodiscard]] path source_image_path() const;
+        [[nodiscard]] auto source_image_path() const -> path;
 
-        [[nodiscard]] camera native_camera() const;
+        [[nodiscard]] auto native_camera() const -> camera;
 
-        [[nodiscard]] observed_point observe_point(const ScoredPoint& point) const;
+        [[nodiscard]] auto observe_point(const ScoredPoint& point) const -> observed_point;
 
-        [[nodiscard]] shared_ptr<vector<observed_point>>
-        observe_points(const vector<ScoredPoint>& camera_points) const;
+        [[nodiscard]] auto
+        observe_points(const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>>;
 
-        [[nodiscard]] shared_ptr<vector<vec3>>
-        project_observed_positions(const vector<observed_point>& position) const;
+        [[nodiscard]] auto project_position(const observed_point& position) const -> vec3;
 
-        static vec3_spherical cartesian_to_spherical(const vec3& point);
+        [[nodiscard]] auto
+        project_observed_positions(const vector<observed_point>& position) const -> shared_ptr<vector<vec3>>;
 
-        static vec3 spherical_to_cartesian(const vec3_spherical& point);
+        [[nodiscard]] static auto cartesian_to_spherical(const vec3& point) -> vec3_spherical;
+
+        [[nodiscard]] static auto spherical_to_cartesian(const vec3_spherical& point) -> vec3;
     };
 }
 

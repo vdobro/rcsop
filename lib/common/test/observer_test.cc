@@ -242,9 +242,9 @@ protected:
             const vector<vec3>& expected_values,
             const projected_point_property_selector& value_mapper) {
         const auto observed_points = observations_to_observed_points(test_input);
-        const auto result = _sut->project_observed_positions(observed_points);
-        for (size_t i = 0; i < result->size(); i++) {
-            const auto result_value = result->at(i);
+        const auto total_results = _sut->project_observed_positions(observed_points);
+        for (size_t i = 0; i < total_results->size(); i++) {
+            const auto result_value = total_results->at(i);
             const auto expected_value = value_mapper(expected_values.at(i));
 
             const auto result = value_mapper(result_value);

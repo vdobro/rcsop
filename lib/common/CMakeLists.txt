@@ -27,7 +27,7 @@ add_library(rcsop-common SHARED
         src/logging.cpp
         src/texture.cpp
         src/gauss.cpp
-        src/colmap_observer_camera.cpp)
+        src/colmap_observer_camera.cpp include/utils/rcs.h src/rcs.cpp)
 
 generate_export_header(rcsop-common)
 

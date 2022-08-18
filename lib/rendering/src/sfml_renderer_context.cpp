@@ -58,7 +58,7 @@ namespace rcsop::rendering {
         const auto r = static_cast<float>(point.color.x()) / RGB,
                 g = static_cast<float>(point.color.y()) / RGB,
                 b = static_cast<float>(point.color.z()) / RGB,
-                a = static_cast<float>(point.color.w() / RGB);
+                a = static_cast<float>(point.color.w()) / RGB;
         auto screen_size = this->_render_target->getSize();
 
         sf::Shader& shader = *this->_shader;

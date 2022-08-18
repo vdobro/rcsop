@@ -179,16 +179,16 @@ namespace rcsop::launcher {
                 },
         };
 
-        try {
-            InputDataCollector input_collector(input_path, options.camera);
+        //try {
+        InputDataCollector input_collector(input_path, options.camera);
 
-            const auto task_executor = available_tasks.at(task);
-            task_executor(input_collector, options);
-        } catch (const std::exception& e) {
-            cerr << "Failed to execute given task, reason:" << endl;
-            cerr << e.what() << endl;
-            return EXIT_FAILURE;
-        }
+        const auto task_executor = available_tasks.at(task);
+        task_executor(input_collector, options);
+        //} catch (const std::exception& e) {
+        //    cerr << "Failed to execute given task, reason:" << endl;
+        //    cerr << e.what() << endl;
+        //    return EXIT_FAILURE;
+        //}
         return EXIT_SUCCESS;
     }
 }

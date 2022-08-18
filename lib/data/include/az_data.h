@@ -17,30 +17,27 @@
 namespace rcsop::data {
     using rcsop::common::ObserverPosition;
 
-    using az_angle_t = double;
-    using az_range_t = long;
-
-    using az_value_map_t = map<az_angle_t, vector<rcs_value_t>>;
+    using az_value_map_t = map<rcs_angle_t, vector<rcs_value_t>>;
 
     class AzimuthRcsDataSet : public AbstractDataSet {
     private:
-        ObserverPosition _position{};
-        vector<az_range_t> _ranges;
-        az_range_t _range_step{};
+        vector<rcs_distance_t> _ranges;
+        rcs_distance_t _range_step{};
 
-        vector<az_angle_t> _angles;
-        az_angle_t _angle_step{};
+        vector<rcs_angle_t> _angles;
+        rcs_angle_t _angle_step{};
 
         az_value_map_t _raw_values;
         az_value_map_t _filtered_values;
         bool use_filtered = false;
 
-        az_value_map_t reconstruct_value_table(const vector<double>& raw_values);
+        [[nodiscard]] az_value_map_t reconstruct_value_table(const vector<double>& raw_values);
 
         void determine_step_sizes();
 
         void filter_peaks();
 
+        [[nodiscard]] rcs_value_t resolve_value(rcs_angle_t angle, size_t range_index) const;
     public:
         AzimuthRcsDataSet(const path& filename,
                           const ObserverPosition& position);
@@ -48,6 +45,12 @@ namespace rcsop::data {
         ~AzimuthRcsDataSet() override = default;
 
         [[nodiscard]] rcs_value_t map_to_nearest(const observed_point& point) const override;
+
+        [[nodiscard]] rcs_value_t map_exact(rcs_distance_t distance, rcs_angle_t angle) const override;
+
+        [[nodiscard]] vector<rcs_distance_t> distances() const override;
+
+        [[nodiscard]] vector<rcs_angle_t> angles() const override;
 
         void use_filtered_peaks();
     };
