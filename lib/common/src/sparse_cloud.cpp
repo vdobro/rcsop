@@ -6,8 +6,7 @@
 namespace rcsop::common {
     using rcsop::common::utils::sparse::Image;
 
-    SparseCloud::SparseCloud(const path& model_path) {
-        this->model_path = model_path;
+    SparseCloud::SparseCloud(const path& model_path) : BasePointCloud(model_path) {
         reload();
 
         vector<Image> images;
@@ -22,13 +21,12 @@ namespace rcsop::common {
         for (auto& image: images) {
             camera camera(image, *reconstruction);
             this->cameras.push_back(camera);
-            this->camera_map.insert(make_pair(camera.id(), camera));
         }
     }
 
     void SparseCloud::reload() {
         this->reconstruction = make_unique<Reconstruction>();
-        this->reconstruction->Read(model_path);
+        this->reconstruction->Read(this->model_path());
     }
 
     void SparseCloud::save(const path& output_path) {
@@ -49,26 +47,14 @@ namespace rcsop::common {
         return this->cameras;
     }
 
-    std::vector<point_pair> SparseCloud::get_point_pairs() const {
+    shared_ptr<vector<IdPoint>> SparseCloud::get_points() const {
         auto point_map = reconstruction->Points3D();
-
-        vector<point_pair> point_pairs;
+        auto result = make_shared<vector<IdPoint>>();
         for (const auto& [point_id, point]: point_map) {
-            auto pair = make_pair(point_id, point.XYZ());
-            point_pairs.push_back(pair);
+            result->emplace_back(point_id, point.XYZ());
         }
 
-        std::ranges::sort(point_pairs.begin(), point_pairs.end(), std::ranges::greater(), &point_pair::first);
-
-        return point_pairs;
-    }
-
-    shared_ptr<vector<ScoredPoint>> SparseCloud::get_scored_points() const {
-        auto model_points = get_point_pairs();
-        auto result = make_shared<vector<ScoredPoint>>();
-        for (const auto& [point_id, point]: model_points) {
-            result->emplace_back(point, point_id, 0);
-        }
+        std::ranges::sort(result->begin(), result->end(), std::ranges::greater(), &IdPoint::id);
         return result;
     }
 
@@ -90,7 +76,39 @@ namespace rcsop::common {
         reconstruction->AddPoint3D(point, colmap::Track(), convert_color(color));
     }
 
+    void SparseCloud::write(const path& output_path) {
+        create_directories(output_path);
+        reconstruction->WriteBinary(output_path);
+    }
+
     void SparseCloud::set_point_color(point_id_t point_id, const color_vec& color) {
         reconstruction->Point3D(point_id).Color() = convert_color(color);
+    }
+
+    size_t SparseCloud::point_count() const {
+        return this->reconstruction->NumPoints3D();
+    }
+
+    void SparseCloud::purge_cameras(const camera_id_t camera_to_keep) {
+        auto points = get_points();
+        map<point_id_t, color_vec> point_colors;
+
+        auto native_points = reconstruction->Points3D();
+        for (const auto& point: *points) {
+            auto color = native_points.at(point.id()).Color();
+            point_colors.insert(make_pair(point.id(), color.homogeneous()));
+        }
+
+        for (const auto& camera: get_cameras()) {
+            if (camera.id() == camera_to_keep) {
+                continue;
+            }
+            reconstruction->DeRegisterImage(camera.id());
+        }
+
+        for (const auto& point: *points) {
+            auto color = point_colors.at(point.id());
+            reconstruction->AddPoint3D(point.position(), colmap::Track{}, convert_color(color));
+        }
     }
 }

@@ -9,9 +9,11 @@
 #include "azimuth_rcs_data_collection.h"
 #include "azimuth_minimap_provider.h"
 #include "input_image.h"
+#include "model_writer.h"
 
 namespace rcsop::data {
     using std::domain_error;
+    using rcsop::data::ModelWriter;
     using rcsop::common::camera_options;
 
     enum InputAssetType {
@@ -105,6 +107,13 @@ namespace rcsop::data {
         [[nodiscard]] bool data_available() const {
             vector<path> asset_paths = _asset_paths.at(AssetType);
             return !asset_paths.empty();
+        }
+
+        [[nodiscard]] shared_ptr<ModelWriter> get_model_writer() const {
+            if (!data_available<SPARSE_CLOUD_COLMAP>()) {
+                throw domain_error("No sparse cloud model available.");
+            }
+            return make_shared<ModelWriter>(data<SPARSE_CLOUD_COLMAP>(false));
         }
     };
 }

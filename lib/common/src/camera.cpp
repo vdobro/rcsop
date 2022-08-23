@@ -27,7 +27,7 @@ namespace rcsop::common {
     }
 
     camera_id_t camera::id() const {
-        return _model_camera.CameraId();
+        return _model_image.ImageId();
     }
 
     vec2 camera::project_from_image(const vec2& point) const {

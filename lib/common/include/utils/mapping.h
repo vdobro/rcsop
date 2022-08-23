@@ -31,7 +31,7 @@ namespace rcsop::common::utils {
     vector<Target> map_vec(const vector<Source>& source,
                            const function<Target(const Source&)>& mapper) {
         vector<Target> result;
-        if constexpr(std::is_default_constructible<Target>::value) {
+        if constexpr (std::is_default_constructible<Target>::value) {
             result.resize(source.size());
             if constexpr (Parallel) {
                 std::transform(PARALLEL_EXECUTOR, source.begin(), source.end(), result.begin(), mapper);
@@ -41,7 +41,7 @@ namespace rcsop::common::utils {
             return result;
         }
 
-        if constexpr(Parallel) {
+        if constexpr (Parallel) {
             std::mutex vector_lock;
             std::for_each(PARALLEL_EXECUTOR,
                           source.cbegin(), source.cend(), [&vector_lock, &result, &mapper]
@@ -68,7 +68,7 @@ namespace rcsop::common::utils {
         auto result = make_shared<vector<Target>>();
         result->resize(source.size());
 
-        if constexpr(Parallel) {
+        if constexpr (Parallel) {
             std::transform(PARALLEL_EXECUTOR, source.cbegin(), source.cend(), result->begin(), mapper);
         } else {
             std::transform(source.cbegin(), source.cend(), result->begin(), mapper);
@@ -95,24 +95,22 @@ namespace rcsop::common::utils {
         });
     }
 
-
-    template<typename InputValueType, typename DataType>
-    size_t find_interval_match_index(InputValueType search_value,
-                                     DataType first_range,
-                                     DataType range_epsilon) {
-        return lround((static_cast<DataType>(search_value) - first_range) / (2 * range_epsilon));
+    template<typename DataType>
+    size_t find_nearest_index(DataType search_value,
+                          const vector<DataType>& list) {
+        auto iterator = std::min_element(list.cbegin(), list.cend(),
+                                         [&search_value](const DataType& a, const DataType& b){
+                                             return abs(search_value - a) < abs(search_value - b);
+                                         });
+        auto index = std::distance(list.cbegin(), iterator);
+        return index;
     }
 
-    template<typename InputValueType, typename DataType, typename MappedValueType>
-    MappedValueType find_interval_match(InputValueType search_value,
-                                        const vector<MappedValueType>& mapped_values,
-                                        DataType first_range,
-                                        DataType range_epsilon) {
-        size_t index = find_interval_match_index(search_value, first_range, range_epsilon);
-        if (index >= mapped_values.size()) {
-            return 0;
-        }
-        return mapped_values.at(index);
+    template<typename DataType>
+    DataType find_nearest(DataType search_value,
+                          const vector<DataType>& list) {
+        const size_t index = find_nearest_index(search_value, list);
+        return list[index];
     }
 }
 

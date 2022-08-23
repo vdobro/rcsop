@@ -8,6 +8,7 @@
 #include "observer_provider.h"
 #include "point_cloud_provider.h"
 #include "observer_renderer.h"
+#include "output_data_writer.h"
 #include "colors.h"
 
 namespace rcsop::launcher::tasks {
@@ -21,7 +22,9 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::height_t;
     using rcsop::common::Observer;
     using rcsop::common::ScoredPoint;
+    using rcsop::common::IdPoint;
     using rcsop::common::ScoredCloud;
+    using rcsop::common::OutputDataWriter;
 
     using rcsop::data::ObserverProvider;
     using rcsop::data::PointCloudProvider;
@@ -31,7 +34,7 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::coloring::color_values;
     using rcsop::rendering::ObserverRenderer;
 
-    using rcsop::launcher::utils::batch_render;
+    using rcsop::launcher::utils::batch_output;
 
     static inline auto flat_down_from_above(const vec3& point) -> vec2 {
         auto res = vec2();
@@ -86,7 +89,7 @@ namespace rcsop::launcher::tasks {
         const auto image_count = image_positions.size();
 
         const size_t take_every_nth = options.rendering.use_gpu_rendering ? 20 : 15;
-        const auto base_points = point_provider->get_base_scored_points(take_every_nth);
+        const auto base_points = point_provider->get_base_points(take_every_nth);
 
         const auto origin = vec2(0, 0);
         const height_t default_height = options.camera.default_height;
@@ -96,10 +99,10 @@ namespace rcsop::launcher::tasks {
         const vector<height_t> heights{default_height};
         const auto rcs_colors = color_values(data, rcsop::common::coloring::map_turbo);
 
-        const auto points = map_vec_shared<ScoredPoint, ScoredPoint>(
+        const auto points = map_vec_shared<IdPoint, ScoredPoint>(
                 *base_points,
                 [&data, &origin, &flattened_image_positions, &image_count]
-                        (const ScoredPoint& point) {
+                        (const IdPoint& point) {
                     auto flat_point = flat_down_from_above(point.position());
 
                     for (size_t image_id = 0; image_id < image_count; image_id++) {
@@ -108,18 +111,18 @@ namespace rcsop::launcher::tasks {
                             return ScoredPoint(point.position(), point.id(), data[image_id]);
                         }
                     }
-                    return ScoredPoint(point.position(), point.id());
+                    return ScoredPoint(point.position(), point.id(), 0);
                 });
 
         auto score_range = ScoredPoint::get_score_range(*points);
         auto color_map = construct_colormap_function(options.rendering.color_map, score_range);
 
-        auto renderers = map_vec<Observer, ObserverRenderer>(
-                observers, [&points, &color_map, &options](const Observer& observer) -> ObserverRenderer {
+        auto renderers = map_vec<Observer, shared_ptr<OutputDataWriter>>(
+                observers, [&points, &color_map, &options](const Observer& observer) -> shared_ptr<OutputDataWriter> {
                     ScoredCloud payload(observer, points);
-                    return ObserverRenderer(payload, color_map, options.rendering);
+                    return make_shared<ObserverRenderer>(payload, color_map, options.rendering);
                 });
 
-        batch_render(renderers, options, heights);
+        batch_output(renderers, options, heights);
     }
 }

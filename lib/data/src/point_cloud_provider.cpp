@@ -24,10 +24,9 @@ namespace rcsop::data {
             : _distance_to_origin(camera_options.distance_to_origin) {
         if (input.data_available<SPARSE_CLOUD_COLMAP>()) {
             this->sparse_cloud = input.data<SPARSE_CLOUD_COLMAP>(false);
-            this->sparse_cloud_points = sparse_cloud->get_scored_points();
+            this->sparse_cloud_points = sparse_cloud->get_points();
 
-            auto point_ids = map_vec<point_pair, point_id_t>(
-                    sparse_cloud->get_point_pairs(), &point_pair::first);
+            auto point_ids = map_vec<IdPoint, point_id_t>(*sparse_cloud_points, &IdPoint::id);
             max_sparse_point_id = *std::max_element(point_ids.begin(), point_ids.end());
 
             auto observer_provider = ObserverProvider(input, camera_options);
@@ -35,34 +34,33 @@ namespace rcsop::data {
         }
         if (input.data_available<DENSE_MESH_PLY>()) {
             this->dense_mesh = input.data<DENSE_MESH_PLY>(false);
-            this->dense_cloud_points = this->dense_mesh->points();
+            this->dense_cloud_points = this->dense_mesh->get_points();
         }
     }
 
-    shared_ptr<vector<ScoredPoint>> PointCloudProvider::get_base_scored_points(
+    shared_ptr<vector<IdPoint>> PointCloudProvider::get_base_points(
             size_t take_every_nth) const {
         assert(take_every_nth >= 1);
 
-        auto result = make_shared<vector<ScoredPoint>>(*sparse_cloud_points);
+        auto result = make_shared<vector<IdPoint>>(*sparse_cloud_points);
         auto dense_point_id = max_sparse_point_id + 1;
         for (const auto& point: *dense_cloud_points) {
-            result->emplace_back(point, dense_point_id, 0);
+            result->emplace_back(dense_point_id, point.position());
             dense_point_id++;
         }
 
         if (take_every_nth == 1) return result;
 
-        auto filtered_result = make_shared<vector<ScoredPoint>>();
+        auto filtered_result = make_shared<vector<IdPoint>>();
         for (size_t i = 0; i < result->size(); i += take_every_nth) {
             filtered_result->push_back(result->at(i));
         }
         return filtered_result;
     }
 
-    shared_ptr<vector<ScoredPoint>> PointCloudProvider::generate_homogenous_cloud(
-            size_t points_per_meter) const {
+    shared_ptr<vector<IdPoint>> PointCloudProvider::generate_homogenous_cloud(size_t points_per_meter) const {
         auto base_points = make_shared<vector<Point>>();
-        auto raw_points = get_base_scored_points();
+        auto raw_points = get_base_points();
         for (const auto& point: *raw_points) {
             const auto point_pos = point.position();
             base_points->emplace_back(point_pos.x(), point_pos.y(), point_pos.z());
@@ -87,7 +85,7 @@ namespace rcsop::data {
         const double span_y = (end_y - begin_y);
         const double span_z = (end_z - begin_z);
 
-        auto result = make_shared<vector<ScoredPoint>>();
+        auto result = make_shared<vector<IdPoint>>();
         size_t point_count = ceil(
                 (span_x / step_size - 1)
                 * (span_y / step_size - 1)
@@ -112,7 +110,7 @@ namespace rcsop::data {
                     const vec3 point_vector(x + dist(e2), y + dist(e2), z + dist(e2));
                     const double distance_from_origin = (middle_point - point_vector).norm();
                     if (distance_from_origin <= distance_threshold) {
-                        result->emplace_back(point_vector, index, 0);
+                        result->emplace_back(index, point_vector);
 
                         index++;
                     }

@@ -16,8 +16,6 @@ namespace rcsop::data {
     public:
         explicit AzimuthRcsDataCollection(const path& input_path);
 
-        ~AzimuthRcsDataCollection() override = default;
-
         void use_filtered_peaks();
 
         [[nodiscard]] const AbstractDataSet* get_for_exact_position(const Observer& observer) const override;

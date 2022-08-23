@@ -1,33 +1,40 @@
 #ifndef RCSOP_DATA_MODEL_WRITER_H
 #define RCSOP_DATA_MODEL_WRITER_H
 
-#include "input_data_collector.h"
 #include "scored_cloud.h"
-#include "sparse_cloud.h"
-#include "dense_cloud.h"
+#include "base_point_cloud.h"
+#include "output_data_writer.h"
+#include "camera.h"
 
 namespace rcsop::data {
-    using rcsop::data::InputDataCollector;
     using rcsop::common::scored_cloud_payload;
-    using rcsop::common::SparseCloud;
-    using rcsop::common::DenseCloud;
+    using rcsop::common::BasePointCloud;
+    using rcsop::common::OutputDataWriter;
+    using rcsop::common::ObserverPosition;
+    using rcsop::common::height_t;
+    using rcsop::common::camera;
 
-    class ModelWriter {
+    class ModelWriter : public OutputDataWriter {
     private:
-        bool _use_sparse = false;
-        shared_ptr<SparseCloud> _sparse_model = nullptr;
-        shared_ptr<DenseCloud> _dense_model = nullptr;
-
+        optional<ObserverPosition> _observer_position;
+        shared_ptr<BasePointCloud> _target_model = nullptr;
+        size_t _point_count{};
 
     public:
-        ModelWriter(const InputDataCollector& inputs,
-                    bool use_sparse_cloud);
-
-        ~ModelWriter() = default;
+        explicit ModelWriter(shared_ptr <BasePointCloud> target);
 
         void add_points(const scored_cloud_payload& points);
 
-        void write(const path& output_path);
+        void set_observer_position(ObserverPosition observer,
+                                   const camera& observer_camera);
+
+        [[nodiscard]] height_t observer_height() const override;
+
+        void write(const path& output_path, const string& log_prefix) override;
+
+        [[nodiscard]] bool observer_has_position() const override;
+
+        [[nodiscard]] string path_prefix() const override;
     };
 }
 

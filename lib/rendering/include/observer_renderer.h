@@ -9,16 +9,18 @@
 #include "texture.h"
 #include "rendering_options.h"
 #include "base_renderer.h"
+#include "output_data_writer.h"
 
 namespace rcsop::rendering {
     using rcsop::common::ScoredCloud;
     using rcsop::common::ScoredPoint;
     using rcsop::common::Texture;
     using rcsop::common::height_t;
+    using rcsop::common::OutputDataWriter;
 
     using rcsop::common::coloring::global_colormap_func;
 
-    class ObserverRenderer {
+    class ObserverRenderer : public OutputDataWriter {
     private:
         Observer _observer;
         shared_ptr<vector<ScoredPoint>> _points;
@@ -35,14 +37,16 @@ namespace rcsop::rendering {
                                   const global_colormap_func& color_map,
                                   const rendering_options& options);
 
-        bool observer_has_position() const;
+        [[nodiscard]] height_t observer_height() const override;
 
-        height_t observer_height() const;
+        void write(const path& output_path, const string& log_prefix) override;
+
+        [[nodiscard]] string path_prefix() const override;
+
+        [[nodiscard]] bool observer_has_position() const override;
 
         void add_texture(Texture texture, texture_rendering_options coordinates);
 
-        void render(const path& output_path,
-                    const string& log_prefix);
     };
 }
 

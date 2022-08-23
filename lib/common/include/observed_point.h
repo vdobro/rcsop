@@ -15,6 +15,8 @@ namespace rcsop::common {
         double vertical_angle = 0;
         double horizontal_angle = 0;
     };
+
+    using observed_factor_func = function<double(const observed_point&)>;
 }
 
 #endif //RCSOP_COMMON_OBSERVED_POINT_H

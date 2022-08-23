@@ -74,8 +74,8 @@ namespace rcsop::common {
         const auto world_point = point.position();
         const auto distance = _camera->distance_to_camera(world_point);
         const auto local_point = _camera->map_to_observer_local(world_point);
-        auto point_check = _camera->map_to_world(local_point);
-        assert(point_check == world_point);
+        //auto point_check = _camera->map_to_world(local_point);
+        //assert(point_check == world_point);
 
         const auto& [_, azimuthal, polar] = cartesian_to_spherical(local_point);
 

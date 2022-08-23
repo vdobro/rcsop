@@ -3,10 +3,10 @@
 
 #include "utils/types.h"
 #include "utils/points.h"
+#include "id_point.h"
 
 namespace rcsop::common {
-    using rcsop::common::utils::points::point_id_t;
-    using rcsop::common::utils::points::vec3;
+    using rcsop::common::IdPoint;
 
     struct ScoreRange {
         double min;
@@ -14,35 +14,34 @@ namespace rcsop::common {
     };
 
     class ScoredPoint {
-
     private:
-        point_id_t _point_id = -1;
-        vec3 _position = vec3::Zero();
+        IdPoint _point;
         double _score = 0;
 
+        double score() const {
+            return _score;
+        }
     public:
         ScoredPoint() = default;
 
-        ScoredPoint(vec3 position, point_id_t id, double score = 0);
+        ScoredPoint(vec3 position, point_id_t id, double score);
 
         ScoredPoint(const ScoredPoint& other) : ScoredPoint(other.position(), other.id(), other.score()) {}
 
         ScoredPoint& operator=(const ScoredPoint& other) {
             if (this == &other)
                 return *this;
-            this->_point_id = other.id();
-            this->_position = other.position();
-            this->_score = other.score();
+            this->_point = other._point;
             return *this;
         }
 
         [[nodiscard]] vec3 position() const;
 
-        [[nodiscard]] double score() const;
-
         [[nodiscard]] point_id_t id() const;
 
         [[nodiscard]] double score_to_dB() const;
+
+        [[nodiscard]] bool is_discarded() const;
 
         static ScoreRange get_score_range(const vector<ScoredPoint>& points);
 

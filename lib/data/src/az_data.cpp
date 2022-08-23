@@ -7,10 +7,8 @@
 namespace rcsop::data {
     using std::reduce;
     using rcsop::common::utils::map_vec;
-    using rcsop::common::utils::find_interval_match;
-    using rcsop::common::utils::find_interval_match_index;
-
-    const size_t ROWS_TO_SKIP = 1; // first row is filled with NaN
+    using rcsop::common::utils::find_nearest;
+    using rcsop::common::utils::find_nearest_index;
 
     const char* VARIABLE_MAIN = "auswertung";
     const char* TABLE_RANGES = "vRangeExt";
@@ -65,22 +63,6 @@ namespace rcsop::data {
         return result;
     }
 
-    void AzimuthRcsDataSet::determine_step_sizes() {
-        vector<long> range_steps;
-        for (size_t i = ROWS_TO_SKIP; i < _ranges.size(); i++) {
-            range_steps.push_back(_ranges[i] - _ranges[i - 1]);
-        }
-        _range_step = reduce(range_steps.begin(), range_steps.end())
-                      / static_cast<long>(range_steps.size());
-
-        vector<rcs_angle_t> angle_steps;
-        for (size_t i = ROWS_TO_SKIP; i < _angles.size(); i++) {
-            angle_steps.push_back(_angles[i] - _angles[i - 1]);
-        }
-        _angle_step = reduce(angle_steps.begin(), angle_steps.end())
-                      / static_cast<rcs_angle_t>(angle_steps.size());
-    }
-
     void AzimuthRcsDataSet::filter_peaks() {
         for (const auto& [angle, raw_column]: _raw_values) {
             double max_value = *std::max_element(raw_column.cbegin(), raw_column.cend());
@@ -115,7 +97,6 @@ namespace rcsop::data {
         Mat_Close(mat_file_handle);
 
         _ranges.erase(_ranges.begin()); // first row contains only NaN
-        determine_step_sizes();
 
         filter_peaks();
     }
@@ -131,11 +112,10 @@ namespace rcsop::data {
     }
 
     double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
-        const double range_distance = point.distance_in_world;
-        const double angle = point.horizontal_angle;
+        long range_distance = lround(point.distance_in_world);
 
-        const rcs_angle_t nearest_angle = find_interval_match(angle, _angles, _angles[0], _angle_step / 2);
-        const size_t nearest_range_index = find_interval_match_index(range_distance, _ranges[0], _range_step / 2);
+        rcs_angle_t nearest_angle = find_nearest(point.horizontal_angle, _angles);
+        size_t nearest_range_index = find_nearest_index(range_distance, _ranges);
 
         return resolve_value(nearest_angle, nearest_range_index);
     }
@@ -145,7 +125,7 @@ namespace rcsop::data {
     }
 
     rcs_value_t AzimuthRcsDataSet::map_exact(rcs_distance_t distance, rcs_angle_t angle) const {
-        const size_t nearest_range_index = find_interval_match_index(distance, _ranges[0], _range_step / 2);
+        const size_t nearest_range_index = find_nearest_index(distance, _ranges);
         return resolve_value(angle, nearest_range_index);
     }
 

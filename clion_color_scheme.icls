@@ -1,9 +1,9 @@
 <scheme name="Farbig" version="142" parent_scheme="Darcula">
   <metaInfo>
-    <property name="created">2022-05-05T10:28:39</property>
+    <property name="created">2022-08-23T20:54:04</property>
     <property name="ide">CLion</property>
-    <property name="ideVersion">2022.1.0.0</property>
-    <property name="modified">2022-05-05T10:29:25</property>
+    <property name="ideVersion">2022.2.1.0.0</property>
+    <property name="modified">2022-08-23T20:54:12</property>
     <property name="originalScheme">Farbig</property>
   </metaInfo>
   <attributes>
@@ -14,12 +14,12 @@
     </option>
     <option name="DEFAULT_FUNCTION_CALL">
       <value>
-        <option name="FOREGROUND" value="c7335b" />
+        <option name="FOREGROUND" value="40e6fc" />
       </value>
     </option>
     <option name="DEFAULT_GLOBAL_VARIABLE">
       <value>
-        <option name="FOREGROUND" value="d51717" />
+        <option name="FOREGROUND" value="2ad517" />
       </value>
     </option>
     <option name="DEFAULT_LOCAL_VARIABLE">

@@ -3,11 +3,13 @@
 
 #include "utils/types.h"
 #include "abstract_rcs_map.h"
+#include "observed_point.h"
 
 namespace rcsop::data {
     using rcsop::common::Observer;
     using rcsop::common::camera_options;
     using rcsop::common::ScoredPoint;
+    using rcsop::common::observed_factor_func;
     using rcsop::common::utils::points::vec3;
 
     class DataPointProjector {
@@ -23,11 +25,8 @@ namespace rcsop::data {
             const double first = source_values.at(0);
             const double last = source_values.at(source_values.size() - 1);
 
-            const double distance_after_first = abs(source_values.at(1) - first);
-            const double distance_before_last = abs(source_values.at(source_values.size() - 2) - last);
-
-            double lower_bound = first - (distance_after_first / 2);
-            double upper_bound = last + (distance_before_last / 2);
+            double lower_bound = first;
+            double upper_bound = last;
 
             const auto is_first = index == 0;
             const auto is_last = index == source_values.size() - 1;
@@ -57,8 +56,9 @@ namespace rcsop::data {
         explicit DataPointProjector();
 
         auto project_data(const AbstractDataSet* data,
-                          const function<bool(const rcs_value_t)>& filter,
-                          const Observer& observer) const -> shared_ptr<vector<ScoredPoint>> const;
+                          const function<bool(double)>& db_filter,
+                          const observed_factor_func& factor_func,
+                          const Observer& observer) const -> shared_ptr<vector<ScoredPoint>>;
 
     };
 

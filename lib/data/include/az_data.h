@@ -22,10 +22,7 @@ namespace rcsop::data {
     class AzimuthRcsDataSet : public AbstractDataSet {
     private:
         vector<rcs_distance_t> _ranges;
-        rcs_distance_t _range_step{};
-
         vector<rcs_angle_t> _angles;
-        rcs_angle_t _angle_step{};
 
         az_value_map_t _raw_values;
         az_value_map_t _filtered_values;
@@ -33,16 +30,12 @@ namespace rcsop::data {
 
         [[nodiscard]] az_value_map_t reconstruct_value_table(const vector<double>& raw_values);
 
-        void determine_step_sizes();
-
         void filter_peaks();
 
         [[nodiscard]] rcs_value_t resolve_value(rcs_angle_t angle, size_t range_index) const;
     public:
         AzimuthRcsDataSet(const path& filename,
                           const ObserverPosition& position);
-
-        ~AzimuthRcsDataSet() override = default;
 
         [[nodiscard]] rcs_value_t map_to_nearest(const observed_point& point) const override;
 

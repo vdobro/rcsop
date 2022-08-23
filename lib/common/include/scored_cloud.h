@@ -12,27 +12,28 @@ namespace rcsop::common {
 
     class ScoredCloud {
     private:
-        const Observer _observer;
-        const shared_ptr<vector<ScoredPoint>> _points;
+        Observer _observer;
+        shared_ptr<vector<ScoredPoint>> _points;
     public:
-        explicit ScoredCloud(const Observer& observer,
-                             shared_ptr<vector<ScoredPoint>> points);
+        ScoredCloud(const Observer& observer, shared_ptr<vector<ScoredPoint>> points);
 
         [[nodiscard]] const Observer& observer() const;
 
         [[nodiscard]] shared_ptr<vector<ScoredPoint>> points() const;
     };
 
+    struct scored_cloud_payload {
+        ScoredCloud point_cloud;
+        global_colormap_func colormap;
+    };
+
     struct multiple_scored_cloud_payload {
         vector<ScoredCloud> point_clouds;
         global_colormap_func colormap;
 
-        [[nodiscard]] vector<height_t> observer_heights() const;
-    };
+        [[nodiscard]] auto observer_heights() const -> vector<height_t>;
 
-    struct scored_cloud_payload {
-        ScoredCloud point_cloud;
-        global_colormap_func colormap;
+        [[nodiscard]] auto extract_single_payloads() const -> vector<scored_cloud_payload>;
     };
 }
 

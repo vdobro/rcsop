@@ -27,4 +27,16 @@ namespace rcsop::common {
         std::copy(heights.begin(), heights.end(), std::back_inserter(result));
         return result;
     }
+
+    auto multiple_scored_cloud_payload::extract_single_payloads() const -> vector<scored_cloud_payload> {
+        return utils::map_vec<ScoredCloud, scored_cloud_payload>(
+                this->point_clouds,
+                [this](const ScoredCloud cloud) -> scored_cloud_payload {
+                    return scored_cloud_payload{
+                        .point_cloud = cloud,
+                        .colormap = this->colormap,
+                    };
+                }
+        );
+    }
 }

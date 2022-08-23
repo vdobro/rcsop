@@ -6,6 +6,7 @@
 
 #include "scored_cloud.h"
 #include "input_data_collector.h"
+#include "observed_point.h"
 
 #include "colors.h"
 
@@ -14,9 +15,8 @@ namespace rcsop::launcher::utils {
     using rcsop::common::observed_point;
     using rcsop::data::AbstractDataCollection;
     using rcsop::common::multiple_scored_cloud_payload;
+    using rcsop::common::observed_factor_func;
     using rcsop::common::coloring::global_colormap_func;
-
-    using observed_factor_func = function<double(const observed_point&)>;
 
     double identity_factor(const observed_point& point);
 

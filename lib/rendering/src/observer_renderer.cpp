@@ -44,8 +44,8 @@ namespace rcsop::rendering {
         return rendered_points;
     }
 
-    void ObserverRenderer::render(const path& output_path,
-                                  const string& log_prefix) {
+    void ObserverRenderer::write(const path& output_path,
+                                 const string& log_prefix) {
         auto time_measure = start_time();
 
         const auto& camera = _observer.native_camera();
@@ -99,5 +99,9 @@ namespace rcsop::rendering {
         assert(this->observer_has_position());
 
         return this->_observer.position().height;
+    }
+
+    string ObserverRenderer::path_prefix() const {
+        return "img";
     }
 }
