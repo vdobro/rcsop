@@ -173,4 +173,8 @@ namespace rcsop::data {
         std::sort(heights.begin(), heights.end());
         return heights;
     }
+
+    bool BasicRcsMap::is_available_at(const path& file_path) {
+        return std::filesystem::is_regular_file(file_path);
+    }
 }

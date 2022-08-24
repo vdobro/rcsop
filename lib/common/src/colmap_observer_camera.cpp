@@ -21,15 +21,15 @@ namespace rcsop::common {
     }
 
     vec3 ColmapObserverCamera::map_to_world(const vec3& observer_local) const {
-        vec3 camera_test_to_world = _camera.transform_to_world(observer_local);
-        vec3 camera_test_to_local = _camera.transform_to_local(camera_test_to_world);
-        assert_near(observer_local, camera_test_to_local);
+        //vec3 camera_test_to_world = _camera.transform_to_world(observer_local);
+        //vec3 camera_test_to_local = _camera.transform_to_local(camera_test_to_world);
+        //assert_near(observer_local, camera_test_to_local);
         vec3 local_point = observer_local.transpose()
                            * _pitch_correction.rotation().transpose()
                            * _colmap_camera_rotation_fix.rotation().transpose();
 
         auto result = _camera.transform_to_world(local_point);
-        assert_near(this->map_to_observer_local(result), observer_local);
+        //assert_near(this->map_to_observer_local(result), observer_local);
         return result;
     }
 

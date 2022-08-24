@@ -5,6 +5,7 @@
 
 namespace rcsop::common {
     using rcsop::common::utils::points::vec3;
+    using camera_correction_transform = Eigen::Transform<double, 3, Eigen::Affine>;
 
     class ObserverCamera {
     public:

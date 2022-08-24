@@ -34,7 +34,7 @@ namespace rcsop::common {
                 [this](const ScoredCloud cloud) -> scored_cloud_payload {
                     return scored_cloud_payload{
                         .point_cloud = cloud,
-                        .colormap = this->colormap,
+                        .color_map = this->color_map,
                     };
                 }
         );

@@ -16,7 +16,7 @@ namespace rcsop::data {
         for (const auto& point: *(payload.point_cloud.points())) {
             _target_model->add_point(
                     point.position(),
-                    payload.colormap(point.score_to_dB())
+                    payload.color_map(point.score_to_dB())
             );
         }
 

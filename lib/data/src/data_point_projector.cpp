@@ -51,7 +51,8 @@ namespace rcsop::data {
     auto DataPointProjector::project_data(const AbstractDataSet* data,
                                           const function<bool(double)>& db_filter,
                                           const observed_factor_func& factor_func,
-                                          const Observer& observer) const
+                                          const Observer& observer,
+                                          const data_observer_translation& observer_translation) const
     -> shared_ptr<vector<ScoredPoint>> {
         const auto angles = data->angles();
         const auto distances = data->distances();
@@ -78,7 +79,7 @@ namespace rcsop::data {
                                                        STEP_ANGLE, STEP_DISTANCE / 2 - 0.001, VERTICAL_ANGLE_LIMIT);
                 for (auto& point: points_in_ranges) {
                     point.id = id++;
-                    point.position = observer.project_position(point);
+                    point.position = observer.project_position(point, observer_translation);
 
                     auto score = data_point * factor_func(point);
                     auto scored_point = ScoredPoint(point.position, point.id, score);

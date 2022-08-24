@@ -19,6 +19,8 @@ namespace rcsop::data {
         explicit AzimuthMinimapProvider(const path& input_root_path);
 
         [[nodiscard]] auto for_position(const Observer& observer) const -> const Texture&;
+
+        [[nodiscard]] static bool is_available_at(const path& root_path);
     };
 }
 

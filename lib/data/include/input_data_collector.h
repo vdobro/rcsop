@@ -99,20 +99,27 @@ namespace rcsop::data {
                 throw domain_error("No data: " + asset_description);
             }
             if constexpr (Multiple) {
-                map<string, ReturnAssetType> labeled_assets{};
+                map<string, shared_ptr<ReturnAssetType>> labeled_assets;
                 for (const auto& asset_path : asset_paths) {
                     string path_suffix = asset_path.filename().string();
-                    labeled_assets.insert(
-                            make_pair(path_suffix, ReturnAssetType(asset_path)));
+                    labeled_assets.insert(make_pair(path_suffix, make_shared<ReturnAssetType>(asset_path)));
                 }
                 return labeled_assets;
+            } else {
+                vector<shared_ptr<ReturnAssetType>> result;
+                for (const auto& path : asset_paths) {
+                    if (ReturnAssetType::is_available_at(path)) {
+                        result.push_back(make_shared<ReturnAssetType>(path));
+                    }
+                }
+                if (result.size() > 1) {
+                    throw domain_error("More than one set of data: " + asset_description);
+                }
+                if (result.empty()) {
+                    throw domain_error("No set of data available: " + asset_description);
+                }
+                return result[0];
             }
-
-            if (asset_paths.size() > 1) {
-                throw domain_error("More than one set of data: " + asset_description);
-            }
-            const path& asset_path = asset_paths[0];
-            return make_shared<ReturnAssetType>(asset_path);
         }
 
         template<InputAssetType AssetType>

@@ -97,7 +97,16 @@ namespace rcsop::common {
         return point_info;
     }
 
-    auto Observer::project_position(const observed_point& observed_point) const -> vec3 {
+    static auto translate_data_point(const vec3& local_point,
+                                     const data_observer_translation& observer_translation) -> vec3 {
+        camera_correction_transform world_translation;
+        world_translation = Eigen::AngleAxis<double>(
+                (observer_translation.rotation * M_PI) / 180., vec3::UnitY());
+        return local_point.transpose() * world_translation.rotation();
+    }
+
+    auto Observer::project_position(const observed_point& observed_point,
+                                    const data_observer_translation& observer_translation) const -> vec3 {
         const auto& [_p, _id, distance_in_world, vertical_angle, horizontal_angle] = observed_point;
         if (distance_in_world == 0) {
             return this->_camera->native_camera().position();
@@ -106,8 +115,10 @@ namespace rcsop::common {
         auto azimuthal = -(horizontal_angle - 90);
         auto polar = 90 - vertical_angle;
 
-        const auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});
-        return _camera->map_to_world(cartesian_local);
+        auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});
+        auto translated_local = translate_data_point(cartesian_local, observer_translation);
+
+        return _camera->map_to_world(translated_local);
     }
 
     auto Observer::observe_points(
@@ -122,10 +133,11 @@ namespace rcsop::common {
     }
 
     auto Observer::project_observed_positions(
-            const vector<observed_point>& positions) const -> shared_ptr<vector<vec3>> {
+            const vector<observed_point>& positions,
+            const data_observer_translation& observer_translation) const -> shared_ptr<vector<vec3>> {
         auto result = map_vec_shared<observed_point, vec3, true>(
-                positions, [this](const auto& position) {
-                    return project_position(position);
+                positions, [this, &observer_translation](const auto& position) {
+                    return project_position(position, observer_translation);
                 });
         return result;
     }

@@ -58,38 +58,12 @@ namespace rcsop::launcher::utils {
         return filtered_points;
     }
 
-    static inline auto value_observed_points(
-            const vector<observed_point>& observed_points,
-            const AbstractDataSet* data_for_observer,
-            const observed_factor_func& factor_func
-    ) -> shared_ptr<vector<ScoredPoint>> {
-        auto scored_points = map_vec<observed_point, ScoredPoint, false>(
-                observed_points,
-                [&data_for_observer, &factor_func](const observed_point& point) {
-                    double value = data_for_observer->map_to_nearest(point);
-                    if (abs(point.vertical_angle) > 5.0 || std::isnan(value)) {
-                        return ScoredPoint(point.position, point.id, 0);
-                    }
-
-                    double factor = factor_func(point);
-                    double final_value = factor * value;
-                    return ScoredPoint(point.position, point.id, final_value);
-                });
-        auto result = make_shared<vector<ScoredPoint>>();
-        for (const auto& point : scored_points) {
-            if (!point.is_discarded()) {
-                result->push_back(point);
-            }
-        }
-        return result;
-    }
-
     auto score_points(
             const InputDataCollector& inputs,
-            const AbstractDataCollection& data,
+            const vector<pair<data_observer_translation, shared_ptr<AbstractDataCollection>>>& labeled_data,
             const task_options& task_options,
-            const global_colormap_func& colormap_func,
-            const observed_factor_func& factor_func) -> shared_ptr<multiple_scored_cloud_payload> {
+            const global_colormap_func& color_map_func,
+            const observed_factor_func& factor_func) -> shared_ptr<multiple_scored_cloud_payload const> {
         auto dB_range = task_options.db_range;
         auto observer_provider = make_shared<ObserverProvider>(inputs, task_options.camera);
         auto projector = make_shared<DataPointProjector>();
@@ -104,30 +78,36 @@ namespace rcsop::launcher::utils {
         size_t filtered_count{0};
         const vector<ScoredCloud> complete_payload = map_vec<Observer, ScoredCloud, false>(
                 observers,
-                [&data, &projector, range_filter, &factor_func,
+                [&labeled_data, &projector, range_filter, &factor_func,
                         &observer_count, &total_count, &filtered_count]
                         (const size_t index, const Observer& observer) {
                     auto time = start_time();
-                    auto data_for_observer = data.get_for_exact_position(observer);
-                    auto projected_points = projector->project_data(data_for_observer, range_filter,
-                                                                    factor_func, observer);
-                    auto filtered_points = filter_points(*projected_points, range_filter);
+                    auto relevant_points = make_shared<vector<ScoredPoint>>();
+                    for (const auto& [observer_options, data_set]: labeled_data) {
+                        auto data_for_observer = data_set->get_for_exact_position(observer);
+                        auto projected_points = projector->project_data(data_for_observer, range_filter, factor_func,
+                                                                        observer, observer_options);
+                        total_count += projected_points->size();
+
+                        auto filtered_points = filter_points(*projected_points, range_filter);
+                        filtered_count += filtered_points->size();
+
+                        relevant_points->insert(relevant_points->end(), filtered_points->cbegin(),
+                                                filtered_points->cend());
+                    }
 
                     log_and_start_next(time, construct_log_prefix(index + 1, observer_count)
-                                             + "Scored and filtered " + std::to_string(filtered_points->size()) +
-                                             " points");
-                    total_count += projected_points->size();
-                    filtered_count += filtered_points->size();
-                    return ScoredCloud(observer, filtered_points);
+                                             + "Scored and filtered " + std::to_string(relevant_points->size()) + " points");
+                    return ScoredCloud(observer, relevant_points);
                 });
         log_and_start_next(total_time, "Scored a total of " + std::to_string(total_count) +
                                        " and filtered down to " + std::to_string(filtered_count) +
-                                       " for a total of " +  std::to_string(observer_count) +
+                                       " for a total of " + std::to_string(observer_count) +
                                        " observers.");
 
         return make_shared<multiple_scored_cloud_payload>(multiple_scored_cloud_payload{
                 .point_clouds = complete_payload,
-                .colormap = colormap_func,
+                .color_map = color_map_func,
         });
     }
 

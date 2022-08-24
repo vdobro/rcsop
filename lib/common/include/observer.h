@@ -18,6 +18,11 @@ namespace rcsop::common {
         height_t default_height{};
     };
 
+    struct data_observer_translation {
+        double vertical_offset{};
+        double rotation{};
+    };
+
     class Observer {
     private:
         optional<ObserverPosition> _position;
@@ -47,10 +52,13 @@ namespace rcsop::common {
         [[nodiscard]] auto
         observe_points(const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>>;
 
-        [[nodiscard]] auto project_position(const observed_point& position) const -> vec3;
+        [[nodiscard]] auto
+        project_position(const observed_point& position,
+                         const data_observer_translation& observer_translation = {}) const -> vec3;
 
         [[nodiscard]] auto
-        project_observed_positions(const vector<observed_point>& position) const -> shared_ptr<vector<vec3>>;
+        project_observed_positions(const vector<observed_point>& position,
+                                   const data_observer_translation& observer_translation = {}) const -> shared_ptr<vector<vec3>>;
 
         [[nodiscard]] static auto cartesian_to_spherical(const vec3& point) -> vec3_spherical;
 

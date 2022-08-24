@@ -38,9 +38,13 @@ namespace rcsop::data::utils {
 
     vector<mat_path_with_azimuth> find_mat_files_in_folder(
             const path& folder_for_height,
-            const regex& data_file_regex);
+            const regex& data_filename_pattern,
+            size_t pattern_azimuth_index);
 
-    vector<height_data_folder> parse_available_heights(const path& data_path);
+    vector<height_data_folder> parse_available_heights(
+            const path& data_path,
+            const regex& data_filename_pattern,
+            size_t pattern_height_index);
 
     enum AzimuthInput {
         RCS_MAT = 0,
@@ -72,14 +76,15 @@ namespace rcsop::data::utils {
     template<AzimuthInput T>
     map<azimuth_t, AzimuthInputType<T>> map_azimuth_angles_to_data(
             const height_data_folder& height_folder,
-            const regex& data_file_regex) {
+            const regex& data_file_regex,
+            size_t filename_azimuth_index) {
         using AT = AzimuthInputType<T>;
 
         const height_t height = height_folder.height;
 
         map<azimuth_t, AT> azimuth_to_data;
 
-        auto file_paths = find_mat_files_in_folder(height_folder.folder_path, data_file_regex);
+        auto file_paths = find_mat_files_in_folder(height_folder.folder_path, data_file_regex, filename_azimuth_index);
         std::mutex map_mutex;
         std::for_each(std::execution::par_unseq,
                       begin(file_paths), end(file_paths),
@@ -100,16 +105,19 @@ namespace rcsop::data::utils {
     template<AzimuthInput T>
     map<height_t, map<azimuth_t, AzimuthInputType<T>>> collect_all_heights(
             const path& data_path,
-            const regex& data_filename_pattern) {
+            const regex& data_filename_pattern,
+            const size_t filename_height_index,
+            const size_t filename_azimuth_index) {
         using AT = AzimuthInputType<T>;
         using azimuth_map_t = map<azimuth_t, AT>;
         using result_map_t = map<height_t, azimuth_map_t>;
 
         auto start = start_time();
-        auto heights = parse_available_heights(data_path);
+        auto heights = parse_available_heights(data_path, data_filename_pattern, filename_height_index);
         result_map_t result;
         for (auto height_folder: heights) {
-            azimuth_map_t angle_mapping = map_azimuth_angles_to_data<T>(height_folder, data_filename_pattern);
+            azimuth_map_t angle_mapping = map_azimuth_angles_to_data<T>(
+                    height_folder, data_filename_pattern, filename_azimuth_index);
             result.insert(make_pair(height_folder.height, angle_mapping));
         }
         log_and_start_next(start, "Reading " + string(azimuthInputTypeDescriptions[T]) + " finished");

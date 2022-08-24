@@ -6,6 +6,10 @@
 namespace rcsop::common {
     using rcsop::common::utils::sparse::Image;
 
+    const static char* FILE_CAMERAS = "cameras.bin";
+    const static char* FILE_IMAGES = "images.bin";
+    const static char* FILE_POINTS = "points3D.bin";
+
     SparseCloud::SparseCloud(const path& model_path) : BasePointCloud(model_path) {
         reload();
 
@@ -24,6 +28,15 @@ namespace rcsop::common {
         }
     }
 
+    bool SparseCloud::is_available_at(const path& root_path) {
+        path cameras_path{root_path / FILE_CAMERAS};
+        path images_path{root_path / FILE_IMAGES};
+        path points_path{root_path / FILE_POINTS};
+        return std::filesystem::is_regular_file(cameras_path)
+               && std::filesystem::is_regular_file(images_path)
+               && std::filesystem::is_regular_file(points_path);
+    }
+
     void SparseCloud::reload() {
         this->reconstruction = make_unique<Reconstruction>();
         this->reconstruction->Read(this->model_path());
@@ -33,9 +46,9 @@ namespace rcsop::common {
         if (!exists(output_path)) {
             create_directories(output_path);
         }
-        path cameras_path{output_path / "cameras.bin"};
-        path images_path{output_path / "images_path.bin"};
-        path points_path{output_path / "points3D.bin"};
+        path cameras_path{output_path / FILE_CAMERAS};
+        path images_path{output_path / FILE_IMAGES};
+        path points_path{output_path / FILE_POINTS};
         remove(cameras_path);
         remove(images_path);
         remove(points_path);

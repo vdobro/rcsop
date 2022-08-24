@@ -4,8 +4,6 @@
 #include "observer_camera.h"
 
 namespace rcsop::common {
-    using camera_correction_transform = Eigen::Transform<double, 3, Eigen::Affine>;
-
     class ColmapObserverCamera : public ObserverCamera {
     private:
         const vec3 _position;

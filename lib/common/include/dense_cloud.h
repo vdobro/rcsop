@@ -47,6 +47,8 @@ namespace rcsop::common {
         void purge_cameras(camera_id_t camera_to_keep) override;
 
         void write(const path& output_path) override;
+
+        [[nodiscard]] static bool is_available_at(const path& file_path);
     };
 }
 #endif //RCSOP_COMMON_DENSE_CLOUD_H

@@ -21,6 +21,8 @@ namespace rcsop::data {
         [[nodiscard]] const AbstractDataSet* get_for_exact_position(const Observer& observer) const override;
 
         [[nodiscard]] vector<height_t> heights() const;
+
+        [[nodiscard]] static bool is_available_at(const path& file_path);
     };
 }
 

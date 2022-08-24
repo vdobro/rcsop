@@ -62,4 +62,8 @@ namespace rcsop::common {
     void DenseCloud::purge_cameras(camera_id_t camera_to_keep) {
         //TODO log warning, nothing else to be done here
     }
+
+    bool DenseCloud::is_available_at(const path& file_path) {
+        return std::filesystem::is_regular_file(file_path);
+    }
 }

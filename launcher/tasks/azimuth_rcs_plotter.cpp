@@ -1,10 +1,13 @@
 #include "azimuth_rcs_plotter.h"
 
+#include <regex>
+
 #include "utils/mapping.h"
 #include "utils/gauss.h"
 #include "utils/point_scoring.h"
 
 #include "colors.h"
+#include "observer.h"
 #include "output_data_writer.h"
 #include "model_writer.h"
 #include "observer_renderer.h"
@@ -24,28 +27,62 @@ namespace rcsop::launcher::tasks {
 
     using rcsop::data::AZIMUTH_RCS_MAT;
     using rcsop::data::AZIMUTH_RCS_MINIMAP;
+    using rcsop::data::AzimuthRcsDataCollection;
+    using rcsop::data::AbstractDataCollection;
     using rcsop::data::ModelWriter;
 
     using rcsop::rendering::texture_rendering_options;
     using rcsop::rendering::ObserverRenderer;
     using rcsop::common::coloring::construct_colormap_function;
+    using rcsop::common::data_observer_translation;
+
+    using std::regex;
+    using std::smatch;
+
+    static const regex data_label_pattern("^(\\d{1,3})(°)?$");
+
+    auto translate_label_to_translation(const string& label) -> data_observer_translation {
+        smatch label_match;
+        if (!regex_match(label, label_match, data_label_pattern)) {
+            std::clog << "Warning: RCS data folder doesn't match expected name pattern, using default values";
+            return {};
+        }
+        long roll_degrees = std::stoi(label_match[1]);
+        data_observer_translation observer_translation{
+                .vertical_offset = 0, //TODO unused
+                .rotation = static_cast<double>(roll_degrees),
+        };
+        return observer_translation;
+    }
+
+    static auto map_labeled_data(const map<string, shared_ptr<AzimuthRcsDataCollection>>& data) {
+        vector<pair<data_observer_translation, shared_ptr<AbstractDataCollection>>> result;
+        for (auto& [label, data_set]: data) {
+            auto observer_translation = translate_label_to_translation(label);
+            result.emplace_back(observer_translation, data_set);
+        }
+        return result;
+    }
 
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
                              const task_options& options) {
-        auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT, false>();
+        auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT, true>();
+        auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP>();
 
-        azimuth_data->use_filtered_peaks();
+        for (auto& [_, data]: azimuth_data) {
+            data->use_filtered_peaks();
+        }
 
         ScoreRange range = options.db_range;
         auto color_map = construct_colormap_function(options.rendering.color_map, range);
-        auto scored_payload = score_points(inputs, *azimuth_data, options, color_map, rcs_gaussian_vertical);
+        auto data_with_translation = map_labeled_data(azimuth_data);
+        auto scored_payload = score_points(inputs, data_with_translation, options, color_map, rcs_gaussian_vertical);
         texture_rendering_options minimap_position = {
                 .coordinates= vec2(915., 420.),
                 .size = vec2(400., 300.),
         };
 
         auto& point_clouds = scored_payload->point_clouds;
-        auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP>();
         auto renderers = map_vec<ScoredCloud, shared_ptr<OutputDataWriter>, true>(
                 point_clouds,
                 [&color_map, &options, &minimaps, &minimap_position]

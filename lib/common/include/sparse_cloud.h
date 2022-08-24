@@ -44,6 +44,8 @@ namespace rcsop::common {
         void purge_cameras(camera_id_t camera_to_keep) override;
 
         void set_point_color(point_id_t point_id, const color_vec& color);
+
+        [[nodiscard]] static bool is_available_at(const path& root_path);
     };
 
 }

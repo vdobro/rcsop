@@ -53,6 +53,8 @@ namespace rcsop::data {
         [[nodiscard]] shared_ptr<BasicRcsDataSet> at_height(height_t height) const;
 
         [[nodiscard]] vector<height_t> available_heights() const;
+
+        [[nodiscard]] static bool is_available_at(const path& file_path);
     };
 }
 

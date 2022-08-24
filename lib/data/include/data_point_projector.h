@@ -7,6 +7,7 @@
 
 namespace rcsop::data {
     using rcsop::common::Observer;
+    using rcsop::common::data_observer_translation;
     using rcsop::common::camera_options;
     using rcsop::common::ScoredPoint;
     using rcsop::common::observed_factor_func;
@@ -58,7 +59,8 @@ namespace rcsop::data {
         auto project_data(const AbstractDataSet* data,
                           const function<bool(double)>& db_filter,
                           const observed_factor_func& factor_func,
-                          const Observer& observer) const -> shared_ptr<vector<ScoredPoint>>;
+                          const Observer& observer,
+                          const data_observer_translation& observer_translation) const -> shared_ptr<vector<ScoredPoint>>;
 
     };
 

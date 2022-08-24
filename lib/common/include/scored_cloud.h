@@ -24,12 +24,12 @@ namespace rcsop::common {
 
     struct scored_cloud_payload {
         ScoredCloud point_cloud;
-        global_colormap_func colormap;
+        global_colormap_func color_map;
     };
 
     struct multiple_scored_cloud_payload {
         vector<ScoredCloud> point_clouds;
-        global_colormap_func colormap;
+        global_colormap_func color_map;
 
         [[nodiscard]] auto observer_heights() const -> vector<height_t>;
 
