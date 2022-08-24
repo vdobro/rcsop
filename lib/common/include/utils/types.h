@@ -28,4 +28,8 @@ using std::filesystem::path;
 using std::filesystem::create_directories;
 using std::filesystem::remove;
 
+const double STANDARD_ERROR = 2E-8;
+
+#define assert_near(vec_a, vec_b) assert(abs(((vec_a) - (vec_b)).norm()) < STANDARD_ERROR);
+
 #endif //RCSOP_COMMON_TYPES_H

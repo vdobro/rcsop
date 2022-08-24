@@ -3,7 +3,6 @@
 namespace rcsop::data {
     using common::utils::points::point_id_t;
     using uniform_distribution = std::uniform_real_distribution<double>;
-    const double STANDARD_ERROR = 2E-8;
 
     const double STEP_DISTANCE = 3;
     const double STEP_ANGLE = 0.3;

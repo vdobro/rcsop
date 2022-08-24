@@ -33,7 +33,7 @@ namespace rcsop::launcher::tasks {
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
                              const task_options& options) {
         auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT>(false);
-        //azimuth_data->use_filtered_peaks();
+        azimuth_data->use_filtered_peaks();
 
         ScoreRange range = options.db_range;
         auto color_map = construct_colormap_function(options.rendering.color_map, range);

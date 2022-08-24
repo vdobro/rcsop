@@ -26,6 +26,7 @@ using rcsop::common::utils::sparse::Camera;
 using rcsop::common::utils::sparse::Reconstruction;
 using rcsop::common::utils::points::vec3;
 using rcsop::common::utils::points::vec3_spherical;
+using rcsop::common::utils::points::point_id_t;
 using rcsop::common::utils::map_vec;
 
 struct observation {
@@ -200,8 +201,9 @@ protected:
 
     shared_ptr<vector<observed_point>> observe_points(
             const vector<vec3>& test_input) {
-        const auto input = map_vec<vec3, ScoredPoint>(test_input, [](const vec3& point) {
-            return ScoredPoint(point, 0);
+        point_id_t id{};
+        const auto input = map_vec<vec3, ScoredPoint, false>(test_input, [&id](const vec3& point) {
+            return ScoredPoint(point, id++, 0);
         });
         return _sut->observe_points(input);
     }

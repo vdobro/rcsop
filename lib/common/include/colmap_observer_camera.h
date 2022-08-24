@@ -11,7 +11,7 @@ namespace rcsop::common {
         const vec3 _position;
         const camera _camera;
 
-        camera_correction_transform _correction;
+        camera_correction_transform _pitch_correction;
         camera_correction_transform _colmap_camera_rotation_fix;
     public:
         explicit ColmapObserverCamera(camera camera,
