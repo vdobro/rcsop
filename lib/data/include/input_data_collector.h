@@ -15,6 +15,7 @@ namespace rcsop::data {
     using std::domain_error;
     using rcsop::data::ModelWriter;
     using rcsop::common::camera_options;
+    using rcsop::common::utils::map_vec_shared;
 
     enum InputAssetType {
         SPARSE_CLOUD_COLMAP = 0,
@@ -84,23 +85,34 @@ namespace rcsop::data {
         void collect_rcs_data();
 
     public:
-        explicit InputDataCollector(const path& root_path, const camera_options& options);
+        InputDataCollector(const path& root_path, const camera_options& options);
 
         [[nodiscard]] vector<CameraInputImage> images() const;
 
-        template<InputAssetType AssetType>
-        shared_ptr<InputAssetDataType<AssetType>> data(bool allow_multiple = false) const {
+        template<InputAssetType AssetType, bool Multiple = false>
+        [[nodiscard]] auto data() const {
+            using ReturnAssetType = InputAssetDataType<AssetType>;
             const string asset_description = inputAssetTypeDescriptions[AssetType];
 
             vector<path> asset_paths = _asset_paths.at(AssetType);
             if (asset_paths.empty()) {
                 throw domain_error("No data: " + asset_description);
             }
-            if (!allow_multiple && asset_paths.size() > 1) {
+            if constexpr (Multiple) {
+                map<string, ReturnAssetType> labeled_assets{};
+                for (const auto& asset_path : asset_paths) {
+                    string path_suffix = asset_path.filename().string();
+                    labeled_assets.insert(
+                            make_pair(path_suffix, ReturnAssetType(asset_path)));
+                }
+                return labeled_assets;
+            }
+
+            if (asset_paths.size() > 1) {
                 throw domain_error("More than one set of data: " + asset_description);
             }
             const path& asset_path = asset_paths[0];
-            return make_shared<InputAssetDataType<AssetType>>(asset_path);
+            return make_shared<ReturnAssetType>(asset_path);
         }
 
         template<InputAssetType AssetType>
@@ -113,7 +125,7 @@ namespace rcsop::data {
             if (!data_available<SPARSE_CLOUD_COLMAP>()) {
                 throw domain_error("No sparse cloud model available.");
             }
-            return make_shared<ModelWriter>(data<SPARSE_CLOUD_COLMAP>(false));
+            return make_shared<ModelWriter>(data<SPARSE_CLOUD_COLMAP, false>());
         }
     };
 }

@@ -56,7 +56,7 @@ namespace rcsop::data {
     }
 
     void ModelWriter::set_observer_position(const ObserverPosition position,
-                                            const camera& observer_camera) {
+                                            const ModelCamera& observer_camera) {
         if (this->_observer_position.has_value()) {
             throw std::domain_error("Position set already");
         }

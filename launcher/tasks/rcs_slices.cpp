@@ -4,7 +4,7 @@
 
 #include "utils/logging.h"
 
-#include "camera.h"
+#include "model_camera.h"
 #include "observer_provider.h"
 #include "point_cloud_provider.h"
 #include "observer_renderer.h"
@@ -18,7 +18,7 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::utils::map_vec_shared;
     using rcsop::common::utils::map_vec;
 
-    using rcsop::common::camera;
+    using rcsop::common::ModelCamera;
     using rcsop::common::height_t;
     using rcsop::common::Observer;
     using rcsop::common::ScoredPoint;
@@ -83,8 +83,8 @@ namespace rcsop::launcher::tasks {
         const auto point_provider = make_shared<PointCloudProvider>(inputs, options.camera);
 
         auto observers = observer_provider->observers_with_positions();
-        const auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
-        const auto image_positions = map_vec<camera, vec3>(cameras, &camera::position);
+        const auto cameras = map_vec<Observer, ModelCamera>(observers, &Observer::native_camera);
+        const auto image_positions = map_vec<ModelCamera, vec3>(cameras, &ModelCamera::position);
         const auto flattened_image_positions = map_vec<vec3, vec2>(image_positions, flat_down_from_above);
         const auto image_count = image_positions.size();
 
@@ -93,7 +93,7 @@ namespace rcsop::launcher::tasks {
 
         const auto origin = vec2(0, 0);
         const height_t default_height = options.camera.default_height;
-        const auto data = inputs.data<SIMPLE_RCS_MAT>(false)
+        const auto data = inputs.data<SIMPLE_RCS_MAT>()
                 ->at_height(default_height)
                 ->rcs();
         const vector<height_t> heights{default_height};

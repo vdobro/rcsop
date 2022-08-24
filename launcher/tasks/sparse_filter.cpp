@@ -8,7 +8,7 @@
 namespace rcsop::launcher::tasks {
     using rcsop::common::Observer;
     using rcsop::common::SparseCloud;
-    using rcsop::common::camera;
+    using rcsop::common::ModelCamera;
     using rcsop::common::camera_options;
 
     using rcsop::common::utils::map_vec;
@@ -28,8 +28,8 @@ namespace rcsop::launcher::tasks {
         if (observers.empty()) {
             throw std::invalid_argument("No observers found");
         }
-        auto cameras = map_vec<Observer, camera>(observers, &Observer::native_camera);
-        auto positions = map_vec<camera, vec3>(cameras, &camera::position);
+        auto cameras = map_vec<Observer, ModelCamera>(observers, &Observer::native_camera);
+        auto positions = map_vec<ModelCamera, vec3>(cameras, &ModelCamera::position);
 
         const auto origin = vec3::Zero(); //TODO: filter outliers and approximate the average origin point (iteratively)
         auto distances = map_vec<vec3, double>(positions, [origin](const vec3& point) {
@@ -43,7 +43,7 @@ namespace rcsop::launcher::tasks {
     void sparse_filter(const InputDataCollector& inputs,
                        const task_options& options) {
         auto distance_threshold = max_camera_distance(inputs, options.camera);
-        shared_ptr<SparseCloud> model = inputs.data<SPARSE_CLOUD_COLMAP>(false);
+        shared_ptr<SparseCloud> model = inputs.data<SPARSE_CLOUD_COLMAP>();
 
         auto origin = vec3::Zero(); //TODO: filter outliers and approximate the average origin point (iteratively)
         model->filter_points([distance_threshold, origin](const vec3& point) -> bool {

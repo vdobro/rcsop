@@ -32,7 +32,8 @@ namespace rcsop::launcher::tasks {
 
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
                              const task_options& options) {
-        auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT>(false);
+        auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT, false>();
+
         azimuth_data->use_filtered_peaks();
 
         ScoreRange range = options.db_range;
@@ -44,7 +45,7 @@ namespace rcsop::launcher::tasks {
         };
 
         auto& point_clouds = scored_payload->point_clouds;
-        auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP>(false);
+        auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP>();
         auto renderers = map_vec<ScoredCloud, shared_ptr<OutputDataWriter>, true>(
                 point_clouds,
                 [&color_map, &options, &minimaps, &minimap_position]

@@ -23,7 +23,7 @@ namespace rcsop::data {
                                            const camera_options& camera_options)
             : _distance_to_origin(camera_options.distance_to_origin) {
         if (input.data_available<SPARSE_CLOUD_COLMAP>()) {
-            this->sparse_cloud = input.data<SPARSE_CLOUD_COLMAP>(false);
+            this->sparse_cloud = input.data<SPARSE_CLOUD_COLMAP>();
             this->sparse_cloud_points = sparse_cloud->get_points();
 
             auto point_ids = map_vec<IdPoint, point_id_t>(*sparse_cloud_points, &IdPoint::id);
@@ -33,7 +33,7 @@ namespace rcsop::data {
             this->_units_per_centimeter = observer_provider.get_units_per_centimeter();
         }
         if (input.data_available<DENSE_MESH_PLY>()) {
-            this->dense_mesh = input.data<DENSE_MESH_PLY>(false);
+            this->dense_mesh = input.data<DENSE_MESH_PLY>();
             this->dense_cloud_points = this->dense_mesh->get_points();
         }
     }

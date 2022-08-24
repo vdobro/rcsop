@@ -3,7 +3,7 @@
 
 #include "utils/points.h"
 
-#include "camera.h"
+#include "model_camera.h"
 #include "observer_position.h"
 #include "observed_point.h"
 #include "observer_camera.h"
@@ -40,7 +40,7 @@ namespace rcsop::common {
 
         [[nodiscard]] auto source_image_path() const -> path;
 
-        [[nodiscard]] auto native_camera() const -> camera;
+        [[nodiscard]] auto native_camera() const -> ModelCamera;
 
         [[nodiscard]] auto observe_point(const ScoredPoint& point) const -> observed_point;
 

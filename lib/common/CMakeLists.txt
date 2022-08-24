@@ -17,7 +17,7 @@ include(GenerateExportHeader)
 add_library(rcsop-common SHARED
         $<INSTALL_INTERFACE:include>
         src/colors.cpp
-        src/camera.cpp
+        src/model_camera.cpp
         src/image_point.cpp
         src/scored_point.cpp
         src/sparse_cloud.cpp

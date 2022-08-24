@@ -2,7 +2,7 @@
 
 namespace rcsop::common {
     ColmapObserverCamera::ColmapObserverCamera(
-            const camera camera,
+            const ModelCamera& camera,
             const double pitch_correction) :
             _position(camera.position()),
             _camera(camera) {
@@ -37,7 +37,7 @@ namespace rcsop::common {
         return (world_coordinates - _position).norm();
     }
 
-    camera ColmapObserverCamera::native_camera() const {
+    ModelCamera ColmapObserverCamera::native_camera() const {
         return this->_camera;
     };
 }

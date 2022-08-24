@@ -15,14 +15,14 @@ namespace rcsop::common {
     using rcsop::common::utils::points::vec2;
     using rcsop::common::utils::points::vec3;
 
-    class camera {
+    class ModelCamera {
     private:
         colmap::Camera _model_camera;
         colmap::Image _model_image;
 
     public:
-        camera(const colmap::Image& image,
-               const colmap::Reconstruction& model);
+        ModelCamera(const colmap::Image& image,
+                    const colmap::Reconstruction& model);
 
         [[nodiscard]] camera_id_t id() const;
 

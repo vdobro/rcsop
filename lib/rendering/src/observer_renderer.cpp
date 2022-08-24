@@ -11,14 +11,14 @@ namespace rcsop::rendering {
     using rcsop::common::utils::time::start_time;
     using rcsop::common::utils::time::log_and_start_next;
     using rcsop::common::utils::map_vec;
-    using rcsop::common::camera;
+    using rcsop::common::ModelCamera;
     using rcsop::common::ImagePoint;
 
     using rcsop::rendering::rendered_point;
 
     static vector<rendered_point> project_in_camera_with_color(
             const vector<ImagePoint>& points,
-            const camera& camera,
+            const ModelCamera& camera,
             const global_colormap_func& color_map) {
         return map_vec<ImagePoint, rendered_point>(points, [camera, color_map](const ImagePoint& point) {
             auto camera_coordinates = camera.project_from_image(point.coordinates());

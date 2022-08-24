@@ -14,7 +14,7 @@ namespace rcsop::common::utils::time {
         return std::chrono::steady_clock::now();
     }
 
-    double get_time_seconds(timer_seconds timer) {
+    static double get_time_seconds(timer_seconds timer) {
         return (start_time() - timer).count();
     }
 

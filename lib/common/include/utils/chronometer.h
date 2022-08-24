@@ -10,8 +10,6 @@ namespace rcsop::common::utils::time {
 
     timer_seconds start_time();
 
-    double get_time_seconds(timer_seconds timer);
-
     timer_seconds log_and_start_next(timer_seconds last_timer, const string& message);
 }
 #endif //RCSOP_COMMON_CHRONOMETER_H

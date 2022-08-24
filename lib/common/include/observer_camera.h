@@ -1,7 +1,7 @@
 #ifndef RCSOP_COMMON_OBSERVER_CAMERA_H
 #define RCSOP_COMMON_OBSERVER_CAMERA_H
 
-#include "camera.h"
+#include "model_camera.h"
 
 namespace rcsop::common {
     using rcsop::common::utils::points::vec3;
@@ -16,7 +16,7 @@ namespace rcsop::common {
 
         [[nodiscard]] virtual double distance_to_camera(const vec3& world_coordinates) const = 0;
 
-        [[nodiscard]] virtual camera native_camera() const = 0;
+        [[nodiscard]] virtual ModelCamera native_camera() const = 0;
     };
 }
 

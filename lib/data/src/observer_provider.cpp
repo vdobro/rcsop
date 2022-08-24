@@ -10,13 +10,13 @@ using rcsop::common::ColmapObserverCamera;
 namespace rcsop::data {
     using rcsop::common::utils::points::vec3;
     using rcsop::common::utils::map_vec;
-    using rcsop::common::camera;
+    using rcsop::common::ModelCamera;
 
-    static vector<camera> filter_with_positions(const vector<camera>& cameras) {
-        vector<camera> result;
+    static vector<ModelCamera> filter_with_positions(const vector<ModelCamera>& cameras) {
+        vector<ModelCamera> result;
         std::copy_if(cameras.cbegin(), cameras.cend(),
                      std::back_inserter(result),
-                     [](const camera& camera) {
+                     [](const ModelCamera& camera) {
                          auto full_name = camera.get_name();
                          std::stringstream name_stream(full_name);
                          vector<string> segment_list;
@@ -32,9 +32,9 @@ namespace rcsop::data {
     }
 
     static double calculate_units_per_centimeter(double camera_distance_to_origin,
-                                                 const vector<camera>& cameras) {
+                                                 const vector<ModelCamera>& cameras) {
         auto positioned_cameras = filter_with_positions(cameras);
-        auto observer_positions = map_vec<camera, vec3, true>(positioned_cameras, [](const auto& camera) {
+        auto observer_positions = map_vec<ModelCamera, vec3, true>(positioned_cameras, [](const auto& camera) {
             return camera.position();
         });
 
@@ -64,7 +64,7 @@ namespace rcsop::data {
         if (!input.data_available<SPARSE_CLOUD_COLMAP>()) {
             throw invalid_argument("No COLMAP model");
         }
-        auto model = input.data<SPARSE_CLOUD_COLMAP>(false);
+        auto model = input.data<SPARSE_CLOUD_COLMAP>();
         auto cameras = model->get_cameras();
 
         this->_units_per_centimeter = calculate_units_per_centimeter(

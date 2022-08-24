@@ -19,7 +19,7 @@ namespace rcsop::common {
                       return a.Name() < b.Name();
                   });
         for (auto& image: images) {
-            camera camera(image, *reconstruction);
+            ModelCamera camera(image, *reconstruction);
             this->cameras.push_back(camera);
         }
     }
@@ -43,7 +43,7 @@ namespace rcsop::common {
         reconstruction->Write(output_path);
     }
 
-    std::vector<camera> SparseCloud::get_cameras() const {
+    std::vector<ModelCamera> SparseCloud::get_cameras() const {
         return this->cameras;
     }
 

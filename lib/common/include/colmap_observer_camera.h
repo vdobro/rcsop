@@ -9,12 +9,12 @@ namespace rcsop::common {
     class ColmapObserverCamera : public ObserverCamera {
     private:
         const vec3 _position;
-        const camera _camera;
+        const ModelCamera _camera;
 
         camera_correction_transform _pitch_correction;
         camera_correction_transform _colmap_camera_rotation_fix;
     public:
-        explicit ColmapObserverCamera(camera camera,
+        explicit ColmapObserverCamera(const ModelCamera& camera,
                                       double pitch_correction);
 
 
@@ -24,7 +24,7 @@ namespace rcsop::common {
 
         [[nodiscard]] double distance_to_camera(const vec3& world_coordinates) const override;
 
-        [[nodiscard]] camera native_camera() const override;
+        [[nodiscard]] ModelCamera native_camera() const override;
     };
 }
 

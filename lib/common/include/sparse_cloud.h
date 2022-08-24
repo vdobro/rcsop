@@ -7,7 +7,7 @@
 #include "utils/points.h"
 #include "utils/sparse.h"
 
-#include "camera.h"
+#include "model_camera.h"
 #include "scored_point.h"
 #include "base_point_cloud.h"
 
@@ -20,12 +20,12 @@ namespace rcsop::common {
     class SparseCloud : public BasePointCloud {
     private:
         shared_ptr<Reconstruction> reconstruction;
-        vector<camera> cameras;
+        vector<ModelCamera> cameras;
 
     public:
         explicit SparseCloud(const path& model_path);
 
-        [[nodiscard]] vector<camera> get_cameras() const;
+        [[nodiscard]] vector<ModelCamera> get_cameras() const;
 
         [[nodiscard]] shared_ptr<vector<IdPoint>> get_points() const override;
 

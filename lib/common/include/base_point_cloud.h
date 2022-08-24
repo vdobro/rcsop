@@ -3,13 +3,13 @@
 
 #include "utils/types.h"
 #include "utils/sparse.h"
-#include "camera.h"
+#include "model_camera.h"
 
 #include "id_point.h"
 
 namespace rcsop::common {
     using rcsop::common::IdPoint;
-    using rcsop::common::camera;
+    using rcsop::common::ModelCamera;
     using rcsop::common::utils::sparse::color_vec;
 
     class BasePointCloud {

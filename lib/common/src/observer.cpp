@@ -134,7 +134,7 @@ namespace rcsop::common {
         return this->_source_filepath;
     }
 
-    auto Observer::native_camera() const -> camera {
+    auto Observer::native_camera() const -> ModelCamera {
         return this->_camera->native_camera();
     }
 

@@ -19,7 +19,7 @@ using rcsop::common::observed_point;
 
 using rcsop::common::ObserverPosition;
 using rcsop::common::ObserverCamera;
-using rcsop::common::camera;
+using rcsop::common::ModelCamera;
 using rcsop::common::camera_options;
 using rcsop::common::utils::sparse::Image;
 using rcsop::common::utils::sparse::Camera;
@@ -39,14 +39,12 @@ using observed_point_property_selector = std::function<double(const observed_poi
 using observation_property_selector = std::function<double(const observation&)>;
 using projected_point_property_selector = std::function<double(const vec3&)>;
 
-const double STANDARD_ERROR = 2E-8;
-
 class MockObserverCamera : public ObserverCamera {
 public:
     MOCK_METHOD(vec3, map_to_observer_local, (const vec3&), (const, override));
     MOCK_METHOD(vec3, map_to_world, (const vec3&), (const, override));
     MOCK_METHOD(double, distance_to_camera, (const vec3&), (const, override));
-    MOCK_METHOD(camera, native_camera, (), (const, override));
+    MOCK_METHOD(ModelCamera, native_camera, (), (const, override));
 };
 
 class ObserverShould : public ::testing::Test {
@@ -146,14 +144,14 @@ protected:
 
     path _camera_path = path{"camera.png"};
 
-    shared_ptr<Camera> _camera;
+    shared_ptr<ModelCamera> _camera;
     shared_ptr<Image> _image;
     shared_ptr<Reconstruction> _model;
 
     shared_ptr<Observer> _sut;
 
     ObserverShould() {
-        _camera = make_shared<Camera>();
+        _camera = make_shared<ModelCamera>();
         _camera->SetModelId(_camera_model_id);
         _camera->SetCameraId(_camera_id);
 
@@ -166,7 +164,7 @@ protected:
         _model->AddCamera(*_camera);
         _model->AddImage(*_image);
 
-        auto observer_camera = camera(*_image, *_model);
+        auto observer_camera = ModelCamera(*_image, *_model);
 
         EXPECT_CALL(*_mock_camera, map_to_observer_local(_))
                 .WillRepeatedly([this](const vec3& world_point) {

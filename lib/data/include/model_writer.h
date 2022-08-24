@@ -4,7 +4,7 @@
 #include "scored_cloud.h"
 #include "base_point_cloud.h"
 #include "output_data_writer.h"
-#include "camera.h"
+#include "model_camera.h"
 
 namespace rcsop::data {
     using rcsop::common::scored_cloud_payload;
@@ -12,7 +12,7 @@ namespace rcsop::data {
     using rcsop::common::OutputDataWriter;
     using rcsop::common::ObserverPosition;
     using rcsop::common::height_t;
-    using rcsop::common::camera;
+    using rcsop::common::ModelCamera;
 
     class ModelWriter : public OutputDataWriter {
     private:
@@ -26,7 +26,7 @@ namespace rcsop::data {
         void add_points(const scored_cloud_payload& points);
 
         void set_observer_position(ObserverPosition observer,
-                                   const camera& observer_camera);
+                                   const ModelCamera& observer_camera);
 
         [[nodiscard]] height_t observer_height() const override;
 
