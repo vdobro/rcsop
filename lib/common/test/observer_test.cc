@@ -144,14 +144,14 @@ protected:
 
     path _camera_path = path{"camera.png"};
 
-    shared_ptr<ModelCamera> _camera;
+    shared_ptr<Camera> _camera;
     shared_ptr<Image> _image;
     shared_ptr<Reconstruction> _model;
 
     shared_ptr<Observer> _sut;
 
     ObserverShould() {
-        _camera = make_shared<ModelCamera>();
+        _camera = make_shared<Camera>();
         _camera->SetModelId(_camera_model_id);
         _camera->SetCameraId(_camera_id);
 
