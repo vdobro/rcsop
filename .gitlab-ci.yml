@@ -104,28 +104,6 @@ task_a-rcs_red-0.6:
       - output
     expire_in: never
 
-task_rcs-slices:
-  stage: verify
-  needs:
-    - fetch-sample-data
-    - compile-gcc-12
-  script:
-    - mkdir output
-    - ./build/launcher/rcs-overlay-plotter -T "rcs-slices" --software-rendering -I input -O output --default-height 40
-  cache:
-    - key: "$CI_PIPELINE_ID-build"
-      paths:
-        - build/
-      policy: pull
-    - key: "$CI_PIPELINE_ID-input"
-      paths:
-        - input/
-      policy: pull
-  artifacts:
-    paths:
-      - output
-    expire_in: never
-
 smoke-test:
   stage: test
   needs:
