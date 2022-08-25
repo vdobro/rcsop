@@ -29,6 +29,7 @@ namespace rcsop::launcher::tasks {
     using rcsop::data::ObserverProvider;
     using rcsop::data::PointCloudProvider;
     using rcsop::data::SIMPLE_RCS_MAT;
+    using rcsop::common::utils::rcs::rcs_value_t;
 
     using rcsop::common::coloring::construct_colormap_function;
     using rcsop::common::coloring::color_values;
@@ -42,7 +43,6 @@ namespace rcsop::launcher::tasks {
         res.y() = point.z();
         return res;
     }
-
 
     static inline auto get_sign(const vec2& p1,
                                   const vec2& p2,
@@ -97,9 +97,8 @@ namespace rcsop::launcher::tasks {
                 ->at_height(default_height)
                 ->rcs();
         const vector<height_t> heights{default_height};
-        const auto rcs_colors = color_values(data, rcsop::common::coloring::map_turbo);
 
-        const auto points = map_vec_shared<IdPoint, ScoredPoint>(
+        auto points = map_vec_shared<IdPoint, ScoredPoint, true>(
                 *base_points,
                 [&data, &origin, &flattened_image_positions, &image_count]
                         (const IdPoint& point) {
@@ -108,18 +107,25 @@ namespace rcsop::launcher::tasks {
                     for (size_t image_id = 0; image_id < image_count; image_id++) {
                         if (is_within_camera_slice(flat_point, origin, image_id, image_count,
                                                    flattened_image_positions)) {
-                            return ScoredPoint(point.position(), point.id(), data[image_id]);
+                            rcs_value_t value = data[image_id];
+                            return ScoredPoint(point.position(), point.id(), value);
                         }
                     }
-                    return ScoredPoint(point.position(), point.id(), 0);
+                    return ScoredPoint(point.position(), point.id());
                 });
+        auto filtered_points = make_shared<vector<ScoredPoint>>();
+        std::copy_if(points->cbegin(), points->cend(),
+                     std::back_inserter(*filtered_points),
+                     [](const ScoredPoint& point) {
+            return !point.is_discarded();
+        });
 
-        auto score_range = ScoredPoint::get_score_range(*points);
+        auto score_range = ScoredPoint::get_score_range(*filtered_points);
         auto color_map = construct_colormap_function(options.rendering.color_map, score_range);
 
         auto renderers = map_vec<Observer, shared_ptr<OutputDataWriter>>(
-                observers, [&points, &color_map, &options](const Observer& observer) -> shared_ptr<OutputDataWriter> {
-                    ScoredCloud payload(observer, points);
+                observers, [&filtered_points, &color_map, &options](const Observer& observer) -> shared_ptr<OutputDataWriter> {
+                    ScoredCloud payload(observer, filtered_points);
                     return make_shared<ObserverRenderer>(payload, color_map, options.rendering);
                 });
 

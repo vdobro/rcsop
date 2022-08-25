@@ -38,6 +38,6 @@ namespace rcsop::common {
     }
 
     bool ScoredPoint::is_discarded() const {
-        return this->_score == 0;
+        return this->_score == default_point_score;
     }
 }

@@ -92,8 +92,8 @@ namespace rcsop::launcher::utils {
                         auto filtered_points = filter_points(*projected_points, range_filter);
                         filtered_count += filtered_points->size();
 
-                        relevant_points->insert(relevant_points->end(), filtered_points->cbegin(),
-                                                filtered_points->cend());
+                        relevant_points->insert(relevant_points->end(),
+                                                filtered_points->cbegin(), filtered_points->cend());
                     }
 
                     log_and_start_next(time, construct_log_prefix(index + 1, observer_count)

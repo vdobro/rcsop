@@ -13,25 +13,39 @@ namespace rcsop::common {
         double max;
     };
 
+    const double default_point_score = -42;
+
     class ScoredPoint {
     private:
         IdPoint _point;
-        double _score = 0;
+        double _score{default_point_score};
 
-        double score() const {
-            return _score;
-        }
     public:
         ScoredPoint() = default;
 
-        ScoredPoint(vec3 position, point_id_t id, double score);
+        ~ScoredPoint() = default;
 
-        ScoredPoint(const ScoredPoint& other) : ScoredPoint(other.position(), other.id(), other.score()) {}
+        ScoredPoint(vec3 position, point_id_t id, double score = default_point_score);
 
-        ScoredPoint& operator=(const ScoredPoint& other) {
+        ScoredPoint(const ScoredPoint& other) noexcept: ScoredPoint(other.position(), other.id(), other._score) {}
+
+        ScoredPoint(ScoredPoint&& other) noexcept {
+            *this = std::move(other);
+        }
+
+        ScoredPoint& operator=(const ScoredPoint& other) noexcept {
             if (this == &other)
                 return *this;
             this->_point = other._point;
+            this->_score = other._score;
+            return *this;
+        }
+
+        ScoredPoint& operator=(ScoredPoint&& other) noexcept {
+            if (this == &other)
+                return *this;
+            this->_point = other._point;
+            this->_score = other._score;
             return *this;
         }
 
@@ -44,8 +58,6 @@ namespace rcsop::common {
         [[nodiscard]] bool is_discarded() const;
 
         static ScoreRange get_score_range(const vector<ScoredPoint>& points);
-
-        virtual ~ScoredPoint() = default;
     };
 }
 

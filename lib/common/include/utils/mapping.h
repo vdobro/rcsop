@@ -2,6 +2,7 @@
 #define RCSOP_COMMON_VECTOR_H
 
 #include <vector>
+#include <memory>
 #include <functional>
 #include <algorithm>
 #include <execution>
@@ -16,6 +17,7 @@ namespace rcsop::common::utils {
 
     using std::vector;
     using std::function;
+    using std::shared_ptr;
 
     template<typename T>
     vector<size_t> get_indices(const vector<T>& source) {

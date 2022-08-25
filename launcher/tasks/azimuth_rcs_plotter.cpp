@@ -41,7 +41,7 @@ namespace rcsop::launcher::tasks {
 
     static const regex data_label_pattern("^(\\d{1,3})(°)?$");
 
-    auto translate_label_to_translation(const string& label) -> data_observer_translation {
+    static auto translate_label_to_translation(const string& label) -> data_observer_translation {
         smatch label_match;
         if (!regex_match(label, label_match, data_label_pattern)) {
             std::clog << "Warning: RCS data folder doesn't match expected name pattern, using default values";

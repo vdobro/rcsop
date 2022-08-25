@@ -10,10 +10,10 @@ namespace rcsop::common {
 
     struct observed_point {
         vec3 position = vec3::Zero();
-        point_id_t id = 0;
-        double distance_in_world = 0;
-        double vertical_angle = 0;
-        double horizontal_angle = 0;
+        point_id_t id{};
+        double distance_in_world{};
+        double vertical_angle{};
+        double horizontal_angle{};
     };
 
     using observed_factor_func = function<double(const observed_point&)>;
