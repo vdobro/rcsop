@@ -1,4 +1,3 @@
-#include <set>
 #include "utils/rcs_data_utils.h"
 
 namespace rcsop::data::utils {

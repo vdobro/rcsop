@@ -88,7 +88,7 @@ namespace rcsop::rendering {
 
     void ObserverRenderer::add_texture(Texture texture,
                                        texture_rendering_options coordinates) {
-        this->_textures->push_back(make_pair(coordinates, texture));
+        this->_textures->emplace_back(coordinates, texture);
     }
 
     bool ObserverRenderer::observer_has_position() const {

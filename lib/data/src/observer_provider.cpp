@@ -11,47 +11,76 @@ namespace rcsop::data {
     using rcsop::common::utils::points::vec3;
     using rcsop::common::utils::map_vec;
     using rcsop::common::ModelCamera;
+    using rcsop::common::height_t;
 
-    static vector<ModelCamera> filter_with_positions(const vector<ModelCamera>& cameras) {
-        vector<ModelCamera> result;
-        std::copy_if(cameras.cbegin(), cameras.cend(),
-                     std::back_inserter(result),
-                     [](const ModelCamera& camera) {
-                         auto full_name = camera.get_name();
-                         std::stringstream name_stream(full_name);
-                         vector<string> segment_list;
-                         string segment;
-                         while (std::getline(name_stream, segment, std::filesystem::path::preferred_separator)) {
-                             segment_list.push_back(segment);
-                         }
-                         auto last_segment = segment_list.at(segment_list.size() - 1);
-                         const optional<azimuth_t> angle = CameraInputImage::parse_angle_from_name(last_segment);
-                         return angle.has_value(); // a camera is positioned if at least its angle can be identified by its name
-                     });
+    static map<height_t, vector<ModelCamera>> filter_with_positions(
+            const camera_options options,
+            const vector<ModelCamera>& cameras) {
+        map<height_t, vector<ModelCamera>> result;
+        for (const auto& camera: cameras) {
+            auto full_name = camera.get_name();
+            std::stringstream name_stream(full_name);
+            vector<string> segment_list;
+            string segment;
+            while (std::getline(name_stream, segment, std::filesystem::path::preferred_separator)) {
+                segment_list.push_back(segment);
+            }
+            auto last_segment = segment_list.at(segment_list.size() - 1);
+            const optional<azimuth_t> angle = CameraInputImage::parse_angle_from_name(last_segment);
+            if (!angle.has_value()) continue; // a camera is positioned if at least its angle can be identified by its name
+
+            auto position = CameraInputImage::parse_position_from_name(last_segment);
+            auto height = position.has_value() ? position->height : options.default_height;
+
+            if (!result.contains(height)) {
+                result[height] = vector<ModelCamera>{};
+            }
+            result[height].push_back(camera);
+        }
         return result;
     }
 
-    static double calculate_units_per_centimeter(double camera_distance_to_origin,
-                                                 const vector<ModelCamera>& cameras) {
-        auto positioned_cameras = filter_with_positions(cameras);
-        auto observer_positions = map_vec<ModelCamera, vec3, true>(positioned_cameras, [](const auto& camera) {
+    static vec3 get_farthest_camera_position(const vec3& camera_position,
+                                             const vector<vec3>& positions) {
+        auto iterator = std::max_element(
+                positions.cbegin(), positions.cend(),
+                [&camera_position](const vec3& a, const vec3& b) {
+                    return (camera_position - a).norm() < (camera_position - b).norm();
+                });
+        auto index = std::distance(positions.cbegin(), iterator);
+        return positions[index];
+    }
+
+    static double average_distance_to_center(const vector<ModelCamera>& cameras) {
+        auto observer_positions = map_vec<ModelCamera, vec3, true>(cameras, [](const auto& camera) {
             return camera.position();
         });
 
-        auto camera_count = positioned_cameras.size();
+        auto camera_count = cameras.size();
 
-        vector<double> distances;
-        distances.resize(camera_count);
-        for (size_t i = 0; i < camera_count; ++i) {
-            auto opposing_index = (i + (camera_count / 2)) % camera_count;
-
-            auto current_camera = observer_positions[i];
-            auto opposing_camera = observer_positions[opposing_index];
-            auto distance = (current_camera - opposing_camera).norm();
-            distances[i] = distance;
-        }
+        vector<double> distances = map_vec<vec3, double>(
+                observer_positions,
+                [&observer_positions](const vec3& position) -> double {
+                    auto farthest_camera = get_farthest_camera_position(position, observer_positions);
+                    return (position - farthest_camera).norm();
+                });
         auto average = std::reduce(distances.begin(), distances.end()) / static_cast<double>(camera_count);
-        const auto result = (average / 2) / camera_distance_to_origin;
+        auto half_average = average / 2;
+        return half_average;
+    }
+
+    static double calculate_units_per_centimeter(const camera_options options,
+                                                 const vector<ModelCamera>& cameras) {
+        auto positioned_cameras = filter_with_positions(options, cameras);
+        vector<double> averages_per_height;
+        for (const auto& [height, cameras_at_height]: positioned_cameras) {
+            double height_average = average_distance_to_center(cameras_at_height);
+            averages_per_height.push_back(height_average);
+        }
+        auto total_average = std::reduce(averages_per_height.begin(), averages_per_height.end())
+                             / static_cast<double>(averages_per_height.size());
+
+        const auto result = total_average / options.distance_to_origin;
 
         if (result == 0 || std::isnan(result)) {
             throw invalid_argument("World scale must not be zero and not NaN");
@@ -67,8 +96,7 @@ namespace rcsop::data {
         auto model = input.data<SPARSE_CLOUD_COLMAP>();
         auto cameras = model->get_cameras();
 
-        this->_units_per_centimeter = calculate_units_per_centimeter(
-                camera_options.distance_to_origin, cameras);
+        this->_units_per_centimeter = calculate_units_per_centimeter(camera_options, cameras);
 
         auto source_images = input.images();
         vector<Observer> all_observers;

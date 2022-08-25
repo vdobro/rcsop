@@ -7,8 +7,10 @@
 #include <filesystem>
 #include <map>
 #include <vector>
+#include <set>
 #include <stdexcept>
 #include <optional>
+#include <utility>
 
 using std::string;
 using std::shared_ptr;
@@ -19,10 +21,12 @@ using std::map;
 using std::pair;
 using std::make_pair;
 using std::vector;
+using std::set;
 using std::function;
 using std::optional;
 using std::invalid_argument;
 using std::runtime_error;
+using std::move;
 
 using std::filesystem::path;
 using std::filesystem::create_directories;

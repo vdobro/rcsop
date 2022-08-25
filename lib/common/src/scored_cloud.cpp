@@ -1,7 +1,5 @@
 #include "scored_cloud.h"
 
-#include <utility>
-#include <set>
 
 namespace rcsop::common {
     ScoredCloud::ScoredCloud(const Observer& observer,

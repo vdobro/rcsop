@@ -10,17 +10,20 @@ namespace rcsop::data {
 
     class AzimuthRcsDataCollection : public AbstractDataCollection {
     private:
+        path _root_path;
         map<height_t, map<azimuth_t, AzimuthRcsDataSet>> _data;
         vector<height_t> _heights;
 
     public:
-        explicit AzimuthRcsDataCollection(const path& input_path);
+        explicit AzimuthRcsDataCollection(path input_path);
 
         void use_filtered_peaks();
 
         [[nodiscard]] const AbstractDataSet* get_for_exact_position(const Observer& observer) const override;
 
-        [[nodiscard]] vector<height_t> heights() const;
+        [[nodiscard]] vector<height_t> heights() const override;
+
+        [[nodiscard]] vector<ObserverPosition> available_positions() const override;
 
         [[nodiscard]] static bool is_available_at(const path& file_path);
     };

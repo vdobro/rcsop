@@ -17,7 +17,7 @@ namespace rcsop::data {
     static const size_t FILENAME_HEIGHT_INDEX = 1;
     static const size_t FILENAME_AZIMUTH_INDEX = 2;
 
-    AzimuthRcsDataCollection::AzimuthRcsDataCollection(const path& input_path) {
+    AzimuthRcsDataCollection::AzimuthRcsDataCollection(path input_path) : _root_path(input_path) {
         this->_data = collect_all_heights<AzimuthInput::RCS_MAT>(
                 input_path, mat_file_regex, FILENAME_HEIGHT_INDEX, FILENAME_AZIMUTH_INDEX);
 
@@ -30,7 +30,19 @@ namespace rcsop::data {
     const AbstractDataSet* AzimuthRcsDataCollection::get_for_exact_position(
             const Observer& observer) const {
         const auto position = observer.position();
-        return &(this->_data.at(position.height).at(position.azimuth));
+        const auto& height = position.height;
+        const auto& azimuth = position.azimuth;
+
+        if (!_data.contains(height)) {
+            throw std::domain_error("No data set at " + std::to_string(height) + "cm in " + _root_path.string());
+        }
+        auto& map_to_azimuth = _data.at(position.height);
+        if (!map_to_azimuth.contains(azimuth)) {
+            throw std::domain_error(
+                    "No data set at " + std::to_string(height) + "cm/" + std::to_string(azimuth) + " in " +
+                    _root_path.string());
+        }
+        return &(map_to_azimuth.at(azimuth));
     }
 
     void AzimuthRcsDataCollection::use_filtered_peaks() {
@@ -56,5 +68,20 @@ namespace rcsop::data {
             }
         }
         return false;
+    }
+
+    vector<ObserverPosition> AzimuthRcsDataCollection::available_positions() const {
+        vector<ObserverPosition> result;
+        for (auto height: heights()) {
+            auto& map_to_azimuth = _data.at(height);
+            for (const auto& [azimuth, data]: map_to_azimuth) {
+                result.push_back(
+                        {
+                                .height = height,
+                                .azimuth = azimuth,
+                        });
+            }
+        }
+        return result;
     }
 }
