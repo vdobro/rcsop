@@ -38,6 +38,6 @@ namespace rcsop::common {
     }
 
     bool ScoredPoint::is_discarded() const {
-        return this->_score == default_point_score;
+        return this->_score == default_point_score || std::isnan(this->_score);
     }
 }

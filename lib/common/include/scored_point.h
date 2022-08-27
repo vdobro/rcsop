@@ -13,7 +13,7 @@ namespace rcsop::common {
         double max;
     };
 
-    const double default_point_score = -42;
+    const double default_point_score = 0;
 
     class ScoredPoint {
     private:
@@ -57,7 +57,7 @@ namespace rcsop::common {
 
         [[nodiscard]] bool is_discarded() const;
 
-        static ScoreRange get_score_range(const vector<ScoredPoint>& points);
+        [[nodiscard]] static ScoreRange get_score_range(const vector<ScoredPoint>& points);
     };
 }
 

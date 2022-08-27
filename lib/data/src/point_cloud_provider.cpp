@@ -29,7 +29,7 @@ namespace rcsop::data {
             auto point_ids = map_vec<IdPoint, point_id_t>(*sparse_cloud_points, &IdPoint::id);
             max_sparse_point_id = *std::max_element(point_ids.begin(), point_ids.end());
 
-            auto observer_provider = ObserverProvider(input, camera_options);
+            auto observer_provider = ObserverProvider(input, camera_options, false);
             this->_units_per_centimeter = observer_provider.get_units_per_centimeter();
         }
         if (input.data_available<DENSE_MESH_PLY>()) {

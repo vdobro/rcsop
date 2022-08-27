@@ -189,7 +189,8 @@ namespace rcsop::data {
     }
 
     ObserverProvider::ObserverProvider(const InputDataCollector& input,
-                                       const camera_options& camera_options) {
+                                       const camera_options& camera_options,
+                                       bool fill_in_missing_observers) {
         if (!input.data_available<SPARSE_CLOUD_COLMAP>()) {
             throw invalid_argument("No COLMAP model");
         }
@@ -200,8 +201,10 @@ namespace rcsop::data {
 
         auto source_images = input.images();
         auto all_observers = collect_from_cameras(source_images, cameras, camera_options);
-        auto extended_observers = collect_missing_data_observers(all_observers, input, camera_options);
-        std::copy(extended_observers.begin(), extended_observers.end(), std::back_inserter(all_observers));
+        if (fill_in_missing_observers) {
+            auto extended_observers = collect_missing_data_observers(all_observers, input, camera_options);
+            std::copy(extended_observers.begin(), extended_observers.end(), std::back_inserter(all_observers));
+        }
         sort_by_image_name(all_observers);
 
         for (auto& observer: all_observers) {

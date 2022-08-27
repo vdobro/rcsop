@@ -80,7 +80,7 @@ namespace rcsop::launcher::tasks {
 
     void rcs_slices(const InputDataCollector& inputs,
                     const task_options& options) {
-        const auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera);
+        const auto observer_provider = make_shared<ObserverProvider>(inputs, options.camera, false);
         const auto point_provider = make_shared<PointCloudProvider>(inputs, options.camera);
 
         auto observers = observer_provider->observers_with_positions();

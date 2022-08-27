@@ -16,8 +16,9 @@ namespace rcsop::data {
         double _units_per_centimeter;
 
     public:
-        explicit ObserverProvider(const InputDataCollector& input,
-                                  const camera_options& camera_options);
+        ObserverProvider(const InputDataCollector& input,
+                         const camera_options& camera_options,
+                         bool fill_in_missing_observers = true);
 
         [[nodiscard]] auto observers_with_positions() const -> vector<Observer>;
 

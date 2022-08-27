@@ -64,7 +64,7 @@ namespace rcsop::launcher::utils {
             const global_colormap_func& color_map_func,
             const observed_factor_func& factor_func) -> shared_ptr<multiple_scored_cloud_payload const> {
         auto dB_range = task_options.db_range;
-        auto observer_provider = make_shared<ObserverProvider>(inputs, task_options.camera);
+        auto observer_provider = make_shared<ObserverProvider>(inputs, task_options.camera, true);
         auto projector = make_shared<DataPointProjector>();
 
         auto observers = observer_provider->observers_with_positions();
