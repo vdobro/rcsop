@@ -6,10 +6,6 @@
 #include "utils/rcs_data_utils.h"
 
 namespace rcsop::data {
-    using std::filesystem::recursive_directory_iterator;
-    using std::regex;
-    using std::smatch;
-
     using rcsop::data::utils::AzimuthInput;
     using rcsop::data::utils::collect_all_heights;
 

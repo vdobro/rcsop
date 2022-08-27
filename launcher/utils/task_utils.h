@@ -23,6 +23,7 @@ namespace rcsop::launcher::utils {
     struct task_options {
         path input_path;
         path output_path;
+        bool prefilter_data;
         ScoreRange db_range;
         camera_options camera;
         rendering_options rendering;

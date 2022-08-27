@@ -17,6 +17,9 @@ namespace rcsop::common::utils::points {
 
     using point_id_t = ulong;
     using point_pair = pair<point_id_t, vec3>;
+
+    auto find_farthest(const vec3& reference_point,
+                       const vector<vec3>& search_values) -> vec3;
 }
 
 #endif //RCSOP_COMMON_POINTS_H

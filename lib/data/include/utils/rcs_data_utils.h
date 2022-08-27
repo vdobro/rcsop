@@ -14,10 +14,6 @@
 #include "texture.h"
 
 namespace rcsop::data::utils {
-    using std::filesystem::recursive_directory_iterator;
-    using std::regex;
-    using std::smatch;
-
     using rcsop::common::height_t;
     using rcsop::common::azimuth_t;
 

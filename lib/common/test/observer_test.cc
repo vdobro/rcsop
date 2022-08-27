@@ -41,8 +41,8 @@ using projected_point_property_selector = std::function<double(const vec3&)>;
 
 class MockObserverCamera : public ObserverCamera {
 public:
-    MOCK_METHOD(vec3, map_to_observer_local, (const vec3&), (const, override));
-    MOCK_METHOD(vec3, map_to_world, (const vec3&), (const, override));
+    MOCK_METHOD(vec3, map_to_observer_local, (const vec3&, double), (const, override));
+    MOCK_METHOD(vec3, map_to_world, (const vec3&, double), (const, override));
     MOCK_METHOD(double, distance_to_camera, (const vec3&), (const, override));
     MOCK_METHOD(ModelCamera, native_camera, (), (const, override));
 };
@@ -166,12 +166,12 @@ protected:
 
         auto observer_camera = ModelCamera(*_image, *_model);
 
-        EXPECT_CALL(*_mock_camera, map_to_observer_local(_))
-                .WillRepeatedly([this](const vec3& world_point) {
+        EXPECT_CALL(*_mock_camera, map_to_observer_local(_, _))
+                .WillRepeatedly([this](const vec3& world_point, double height_offset_in_world) {
                     return world_point - this->_observer_position;
                 });
-        EXPECT_CALL(*_mock_camera, map_to_world(_))
-                .WillRepeatedly([this](const vec3& local_point) {
+        EXPECT_CALL(*_mock_camera, map_to_world(_, _))
+                .WillRepeatedly([this](const vec3& local_point, double height_offset_in_world) {
                     return this->_observer_position + local_point;
                 });
         EXPECT_CALL(*_mock_camera, distance_to_camera(_))
@@ -446,7 +446,7 @@ TEST_F(ObserverShould, CalculateDistanceEqualToSphericalRadialComponent) {
     rcsop::common::point_id_t id{0};
     for (const auto& point: ALL_POINTS) {
         const auto observed = _sut->observe_point(ScoredPoint(point, id++));
-        const auto spherical = Observer::cartesian_to_spherical(this->_mock_camera->map_to_observer_local(point));
+        const auto spherical = Observer::cartesian_to_spherical(this->_mock_camera->map_to_observer_local(point, 0.));
 
         const auto distance = observed.distance_in_world * UNITS_PER_CENTIMETER;
         const auto radial = spherical.radial;

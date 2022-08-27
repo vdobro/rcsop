@@ -45,9 +45,10 @@ namespace rcsop::common::utils {
 
         if constexpr (Parallel) {
             std::mutex vector_lock;
-            std::for_each(PARALLEL_EXECUTOR,
-                          source.cbegin(), source.cend(), [&vector_lock, &result, &mapper]
-                                  (const Source& value) {
+            std::for_each(
+                    PARALLEL_EXECUTOR,
+                    source.cbegin(), source.cend(),
+                    [&vector_lock, &result, &mapper] (const Source& value) {
                         const auto mapped_value = mapper(value);
 
                         const std::lock_guard<std::mutex> lock(vector_lock);
@@ -99,9 +100,9 @@ namespace rcsop::common::utils {
 
     template<typename DataType>
     size_t find_nearest_index(DataType search_value,
-                          const vector<DataType>& list) {
+                              const vector<DataType>& list) {
         auto iterator = std::min_element(list.cbegin(), list.cend(),
-                                         [&search_value](const DataType& a, const DataType& b){
+                                         [&search_value](const DataType& a, const DataType& b) {
                                              return abs(search_value - a) < abs(search_value - b);
                                          });
         auto index = std::distance(list.cbegin(), iterator);
@@ -113,6 +114,26 @@ namespace rcsop::common::utils {
                           const vector<DataType>& list) {
         const size_t index = find_nearest_index(search_value, list);
         return list[index];
+    }
+
+    template<typename DataType>
+    using predicate_func = function<bool(const DataType&)>;
+
+    template<typename DataType>
+    vector<DataType> filter_vec(const vector<DataType>& values,
+                                const predicate_func<DataType>& filter_predicate) {
+        vector<DataType> filtered_values;
+        std::copy_if(values.cbegin(), values.cend(), std::back_inserter(filtered_values), filter_predicate);
+        return filtered_values;
+    }
+
+    template<typename DataType>
+    shared_ptr<vector<DataType>> filter_vec_shared(
+            const vector<DataType>& values,
+            const predicate_func<DataType>& filter_predicate) {
+        auto filtered_values = make_shared<vector<DataType>>();
+        std::copy_if(values.cbegin(), values.cend(), std::back_inserter(*filtered_values), filter_predicate);
+        return filtered_values;
     }
 }
 

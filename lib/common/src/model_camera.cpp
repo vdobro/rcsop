@@ -46,16 +46,30 @@ namespace rcsop::common {
         return _model_image.Name();
     }
 
-    vector<ImagePoint> ModelCamera::project_to_image(const vector<ScoredPoint>& points) const {
-        const auto camera_position = this->position();
-        const auto image_projection_matrix = _model_image.ProjectionMatrix();
+    vector<ImagePoint> ModelCamera::project_to_image(
+            const vector<ScoredPoint>& points) const {
+        auto camera_position = this->position();
+        auto image_projection_matrix = _model_image.ProjectionMatrix();
 
         return utils::map_vec<ScoredPoint, ImagePoint>(points, [camera_position, image_projection_matrix]
                 (const ScoredPoint& point) -> ImagePoint {
-            vec2 position_normalized = (image_projection_matrix * point.position().homogeneous()).hnormalized();
-            double distance_to_camera = (camera_position - point.position()).norm();
-            ImagePoint projected_point = ImagePoint(position_normalized, distance_to_camera, point.score_to_dB());
+            auto position =  point.position();
+            auto score = point.score_to_dB();
+            auto position_normalized = (image_projection_matrix * position.homogeneous()).hnormalized();
+            auto distance_to_camera = (camera_position - position).norm();
+            auto projected_point = ImagePoint(position_normalized, distance_to_camera, score);
             return projected_point;
         });
+    }
+
+    string ModelCamera::get_last_name_segment() const {
+        std::stringstream name_stream(get_name());
+        vector<string> segment_list;
+        string segment;
+        while (std::getline(name_stream, segment, std::filesystem::path::preferred_separator)) {
+            segment_list.push_back(segment);
+        }
+        auto last_segment = segment_list.at(segment_list.size() - 1);
+        return last_segment;
     }
 }

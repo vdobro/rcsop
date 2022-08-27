@@ -9,13 +9,23 @@
 
 namespace rcsop::common {
     using rcsop::common::utils::map_vec_shared;
+    using rcsop::common::utils::filter_vec;
 
     Observer::Observer(optional<ObserverPosition> camera_position,
                        path filepath,
-                       shared_ptr<ObserverCamera const> observer_camera)
+                       shared_ptr<ObserverCamera const> observer_camera,
+                       data_observer_translation observer_translation,
+                       observer_camera_options camera_options)
             : _position(camera_position),
               _source_filepath(std::move(filepath)),
-              _camera(std::move(observer_camera)) {}
+              _camera(std::move(observer_camera)),
+              _observer_translation(observer_translation),
+              _camera_options(camera_options) {
+    }
+
+    auto Observer::get_height_offset() const -> double {
+        return static_cast<double>(_camera_options.height_offset) * _units_per_centimeter;
+    }
 
     auto Observer::position() const -> ObserverPosition {
         if (!this->has_position()) {
@@ -73,7 +83,8 @@ namespace rcsop::common {
     auto Observer::observe_point(const ScoredPoint& point) const -> observed_point {
         const auto world_point = point.position();
         const auto distance = _camera->distance_to_camera(world_point);
-        const auto local_point = _camera->map_to_observer_local(world_point);
+        const auto local_point = _camera->map_to_observer_local(world_point, get_height_offset());
+
         //auto point_check = _camera->map_to_world(local_point);
         //assert(point_check == world_point);
 
@@ -97,16 +108,14 @@ namespace rcsop::common {
         return point_info;
     }
 
-    static auto translate_data_point(const vec3& local_point,
-                                     const data_observer_translation& observer_translation) -> vec3 {
-        camera_correction_transform world_translation;
-        world_translation = Eigen::AngleAxis<double>(
-                (observer_translation.rotation * M_PI) / 180., vec3::UnitY());
-        return local_point.transpose() * world_translation.rotation();
+    auto Observer::translate_data_point(const vec3& local_point) const -> vec3 {
+        camera_correction_transform world_roll;
+        world_roll = Eigen::AngleAxis<double>(
+                (_observer_translation.roll * M_PI) / 180., vec3::UnitY());
+        return local_point.transpose() * world_roll.rotation();
     }
 
-    auto Observer::project_position(const observed_point& observed_point,
-                                    const data_observer_translation& observer_translation) const -> vec3 {
+    auto Observer::project_position(const observed_point& observed_point) const -> vec3 {
         const auto& [_p, _id, distance_in_world, vertical_angle, horizontal_angle] = observed_point;
         if (distance_in_world == 0) {
             return this->_camera->native_camera().position();
@@ -116,13 +125,13 @@ namespace rcsop::common {
         auto polar = 90 - vertical_angle;
 
         auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});
-        auto translated_local = translate_data_point(cartesian_local, observer_translation);
+        auto translated_local = translate_data_point(cartesian_local);
 
-        return _camera->map_to_world(translated_local);
+        return _camera->map_to_world(translated_local, get_height_offset());
     }
 
-    auto Observer::observe_points(
-            const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>> {
+    auto
+    Observer::observe_points(const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>> {
         auto result = map_vec_shared<ScoredPoint, observed_point, true>(
                 camera_points,
                 [this](const auto& point) {
@@ -132,12 +141,11 @@ namespace rcsop::common {
         return result;
     }
 
-    auto Observer::project_observed_positions(
-            const vector<observed_point>& positions,
-            const data_observer_translation& observer_translation) const -> shared_ptr<vector<vec3>> {
+    auto
+    Observer::project_observed_positions(const vector<observed_point>& positions) const -> shared_ptr<vector<vec3>> {
         auto result = map_vec_shared<observed_point, vec3, true>(
-                positions, [this, &observer_translation](const auto& position) {
-                    return project_position(position, observer_translation);
+                positions, [this](const auto& position) {
+                    return project_position(position);
                 });
         return result;
     }
@@ -156,5 +164,56 @@ namespace rcsop::common {
 
     void Observer::set_units_per_centimeter(double units) {
         this->_units_per_centimeter = units;
+    }
+
+    auto Observer::map_to_positions(const vector<Observer>& observers) -> set<ObserverPosition> {
+        set<ObserverPosition> result;
+        for (const auto& observer: observers) {
+            result.insert(observer.position());
+        }
+        return result;
+    }
+
+    auto Observer::clone_with_camera(observer_camera_options observer_options) const -> Observer {
+        auto result = Observer{
+                this->_position,
+                this->_source_filepath,
+                this->_camera,
+                this->_observer_translation,
+                observer_options,
+        };
+        result.set_units_per_centimeter(this->_units_per_centimeter);
+        return result;
+    }
+
+    auto Observer::clone_with_data(data_observer_translation data_options) const -> Observer {
+        auto result = Observer{
+                this->_position,
+                this->_source_filepath,
+                this->_camera,
+                data_options,
+                this->_camera_options,
+        };
+        result.set_units_per_centimeter(this->_units_per_centimeter);
+        return result;
+    }
+
+    auto Observer::clone_with_position(ObserverPosition position) const -> Observer {
+        auto result = Observer{
+            position,
+                this->_source_filepath,
+                this->_camera,
+                this->_observer_translation,
+                this->_camera_options,
+        };
+        result.set_units_per_centimeter(this->_units_per_centimeter);
+        return result;
+    }
+
+    auto Observer::filter_with_positions(const vector<Observer>& observers) -> vector<Observer> {
+        return filter_vec<Observer>(observers,
+                          [](const Observer& observer) -> bool {
+                              return observer.has_position();
+                          });
     }
 }

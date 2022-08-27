@@ -17,6 +17,7 @@ namespace rcsop::launcher::tasks {
 
     using rcsop::common::utils::map_vec_shared;
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::filter_vec_shared;
 
     using rcsop::common::ModelCamera;
     using rcsop::common::height_t;
@@ -45,8 +46,8 @@ namespace rcsop::launcher::tasks {
     }
 
     static inline auto get_sign(const vec2& p1,
-                                  const vec2& p2,
-                                  const vec2& p3) -> double {
+                                const vec2& p2,
+                                const vec2& p3) -> double {
         return (p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y());
     }
 
@@ -113,18 +114,17 @@ namespace rcsop::launcher::tasks {
                     }
                     return ScoredPoint(point.position(), point.id());
                 });
-        auto filtered_points = make_shared<vector<ScoredPoint>>();
-        std::copy_if(points->cbegin(), points->cend(),
-                     std::back_inserter(*filtered_points),
-                     [](const ScoredPoint& point) {
-            return !point.is_discarded();
-        });
+        auto filtered_points = filter_vec_shared<ScoredPoint>(
+                *points, [](const ScoredPoint& point) {
+                    return !point.is_discarded();
+                });
 
         auto score_range = ScoredPoint::get_score_range(*filtered_points);
         auto color_map = construct_colormap_function(options.rendering.color_map, score_range);
 
         auto renderers = map_vec<Observer, shared_ptr<OutputDataWriter>>(
-                observers, [&filtered_points, &color_map, &options](const Observer& observer) -> shared_ptr<OutputDataWriter> {
+                observers,
+                [&filtered_points, &color_map, &options](const Observer& observer) -> shared_ptr<OutputDataWriter> {
                     ScoredCloud payload(observer, filtered_points);
                     return make_shared<ObserverRenderer>(payload, color_map, options.rendering);
                 });

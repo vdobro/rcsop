@@ -31,6 +31,9 @@ namespace rcsop::launcher {
 
     using std::chrono::system_clock;
 
+    using rcsop::common::utils::time::start_time;
+    using rcsop::common::utils::time::log_and_start_next;
+
     using rcsop::common::height_t;
     using rcsop::data::InputDataCollector;
 
@@ -40,6 +43,8 @@ namespace rcsop::launcher {
     const char* PARAM_OUTPUT_NAME_NO_TIMESTAMP = "no-timestamp";
     const char* PARAM_SOFTWARE_RENDERING = "software-rendering";
     const char* PARAM_CAMERA_DISTANCE = "camera-distance";
+    const char* PARAM_USE_CLOSEST_CAMERA = "use-closest-camera";
+    const char* PARAM_NO_DATA_PREFILTER = "no-data-prefilter";
     const char* PARAM_PITCH_CORRECTION = "pitch-correction";
     const char* PARAM_DEFAULT_HEIGHT = "default-height";
     const char* PARAM_COLOR_MAP = "color-map";
@@ -96,17 +101,23 @@ namespace rcsop::launcher {
 
     int launcher_main(int argc, char** argv) {
         po::options_description desc("Allowed options");
+
+        po::variables_map vm;
         desc.add_options()
                 ("input-path,I", po::value<string>(),
                  "folder with the inputs: source images, sparse/dense point clouds and MATLAB data sources")
                 ("output-path,O", po::value<string>(), "output path")
                 ("task,T", po::value<string>()->default_value(DEFAULT_TASK), "task to execute")
-                (PARAM_OUTPUT_NAME_NO_TIMESTAMP, po::bool_switch()->default_value(false),
+                (PARAM_OUTPUT_NAME_NO_TIMESTAMP, po::bool_switch(),
                  "use current timestamp as output folder name")
-                (PARAM_SOFTWARE_RENDERING, po::bool_switch()->default_value(false),
+                (PARAM_SOFTWARE_RENDERING, po::bool_switch(),
                  "enable software rendering instead of GPU")
                 ("camera-distance,R", po::value<double>()->default_value(DEFAULT_CAMERA_DISTANCE),
                  "distance from the camera to the origin/center in centimeters")
+                (PARAM_USE_CLOSEST_CAMERA, po::bool_switch(),
+                 "use any closest camera if none found at the same angle")
+                (PARAM_NO_DATA_PREFILTER, po::bool_switch(),
+                 "filter RCS data to only contain one maximum value per azimuth angle")
                 (PARAM_PITCH_CORRECTION, po::value<double>()->default_value(DEFAULT_CAMERA_PITCH_CORRECTION),
                  "camera pitch correction")
                 (PARAM_DEFAULT_HEIGHT, po::value<height_t>()->default_value(DEFAULT_HEIGHT),
@@ -115,8 +126,6 @@ namespace rcsop::launcher {
                  "default color map to use")
                 (PARAM_ALPHA, po::value<float>()->default_value(0.3),
                  "base alpha value/factor to apply and full color intensity");
-
-        po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
         if (!vm.count(PARAM_INPUT_PATH) || !vm.count(PARAM_OUTPUT_PATH)) {
@@ -156,10 +165,13 @@ namespace rcsop::launcher {
         create_directories(task_output_path);
 
         auto color_map = rcsop::common::coloring::resolve_map_by_name(vm.at(PARAM_COLOR_MAP).as<string>());
+        auto disable_data_prefilter = vm.at(PARAM_NO_DATA_PREFILTER).as<bool>();
+        auto use_any_closest_observer = vm.at(PARAM_USE_CLOSEST_CAMERA).as<bool>();
 
         const task_options options{
                 .input_path = input_path,
                 .output_path = task_output_path,
+                .prefilter_data = !disable_data_prefilter,
                 .db_range = {
                         .min = -20,
                         .max = 5,
@@ -168,6 +180,7 @@ namespace rcsop::launcher {
                         .pitch_correction = pitch_correction,
                         .distance_to_origin = camera_distance,
                         .default_height = default_camera_height,
+                        .use_any_camera_nearby = use_any_closest_observer,
                 },
                 .rendering = {
                         .use_gpu_rendering = !use_software_rendering,
@@ -179,16 +192,21 @@ namespace rcsop::launcher {
                 },
         };
 
-        //try {
-        InputDataCollector input_collector(input_path, options.camera);
+        try {
+            InputDataCollector input_collector(input_path, options.camera);
 
-        const auto task_executor = available_tasks.at(task);
-        task_executor(input_collector, options);
-        //} catch (const std::exception& e) {
-        //    cerr << "Failed to execute given task, reason:" << endl;
-        //    cerr << e.what() << endl;
-        //    return EXIT_FAILURE;
-        //}
+            const auto task_executor = available_tasks.at(task);
+
+            auto total_time = start_time();
+            task_executor(input_collector, options);
+
+            log_and_start_next(total_time,
+                               "Successfully finished task '" + task + "', exiting.");
+        } catch (const std::exception& e) {
+            cerr << "Failed to execute given task, reason:" << endl;
+            cerr << e.what() << endl;
+            return EXIT_FAILURE;
+        }
         return EXIT_SUCCESS;
     }
 }

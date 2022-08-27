@@ -22,9 +22,14 @@ namespace rcsop::launcher::utils {
 
     double identity_factor(const observed_point& point);
 
+    struct data_with_observer_options {
+        data_observer_translation observer_options;
+        shared_ptr<AbstractDataCollection> data_collection;
+    };
+
     auto score_points(
             const InputDataCollector& inputs,
-            const vector<pair<data_observer_translation, shared_ptr<AbstractDataCollection>>>& data,
+            const vector<data_with_observer_options>& data,
             const task_options& task_options,
             const global_colormap_func& color_map_func,
             const observed_factor_func& factor_func = &identity_factor) -> shared_ptr<multiple_scored_cloud_payload const>;

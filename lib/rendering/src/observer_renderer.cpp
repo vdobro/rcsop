@@ -50,7 +50,8 @@ namespace rcsop::rendering {
 
         const auto& camera = _observer.native_camera();
         const path input_file_path = _observer.source_image_path();
-        const path output_file_path{output_path / camera.get_name()};
+        const string file_name = "data-" + _observer.position().str() + "__source-" + camera.get_last_name_segment();
+        const path output_file_path{output_path / file_name};
         string output_name = output_file_path.filename().string();
 
         shared_ptr<BaseRendererContext> renderer_context = this->_renderer->create_context(_observer);
@@ -102,6 +103,6 @@ namespace rcsop::rendering {
     }
 
     string ObserverRenderer::path_prefix() const {
-        return "img";
+        return "images";
     }
 }

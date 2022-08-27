@@ -8,10 +8,15 @@ namespace rcsop::common {
     using azimuth_t = long;
 
     struct ObserverPosition {
-        height_t height;
-        azimuth_t azimuth;
+        height_t height{};
+        azimuth_t azimuth{};
 
         [[nodiscard]] auto str() const -> string;
+
+        bool operator<(const ObserverPosition& other) const;
+
+        [[nodiscard]] auto distance_to(const ObserverPosition& other,
+                                       double world_distance_to_origin) const -> double;
     };
 }
 

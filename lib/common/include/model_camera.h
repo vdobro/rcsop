@@ -45,6 +45,8 @@ namespace rcsop::common {
         [[nodiscard]] string get_name() const;
 
         [[nodiscard]] vector<ImagePoint> project_to_image(const vector<ScoredPoint>& points) const;
+
+        [[nodiscard]] string get_last_name_segment() const;
     };
 }
 

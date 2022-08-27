@@ -1,12 +1,9 @@
 #include "input_image.h"
 
 #include <stdexcept>
-#include <regex>
 #include <utility>
 
 namespace rcsop::data {
-    using std::regex;
-    using std::smatch;
     using std::invalid_argument;
 
     using rcsop::common::height_t;

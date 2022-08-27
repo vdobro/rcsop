@@ -2,9 +2,6 @@
 
 namespace rcsop::data {
     using std::filesystem::directory_iterator;
-    using std::filesystem::recursive_directory_iterator;
-    using std::filesystem::is_directory;
-    using std::filesystem::is_regular_file;
 
     InputDataCollector::InputDataCollector(const path& root_path, const camera_options& options) {
         this->_root_path = root_path;
