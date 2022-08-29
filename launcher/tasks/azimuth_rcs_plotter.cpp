@@ -40,6 +40,9 @@ namespace rcsop::launcher::tasks {
 
     using rcsop::launcher::utils::data_with_observer_options;
 
+    using std::clog;
+    using std::endl;
+
     static const regex data_label_pattern("^(\\d{1,3})(°)?$");
 
     static auto translate_label_to_translation(const string& label) -> data_observer_translation {
@@ -114,8 +117,14 @@ namespace rcsop::launcher::tasks {
 
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
                              const task_options& options) {
+        ScoreRange range = options.db_range;
+        auto color_map = construct_colormap_function(options.rendering.color_map, range);
+
         auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT, true>();
         auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP, false>();
+
+        auto data_with_translation = map_labeled_data(azimuth_data);
+        auto scored_payload = score_points(inputs, data_with_translation, options, color_map, rcs_gaussian_vertical);
 
         if (options.prefilter_data) {
             for (auto& [_, data]: azimuth_data) {
@@ -123,12 +132,12 @@ namespace rcsop::launcher::tasks {
             }
         }
 
-        ScoreRange range = options.db_range;
-        auto color_map = construct_colormap_function(options.rendering.color_map, range);
-        auto data_with_translation = map_labeled_data(azimuth_data);
-        auto scored_payload = score_points(inputs, data_with_translation, options, color_map, rcs_gaussian_vertical);
+        auto scored_filtered_payload = score_points(inputs, data_with_translation, options, color_map, rcs_gaussian_vertical);
 
-        plot_to_images(*scored_payload, *minimaps, color_map, options);
+        clog << endl <<  "Rendering to sparse cloud models:" << endl;
         plot_to_models(*scored_payload, inputs, color_map, options);
+
+        clog << endl << "Rendering to images:" << endl;
+        plot_to_images(*scored_filtered_payload, *minimaps, color_map, options);
     }
 }

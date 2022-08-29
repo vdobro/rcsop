@@ -200,6 +200,7 @@ namespace rcsop::launcher {
             auto total_time = start_time();
             task_executor(input_collector, options);
 
+            clog << endl;
             log_and_start_next(total_time,
                                "Successfully finished task '" + task + "', exiting.");
         } catch (const std::exception& e) {

@@ -200,7 +200,7 @@ namespace rcsop::common {
 
     auto Observer::clone_with_position(ObserverPosition position) const -> Observer {
         auto result = Observer{
-            position,
+                position,
                 this->_source_filepath,
                 this->_camera,
                 this->_observer_translation,
@@ -208,6 +208,19 @@ namespace rcsop::common {
         };
         result.set_units_per_centimeter(this->_units_per_centimeter);
         return result;
+    }
+
+    auto Observer::clone_with_source_path(path source_image_path) const -> Observer {
+        auto result = Observer {
+            this->_position,
+            source_image_path,
+            this->_camera,
+            this->_observer_translation,
+            this->_camera_options,
+        };
+        result.set_units_per_centimeter(this->_units_per_centimeter);
+        return result;
+
     }
 
     auto Observer::filter_with_positions(const vector<Observer>& observers) -> vector<Observer> {

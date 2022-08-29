@@ -77,6 +77,8 @@ namespace rcsop::common {
 
         [[nodiscard]] auto clone_with_position(ObserverPosition position) const -> Observer;
 
+        [[nodiscard]] auto clone_with_source_path(path source_image_path) const -> Observer;
+
         [[nodiscard]] static auto cartesian_to_spherical(const vec3& point) -> vec3_spherical;
 
         [[nodiscard]] static auto spherical_to_cartesian(const vec3_spherical& point) -> vec3;

@@ -182,7 +182,22 @@ namespace rcsop::data {
             };
             auto observer_with_position = nearest_observer->clone_with_position(position);
             auto observer_with_translation = observer_with_position.clone_with_camera(translation);
-            result.push_back(observer_with_translation);
+
+            ///
+            /// WARNING: this will try to use the actual source image if it exists,
+            /// but with the nearest observer camera position(!!!) and camera intristics,
+            /// as the latter should be on average the same if taken with the same camera,
+            /// there
+            auto actual_source_path = observer_with_translation.source_image_path().parent_path() / (position.str() + ".png" );
+            if (!is_regular_file(actual_source_path)) {
+                std::clog << "Warning: no source image found for approximated observer: " << position.str() << std::endl;
+                result.push_back(observer_with_translation);
+                continue;
+            }
+
+            std::clog << "Info: original source image found for approximated observer : " << position.str() << std::endl;
+            auto observer_with_actual_source_path = observer_with_translation.clone_with_source_path(actual_source_path);
+            result.push_back(observer_with_actual_source_path);
         }
 
         return result;
