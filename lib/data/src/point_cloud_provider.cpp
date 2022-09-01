@@ -72,7 +72,7 @@ namespace rcsop::data {
         const double step_size = step_size_meters * units_per_meter;
 
         const vec3 middle_point = vec3::Zero();
-        const double radius_limit = _distance_to_origin * _units_per_centimeter;
+        const double radius_limit = _distance_to_origin * _units_per_centimeter * 1.5;
         const double begin_x = std::max(middle_point.x() - radius_limit, bound.xmin());
         const double begin_y = std::max(middle_point.y() - radius_limit, bound.ymin());
         const double begin_z = std::max(middle_point.z() - radius_limit, bound.zmin());
