@@ -34,7 +34,7 @@ namespace rcsop::launcher::tasks {
 
     using rcsop::rendering::texture_rendering_options;
     using rcsop::rendering::ObserverRenderer;
-    using rcsop::common::coloring::construct_colormap_function;
+    using rcsop::common::coloring::construct_color_map_function;
     using rcsop::common::data_observer_translation;
     using rcsop::common::global_colormap_func;
 
@@ -118,13 +118,15 @@ namespace rcsop::launcher::tasks {
     void azimuth_rcs_plotter(const InputDataCollector& inputs,
                              const task_options& options) {
         ScoreRange range = options.db_range;
-        auto color_map = construct_colormap_function(options.rendering.color_map, range);
+        auto color_map = construct_color_map_function(options.rendering.color_map, range);
 
         auto azimuth_data = inputs.data<AZIMUTH_RCS_MAT, true>();
         auto minimaps = inputs.data<AZIMUTH_RCS_MINIMAP, false>();
 
         auto data_with_translation = map_labeled_data(azimuth_data);
-        auto scored_payload = score_points(inputs, data_with_translation, options, color_map, rcs_gaussian_vertical);
+
+        auto vertical_distribution = rcs_gaussian_vertical(options.vertical_spread);
+        auto scored_payload = score_points(inputs, data_with_translation, options, color_map, vertical_distribution);
 
         if (options.prefilter_data) {
             for (auto& [_, data]: azimuth_data) {
@@ -132,9 +134,10 @@ namespace rcsop::launcher::tasks {
             }
         }
 
-        auto scored_filtered_payload = score_points(inputs, data_with_translation, options, color_map, rcs_gaussian_vertical);
+        auto scored_filtered_payload = score_points(inputs, data_with_translation, options, color_map,
+                                                    vertical_distribution);
 
-        clog << endl <<  "Rendering to sparse cloud models:" << endl;
+        clog << endl << "Rendering to sparse cloud models:" << endl;
         plot_to_models(*scored_payload, inputs, color_map, options);
 
         clog << endl << "Rendering to images:" << endl;

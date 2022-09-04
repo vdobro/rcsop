@@ -32,7 +32,7 @@ namespace rcsop::launcher::tasks {
     using rcsop::data::SIMPLE_RCS_MAT;
     using rcsop::common::utils::rcs::rcs_value_t;
 
-    using rcsop::common::coloring::construct_colormap_function;
+    using rcsop::common::coloring::construct_color_map_function;
     using rcsop::common::coloring::color_values;
     using rcsop::rendering::ObserverRenderer;
 
@@ -120,7 +120,7 @@ namespace rcsop::launcher::tasks {
                 });
 
         auto score_range = ScoredPoint::get_score_range(*filtered_points);
-        auto color_map = construct_colormap_function(options.rendering.color_map, score_range);
+        auto color_map = construct_color_map_function(options.rendering.color_map, score_range);
 
         auto renderers = map_vec<Observer, shared_ptr<OutputDataWriter>>(
                 observers,

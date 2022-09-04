@@ -3,7 +3,15 @@
 #include <cmath>
 
 namespace rcsop::common::coloring {
+    using rcsop::common::utils::sparse::color_vec;
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::min_value;
+    using rcsop::common::utils::max_value;
+
+    using std::lround;
+
+    const static unsigned char RGB_MAX = 255;
+    const static double RGB_MAX_D = 255.;
 
     // Copyright 2019 Google LLC.
     // SPDX-License-Identifier: Apache-2.0
@@ -268,16 +276,23 @@ namespace rcsop::common::coloring {
                                                            {126, 5,   2},
                                                            {122, 4,   3}};
 
-    using rcsop::common::utils::sparse::color_vec;
-
     static color_vec to_vec(const unsigned char* color) {
         color_vec vec;
         vec.setZero();
         vec.x() = color[0];
         vec.y() = color[1];
         vec.z() = color[2];
-        vec.w() = 255;
+        vec.w() = RGB_MAX;
         return vec;
+    }
+
+    static color_vec floats_to_color(double r, double g, double b, double a) {
+        color_vec color;
+        color.x() = lround(r * RGB_MAX_D);
+        color.y() = lround(g * RGB_MAX_D);
+        color.z() = lround(b * RGB_MAX_D);
+        color.w() = lround(a * RGB_MAX_D);
+        return color;
     }
 
     color_vec map_turbo(double v, double vmin, double vmax) {
@@ -285,12 +300,12 @@ namespace rcsop::common::coloring {
             return to_vec(*(turbo_srgb_bytes + 0));
         }
         if (v >= vmax) {
-            return to_vec(*(turbo_srgb_bytes + 255));
+            return to_vec(*(turbo_srgb_bytes + RGB_MAX));
         }
         auto range = vmax - vmin;
         auto pos = v - vmin;
-        auto step_size = range / 255.;
-        auto steps = std::lround(pos / step_size);
+        auto step_size = range / RGB_MAX_D;
+        auto steps = lround(pos / step_size);
         return to_vec(*(turbo_srgb_bytes + steps));
     }
 
@@ -328,80 +343,76 @@ namespace rcsop::common::coloring {
             b = 0;
         }
 
-        color_vec color;
-        color.x() = std::lround(r * 255.0);
-        color.y() = std::lround(g * 255.0);
-        color.z() = std::lround(b * 255.0);
-        color.w() = 255.;
-        return color;
+        return floats_to_color(r, g, b, 1.);
     }
 
-    color_vec map_red(double v, double vmin, double vmax) {
-        double r = 1.0, g = 0.0, b = 0.0, a = 1.0; // red
-
-        if (v < vmin) {
-            v = vmin;
-        }
-        if (v > vmax) {
-            v = vmax;
-        }
+    static auto clamp_and_factor(double v, double vmin, double vmax) -> double {
+        auto value = std::clamp(v, vmin, vmax);
 
         auto range = vmax - vmin;
-        auto pos = v - vmin;
-        auto step_size = range / 255.;
-        auto steps = pos / step_size;
-
-        color_vec color;
-        color.x() = std::lround(r * steps);
-        color.y() = std::lround(g * steps);
-        color.z() = std::lround(b * steps);
-        color.w() = std::lround(a * steps);
-        return color;
+        auto pos = value - vmin;
+        auto factor = pos / range;
+        return factor;
     }
 
-    global_colormap_func construct_colormap_function(
-            const local_colormap_func& colormap,
+    // just red
+    static const double LINEAR_MAP_RED = 1.;
+    static const double LINEAR_MAP_GREEN = 0.;
+    static const double LINEAR_MAP_BLUE = 0.;
+    static const double LINEAR_MAP_ALPHA = 1.;
+
+    color_vec map_red(double v, double vmin, double vmax) {
+        auto factor = clamp_and_factor(v, vmin, vmax);
+
+        return floats_to_color(LINEAR_MAP_RED * factor,
+                               LINEAR_MAP_GREEN * factor,
+                               LINEAR_MAP_BLUE * factor,
+                               LINEAR_MAP_ALPHA * factor);
+    }
+
+    color_vec map_red_alpha_only(double v, double vmin, double vmax) {
+        auto factor = clamp_and_factor(v, vmin, vmax);
+
+        return floats_to_color(LINEAR_MAP_RED,
+                               LINEAR_MAP_GREEN,
+                               LINEAR_MAP_BLUE,
+                               LINEAR_MAP_ALPHA * factor);
+    }
+
+    global_colormap_func construct_color_map_function(
+            const local_colormap_func& color_map,
             double min_value,
             double max_value) {
 
-        return [min_value, max_value, colormap](double value) {
-            return colormap(value, min_value, max_value);
+        return [min_value, max_value, color_map](double value) {
+            return color_map(value, min_value, max_value);
         };
     }
 
-    global_colormap_func construct_colormap_function(
-            const local_colormap_func& colormap,
+    global_colormap_func construct_color_map_function(
+            const local_colormap_func& color_map,
             const ScoreRange& range) {
 
-        return construct_colormap_function(colormap, range.min, range.max);
-    }
-
-    global_colormap_func construct_colormap_function(
-            const local_colormap_func& colormap,
-            const vector<double>& values) {
-
-        auto min_value = *std::min_element(values.begin(), values.end());
-        auto max_value = *std::max_element(values.begin(), values.end());
-
-        return construct_colormap_function(colormap, min_value, max_value);
+        return construct_color_map_function(color_map, range.min, range.max);
     }
 
     vector<color_vec> color_values(
             const vector<double>& values,
             const local_colormap_func& colormap) {
 
-        auto min_value = *std::min_element(values.begin(), values.end());
-        auto max_value = *std::max_element(values.begin(), values.end());
+        auto min = min_value(values);
+        auto max = max_value(values);
 
-        return map_vec<double, color_vec>(values, [colormap, min_value, max_value](double value) {
-            return colormap(value, min_value, max_value);
+        return map_vec<double, color_vec>(values, [colormap, min, max](double value) {
+            return colormap(value, min, max);
         });
     }
 
     const static map<string, local_colormap_func> COLOR_MAPS = {
-            {"jet",   rcsop::common::coloring::map_jet},
-            {"turbo", rcsop::common::coloring::map_turbo},
-            {"red",   rcsop::common::coloring::map_red},
+            {"jet",            rcsop::common::coloring::map_jet},
+            {"turbo",          rcsop::common::coloring::map_turbo},
+            {"red",            rcsop::common::coloring::map_red},
+            {"red-alpha-only", rcsop::common::coloring::map_red_alpha_only},
     };
 
     local_colormap_func resolve_map_by_name(const string& name) {

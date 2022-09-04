@@ -21,9 +21,11 @@ namespace rcsop::launcher::utils {
     using rcsop::rendering::rendering_options;
 
     struct task_options {
+        string task_name;
         path input_path;
         path output_path;
         bool prefilter_data;
+        double vertical_spread;
         ScoreRange db_range;
         camera_options camera;
         rendering_options rendering;

@@ -135,6 +135,16 @@ namespace rcsop::common::utils {
         std::copy_if(values.cbegin(), values.cend(), std::back_inserter(*filtered_values), filter_predicate);
         return filtered_values;
     }
+
+    template<typename ValueType>
+    auto min_value(const vector<ValueType>& values) -> ValueType {
+        return *std::min_element(values.begin(), values.end());
+    }
+
+    template<typename ValueType>
+    auto max_value(const vector<ValueType>& values) -> ValueType {
+        return *std::max_element(values.begin(), values.end());
+    }
 }
 
 #endif //RCSOP_COMMON_VECTOR_H

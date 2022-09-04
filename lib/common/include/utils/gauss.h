@@ -15,7 +15,7 @@ namespace rcsop::common::utils::gauss {
 
     double rcs_gaussian(const observed_point& point, const gauss_options& options);
 
-    double rcs_gaussian_vertical(const observed_point& point);
+    observed_factor_func rcs_gaussian_vertical(double vertical_spread);
 }
 
 #endif //RCSOP_COMMON_GAUSS_H

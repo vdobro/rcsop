@@ -11,6 +11,7 @@ find_package(COLMAP REQUIRED)
 add_executable(rcs-overlay-plotter
         main.cpp
         launcher.cpp
+        launcher_options.cpp
         utils/point_scoring.cpp
         utils/task_utils.cpp
         tasks/test_task.cpp
