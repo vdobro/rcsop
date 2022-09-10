@@ -1,5 +1,5 @@
 diff --git a/cmake/FindEigen3.cmake b/cmake/FindEigen3.cmake
-deleted file mode 100755
+deleted file mode 100644
 index 3f0c40b..0000000
 --- a/cmake/FindEigen3.cmake
 +++ /dev/null
@@ -130,16 +130,3 @@ index 3f0c40b..0000000
 -        message(FATAL_ERROR "Could not find Eigen")
 -    endif()
 -endif()
-diff --git a/src/util/misc.cc b/src/util/misc.cc
-index c0dc60c..cd5535b 100644
---- a/src/util/misc.cc
-+++ b/src/util/misc.cc
-@@ -111,7 +111,7 @@ bool ExistsPath(const std::string& path) {
- 
- void CreateDirIfNotExists(const std::string& path) {
-   if (!ExistsDir(path)) {
--    CHECK(boost::filesystem::create_directory(path));
-+    CHECK(boost::filesystem::create_directories(path));
-   }
- }
- 

@@ -82,7 +82,7 @@ cmake -DCMAKE_BUILD_TYPE="Release" \
     -DBUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
     "$WORK_DIR/ceres"
-make -j "$CPU_CORES"
+make -j 4
 make install
 
 # cgal
