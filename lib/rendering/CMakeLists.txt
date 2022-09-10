@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Wpedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -Wall -Wpedantic")
 
 find_package(PkgConfig)
-pkg_check_modules(cairo REQUIRED IMPORTED_TARGET "cairomm-1.0")
+pkg_search_module(cairo REQUIRED IMPORTED_TARGET "cairomm-1.0" "cairomm-1.16")
 
 find_package(SFML 2.5 COMPONENTS graphics REQUIRED)
 

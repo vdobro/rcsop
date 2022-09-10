@@ -94,7 +94,7 @@ namespace rcsop::common::utils {
         result->resize(source.size());
 
         if constexpr (Parallel) {
-            if (Vectorized) {
+            if constexpr (Vectorized) {
                 std::transform(PARALLEL_VECTORIZED, source.cbegin(), source.cend(), result->begin(), mapper);
             } else {
                 std::transform(PARALLEL, source.cbegin(), source.cend(), result->begin(), mapper);
