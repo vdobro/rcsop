@@ -16,9 +16,6 @@ namespace rcsop::data {
     using rcsop::common::utils::time::log_and_start_next;
     using rcsop::common::utils::map_vec;
 
-    using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-    using Point = Kernel::Point_3;
-
     PointCloudProvider::PointCloudProvider(const InputDataCollector& input,
                                            const camera_options& camera_options)
             : _distance_to_origin(camera_options.distance_to_origin) {
@@ -36,17 +33,34 @@ namespace rcsop::data {
             this->dense_mesh = input.data<DENSE_MESH_PLY>();
             this->dense_cloud_points = this->dense_mesh->get_points();
         }
+        _bounding_box = get_bounding_box();
     }
 
-    shared_ptr<vector<SimplePoint>> PointCloudProvider::get_base_points(
-            size_t take_every_nth) const {
+    auto PointCloudProvider::get_bounding_box() const -> BoundingBox {
+        auto base_points = make_shared<vector<Point>>();
+        auto raw_points = get_base_points();
+        for (const auto& point: *raw_points) {
+            const auto point_pos = point.position();
+            base_points->emplace_back(point_pos.x(), point_pos.y(), point_pos.z());
+        }
+        return CGAL::bounding_box(base_points->cbegin(), base_points->cend());
+    }
+
+    auto PointCloudProvider::get_base_points(ReconstructionType cloud_selection,
+                                             size_t take_every_nth) const -> shared_ptr<vector<SimplePoint>> {
         assert(take_every_nth >= 1);
 
-        auto result = make_shared<vector<SimplePoint>>(*sparse_cloud_points);
-        auto dense_point_id = max_sparse_point_id + 1;
-        for (const auto& point: *dense_cloud_points) {
-            result->emplace_back(dense_point_id, point.position());
-            dense_point_id++;
+        auto result = make_shared<vector<SimplePoint>>();
+
+        if ((cloud_selection & ReconstructionType::SPARSE_CLOUD) != 0) {
+            std::copy(sparse_cloud_points->cbegin(), sparse_cloud_points->cend(), std::back_inserter(*result));
+        }
+        if ((cloud_selection & ReconstructionType::DENSE_CLOUD) != 0) {
+            auto dense_point_id = max_sparse_point_id + 1;
+            for (const auto& point: *dense_cloud_points) {
+                result->emplace_back(dense_point_id, point.position());
+                dense_point_id++;
+            }
         }
 
         if (take_every_nth == 1) return result;
@@ -58,28 +72,20 @@ namespace rcsop::data {
         return filtered_result;
     }
 
-    shared_ptr<vector<SimplePoint>> PointCloudProvider::generate_homogenous_cloud(size_t points_per_meter) const {
-        auto base_points = make_shared<vector<Point>>();
-        auto raw_points = get_base_points();
-        for (const auto& point: *raw_points) {
-            const auto point_pos = point.position();
-            base_points->emplace_back(point_pos.x(), point_pos.y(), point_pos.z());
-        }
-        const Kernel::Iso_cuboid_3 bound = CGAL::bounding_box(base_points->begin(), base_points->end());
-
+    auto PointCloudProvider::generate_homogenous_cloud(size_t points_per_meter) const -> shared_ptr<vector<SimplePoint>> {
         const double units_per_meter = _units_per_centimeter * 100;
         const double step_size_meters = 1. / static_cast<double>(points_per_meter);
         const double step_size = step_size_meters * units_per_meter;
 
         const vec3 middle_point = vec3::Zero();
         const double radius_limit = _distance_to_origin * _units_per_centimeter * 1.5;
-        const double begin_x = std::max(middle_point.x() - radius_limit, bound.xmin());
-        const double begin_y = std::max(middle_point.y() - radius_limit, bound.ymin());
-        const double begin_z = std::max(middle_point.z() - radius_limit, bound.zmin());
+        const double begin_x = std::max(middle_point.x() - radius_limit, _bounding_box.xmin());
+        const double begin_y = std::max(middle_point.y() - radius_limit, _bounding_box.ymin());
+        const double begin_z = std::max(middle_point.z() - radius_limit, _bounding_box.zmin());
 
-        const double end_x = std::min(middle_point.x() + radius_limit, bound.xmax());
-        const double end_y = std::min(middle_point.y() + radius_limit, bound.ymax());
-        const double end_z = std::min(middle_point.z() + radius_limit, bound.zmax());
+        const double end_x = std::min(middle_point.x() + radius_limit, _bounding_box.xmax());
+        const double end_y = std::min(middle_point.y() + radius_limit, _bounding_box.ymax());
+        const double end_z = std::min(middle_point.z() + radius_limit, _bounding_box.zmax());
 
         const double span_x = (end_x - begin_x);
         const double span_y = (end_y - begin_y);

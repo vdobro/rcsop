@@ -35,6 +35,7 @@ namespace rcsop::launcher::utils {
     using rcsop::data::ObserverProvider;
     using rcsop::data::DataPointProjector;
     using rcsop::data::projection_options;
+    using rcsop::data::ReconstructionType;
 
     using rcsop::common::coloring::global_colormap_func;
 
@@ -72,9 +73,13 @@ namespace rcsop::launcher::utils {
                                      const task_options& task_options) -> shared_ptr<vector<SimplePoint>> {
         const auto point_provider = make_unique<PointCloudProvider>(inputs, task_options.camera);
         switch (task_options.point_generator) {
-            case MODEL_POINT_CLOUD:
+            case MODEL_SPARSE:
+                return point_provider->get_base_points(ReconstructionType::SPARSE_CLOUD);
+            case MODEL_DENSE:
+                return point_provider->get_base_points(ReconstructionType::DENSE_CLOUD);
+            case FULL_MODEL:
             case MODEL_WITH_PROJECTION:
-                return point_provider->get_base_points();
+                return point_provider->get_base_points(ReconstructionType::COMPLETE);
             case BOUNDING_BOX:
                 return point_provider->generate_homogenous_cloud(task_options.point_density);
             case DATA_PROJECTION:
@@ -180,19 +185,21 @@ namespace rcsop::launcher::utils {
                         auto observer_with_translation = observer.clone_with_data(observer_options);
 
                         // 1. observed base points
-                        auto [total_observed_count, observed_points] = filter_and_score_points(
-                                data_for_observer, *base_points, observer_with_translation, projection_params);
-                        total_count += total_observed_count;
-                        filtered_count += observed_points->size();
+                        if (!base_points->empty()) {
+                            auto [total_observed_count, observed_points] = filter_and_score_points(
+                                    data_for_observer, *base_points, observer_with_translation, projection_params);
+                            total_count += total_observed_count;
+                            filtered_count += observed_points->size();
 
-                        relevant_points->insert(relevant_points->end(),
-                                                observed_points->cbegin(), observed_points->cend());
+                            relevant_points->insert(relevant_points->end(),
+                                                    observed_points->cbegin(), observed_points->cend());
+                        }
 
                         // 2. projected points
                         if ((task_options.point_generator & PointGenerator::DATA_PROJECTION) != 0) {
-                            auto [projected_count, projected_points] = project_data_to_points(
+                            auto [total_projected_count, projected_points] = project_data_to_points(
                                     data_for_observer, observer_with_translation, *projector, projection_params);
-                            total_count += projected_count;
+                            total_count += total_projected_count;
                             filtered_count += projected_points->size();
 
                             relevant_points->insert(relevant_points->end(),

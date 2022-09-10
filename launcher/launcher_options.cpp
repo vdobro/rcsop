@@ -90,8 +90,14 @@ namespace rcsop::launcher {
     }
 
     static auto parse_point_generator_option(const string& option) -> PointGenerator {
-        if (option == "model-cloud") {
-            return PointGenerator::MODEL_POINT_CLOUD;
+        if (option == "model-sparse") {
+            return PointGenerator::MODEL_SPARSE;
+        }
+        if (option == "model-dense") {
+            return PointGenerator::MODEL_DENSE;
+        }
+        if (option == "model") {
+            return PointGenerator::FULL_MODEL;
         }
         if (option == "bounding-box") {
             return PointGenerator::BOUNDING_BOX;
@@ -103,7 +109,7 @@ namespace rcsop::launcher {
             return PointGenerator::MODEL_WITH_PROJECTION;
         }
         throw invalid_argument(string(PARAM_POINT_GENERATOR)
-                               + " must be one of the following: model-cloud, bounding-box, data-projection or model-with-projection.");
+                               + " must be one of the following: model, model-sparse, model-dense, bounding-box, data-projection or model-with-projection.");
     }
 
     static auto parse_output_format_option(const string& option) -> OutputFormat {

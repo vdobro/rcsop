@@ -21,10 +21,13 @@ namespace rcsop::launcher::utils {
     using rcsop::rendering::rendering_options;
 
     enum PointGenerator {
-        MODEL_POINT_CLOUD = 1,
-        BOUNDING_BOX = 2,
-        DATA_PROJECTION = 4,
-        MODEL_WITH_PROJECTION = MODEL_POINT_CLOUD | DATA_PROJECTION,
+        MODEL_SPARSE = 1 << 0,
+        MODEL_DENSE = 1 << 1,
+        BOUNDING_BOX = 1 << 2,
+        DATA_PROJECTION = 1 << 3,
+
+        FULL_MODEL = MODEL_SPARSE | MODEL_DENSE,
+        MODEL_WITH_PROJECTION = FULL_MODEL | DATA_PROJECTION,
     };
 
     struct vertical_spread {

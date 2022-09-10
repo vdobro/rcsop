@@ -90,7 +90,7 @@ namespace rcsop::launcher::tasks {
         const auto image_count = image_positions.size();
 
         const size_t take_every_nth = options.rendering.use_gpu_rendering ? 20 : 15;
-        const auto base_points = point_provider->get_base_points(take_every_nth);
+        const auto base_points = point_provider->get_base_points(data::ReconstructionType::COMPLETE, take_every_nth);
 
         const auto origin = vec2(0, 0);
         const height_t default_height = options.camera.default_height;
