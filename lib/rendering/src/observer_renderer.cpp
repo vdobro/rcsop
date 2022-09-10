@@ -17,7 +17,7 @@ namespace rcsop::rendering {
 
     using rcsop::rendering::rendered_point;
 
-    float ObserverRenderer::get_point_perspective_scale(const ImagePoint& point) const {
+    auto ObserverRenderer::get_point_perspective_scale(const ImagePoint& point) const -> double {
         return atan(_reference_radius / _reference_distance)
                / atan(point.distance() / _reference_distance);
     }
@@ -35,7 +35,7 @@ namespace rcsop::rendering {
             auto color = color_map(point.score());
             return rendered_point{
                     .coordinates = camera_coordinates,
-                    .size_factor = get_point_perspective_scale(point),
+                    .size_factor = static_cast<float>(get_point_perspective_scale(point)),
                     .color = color
             };
         });

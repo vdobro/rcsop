@@ -39,7 +39,7 @@ namespace rcsop::rendering {
 
         [[nodiscard]] vector<rendered_point> project_points() const;
 
-        [[nodiscard]] float get_point_perspective_scale(const common::ImagePoint& point) const;
+        [[nodiscard]] double get_point_perspective_scale(const common::ImagePoint& point) const;
 
         [[nodiscard]] vector<rendered_point> project_in_camera_with_color(
                 const vector<ImagePoint>& points,
