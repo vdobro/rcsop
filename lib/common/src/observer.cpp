@@ -11,6 +11,9 @@ namespace rcsop::common {
     using rcsop::common::utils::map_vec_shared;
     using rcsop::common::utils::filter_vec;
 
+    const static double PI_RADIANS = 180.;
+    const static double HALF_PI_RADIANS = PI_RADIANS / 2;
+
     Observer::Observer(optional<ObserverPosition> camera_position,
                        path filepath,
                        shared_ptr<ObserverCamera const> observer_camera,
@@ -21,6 +24,7 @@ namespace rcsop::common {
               _camera(std::move(observer_camera)),
               _observer_translation(observer_translation),
               _camera_options(camera_options) {
+        _world_roll = Eigen::AngleAxis<double>((_observer_translation.roll * M_PI) / PI_RADIANS, vec3::UnitY());
     }
 
     auto Observer::get_height_offset() const -> double {
@@ -36,7 +40,7 @@ namespace rcsop::common {
     }
 
     auto Observer::cartesian_to_spherical(const vec3& point) -> vec3_spherical {
-        const double distance = point.norm();
+        double distance = point.norm();
         const double
                 x = point.x(),
                 y = point.y(),
@@ -64,29 +68,28 @@ namespace rcsop::common {
 
         return {
                 .radial = distance,
-                .azimuthal = phi * 180. / M_PI,
-                .polar = theta * 180. / M_PI,
+                .azimuthal = phi * PI_RADIANS / M_PI,
+                .polar = theta * PI_RADIANS / M_PI,
         };
     }
 
     auto Observer::spherical_to_cartesian(const vec3_spherical& point) -> vec3 {
         const auto& [radial, azimuthal, polar] = point;
-        const auto phi = azimuthal * M_PI / 180.;
-        const auto theta = polar * M_PI / 180.;
+        const auto phi = azimuthal * M_PI / PI_RADIANS;
+        const auto theta = polar * M_PI / PI_RADIANS;
 
-        const auto x = radial * cos(phi) * sin(theta);
-        const auto y = radial * sin(phi) * sin(theta);
-        const auto z = radial * cos(theta);
+        auto x = radial * cos(phi) * sin(theta);
+        auto y = radial * sin(phi) * sin(theta);
+        auto z = radial * cos(theta);
         return {x, y, z};
     }
 
-    auto Observer::observe_point(const ScoredPoint& point) const -> observed_point {
+    auto Observer::observe_point(const SimplePoint& point) const -> observed_point {
         const auto world_point = point.position();
         const auto distance = _camera->distance_to_camera(world_point);
-        const auto local_point = _camera->map_to_observer_local(world_point, get_height_offset());
 
-        //auto point_check = _camera->map_to_world(local_point);
-        //assert(point_check == world_point);
+        const auto translated_point = _camera->map_to_observer_local(world_point, get_height_offset());
+        const auto local_point = undo_data_point_translation(translated_point);
 
         const auto& [_, azimuthal, polar] = cartesian_to_spherical(local_point);
 
@@ -95,24 +98,25 @@ namespace rcsop::common {
             horizontal_angle = 0;
             vertical_angle = 0;
         } else {
-            horizontal_angle = 90 - abs(azimuthal);
-            vertical_angle = 90 - polar;
+            horizontal_angle = HALF_PI_RADIANS - abs(azimuthal);
+            vertical_angle = HALF_PI_RADIANS - polar;
         }
-        observed_point point_info = {
+
+        return {
                 .position = point.position(),
                 .id = point.id(),
                 .distance_in_world = distance / this->_units_per_centimeter,
                 .vertical_angle = vertical_angle,
                 .horizontal_angle = horizontal_angle,
         };
-        return point_info;
     }
 
     auto Observer::translate_data_point(const vec3& local_point) const -> vec3 {
-        camera_correction_transform world_roll;
-        world_roll = Eigen::AngleAxis<double>(
-                (_observer_translation.roll * M_PI) / 180., vec3::UnitY());
-        return local_point.transpose() * world_roll.rotation();
+        return local_point.transpose() * _world_roll.rotation();
+    }
+
+    auto Observer::undo_data_point_translation(const vec3& world_point) const -> vec3 {
+        return world_point.transpose() * _world_roll.rotation().transpose();
     }
 
     auto Observer::project_position(const observed_point& observed_point) const -> vec3 {
@@ -121,8 +125,8 @@ namespace rcsop::common {
             return this->_camera->native_camera().position();
         }
         auto radial = distance_in_world * this->_units_per_centimeter;
-        auto azimuthal = -(horizontal_angle - 90);
-        auto polar = 90 - vertical_angle;
+        auto azimuthal = -(horizontal_angle - HALF_PI_RADIANS);
+        auto polar = HALF_PI_RADIANS - vertical_angle;
 
         auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});
         auto translated_local = translate_data_point(cartesian_local);
@@ -130,9 +134,8 @@ namespace rcsop::common {
         return _camera->map_to_world(translated_local, get_height_offset());
     }
 
-    auto
-    Observer::observe_points(const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>> {
-        auto result = map_vec_shared<ScoredPoint, observed_point, true>(
+    auto Observer::observe_points(const vector<SimplePoint>& camera_points) const -> shared_ptr<vector<observed_point>> {
+        auto result = map_vec_shared<SimplePoint, observed_point>(
                 camera_points,
                 [this](const auto& point) {
                     return observe_point(point);
@@ -143,7 +146,7 @@ namespace rcsop::common {
 
     auto
     Observer::project_observed_positions(const vector<observed_point>& positions) const -> shared_ptr<vector<vec3>> {
-        auto result = map_vec_shared<observed_point, vec3, true>(
+        auto result = map_vec_shared<observed_point, vec3>(
                 positions, [this](const auto& position) {
                     return project_position(position);
                 });
@@ -213,7 +216,7 @@ namespace rcsop::common {
     auto Observer::clone_with_source_path(path source_image_path) const -> Observer {
         auto result = Observer {
             this->_position,
-            source_image_path,
+            std::move(source_image_path),
             this->_camera,
             this->_observer_translation,
             this->_camera_options,
@@ -228,5 +231,9 @@ namespace rcsop::common {
                           [](const Observer& observer) -> bool {
                               return observer.has_position();
                           });
+    }
+
+    double Observer::world_to_local_units(double centimeters) const {
+        return centimeters * this->_units_per_centimeter;
     }
 }

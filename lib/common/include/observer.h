@@ -34,10 +34,13 @@ namespace rcsop::common {
         shared_ptr<ObserverCamera const> _camera;
         data_observer_translation _observer_translation;
         observer_camera_options _camera_options;
+        camera_correction_transform _world_roll;
 
         double _units_per_centimeter = 1;
 
         [[nodiscard]] vec3 translate_data_point(const vec3& local_point) const;
+
+        [[nodiscard]] vec3 undo_data_point_translation(const vec3& world_point) const;
 
         [[nodiscard]] double get_height_offset() const;
 
@@ -52,6 +55,8 @@ namespace rcsop::common {
 
         void set_units_per_centimeter(double units);
 
+        [[nodiscard]] double world_to_local_units(double centimeters) const;
+
         [[nodiscard]] auto position() const -> ObserverPosition;
 
         [[nodiscard]] auto has_position() const -> bool;
@@ -60,10 +65,10 @@ namespace rcsop::common {
 
         [[nodiscard]] auto native_camera() const -> ModelCamera;
 
-        [[nodiscard]] auto observe_point(const ScoredPoint& point) const -> observed_point;
+        [[nodiscard]] auto observe_point(const SimplePoint& point) const -> observed_point;
 
         [[nodiscard]] auto
-        observe_points(const vector<ScoredPoint>& camera_points) const -> shared_ptr<vector<observed_point>>;
+        observe_points(const vector<SimplePoint>& camera_points) const -> shared_ptr<vector<observed_point>>;
 
         [[nodiscard]] auto
         project_position(const observed_point& position) const -> vec3;

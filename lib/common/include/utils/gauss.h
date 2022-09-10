@@ -11,11 +11,14 @@ namespace rcsop::common::utils::gauss {
         double y_scale{};
     };
 
+    double gauss(double x, double sigma, double mu = 0);
+
     double get_gauss_integral_factor(const double& sigma);
 
     double rcs_gaussian(const observed_point& point, const gauss_options& options);
 
-    observed_factor_func rcs_gaussian_vertical(double vertical_spread);
+    observed_factor_func rcs_gaussian_vertical(double vertical_spread,
+                                               double sigma);
 }
 
 #endif //RCSOP_COMMON_GAUSS_H

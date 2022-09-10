@@ -20,12 +20,26 @@ namespace rcsop::launcher::utils {
     using rcsop::rendering::ObserverRenderer;
     using rcsop::rendering::rendering_options;
 
+    enum PointGenerator {
+        MODEL_POINT_CLOUD = 1,
+        BOUNDING_BOX = 2,
+        DATA_PROJECTION = 4,
+        MODEL_WITH_PROJECTION = MODEL_POINT_CLOUD | DATA_PROJECTION,
+    };
+
+    struct vertical_spread {
+        double angle_spread;
+        double normal_variance;
+    };
+
     struct task_options {
         string task_name;
         path input_path;
         path output_path;
         bool prefilter_data;
-        double vertical_spread;
+        vertical_spread vertical_options;
+
+        PointGenerator point_generator;
         ScoreRange db_range;
         camera_options camera;
         rendering_options rendering;

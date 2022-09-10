@@ -8,9 +8,11 @@
 namespace rcsop::common {
     using rcsop::common::utils::rcs::raw_rcs_to_dB;
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::min_value;
+    using rcsop::common::utils::max_value;
 
     ScoredPoint::ScoredPoint(vec3 position, point_id_t id, double score) :
-            _point(IdPoint(id, std::move(position))), _score(score) {}
+            _point(SimplePoint(id, std::move(position))), _score(score) {}
 
     point_id_t ScoredPoint::id() const { return _point.id(); }
 
@@ -28,8 +30,8 @@ namespace rcsop::common {
         }
         auto scores = map_vec<ScoredPoint, double>(points, &ScoredPoint::score_to_dB);
 
-        auto min_score = *std::min_element(scores.cbegin(), scores.cend());
-        auto max_score = *std::max_element(scores.cbegin(), scores.cend());
+        auto min_score = min_value(scores);
+        auto max_score = max_value(scores);
 
         return ScoreRange{
                 .min = min_score,

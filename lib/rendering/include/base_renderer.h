@@ -15,6 +15,7 @@ namespace rcsop::rendering {
 
     struct rendered_point {
         vec2 coordinates = vec2::Zero();
+        float size_factor = 1;
         color_vec color = color_vec::Zero();
     };
 

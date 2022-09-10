@@ -2,6 +2,7 @@
 
 namespace rcsop::data {
     using common::utils::points::point_id_t;
+    using common::utils::rcs::raw_rcs_to_dB;
     using uniform_distribution = std::uniform_real_distribution<double>;
 
     const double STEP_DISTANCE = 3;
@@ -56,7 +57,7 @@ namespace rcsop::data {
         const auto angles = data->angles();
         const auto distances = data->distances();
         auto data_filter = [&db_filter](rcs_value_t rcs_value) -> bool {
-            const auto db_value = common::utils::rcs::raw_rcs_to_dB(rcs_value);
+            const auto db_value = raw_rcs_to_dB(rcs_value);
             return db_filter(db_value);
         };
 

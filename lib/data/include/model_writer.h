@@ -21,7 +21,7 @@ namespace rcsop::data {
         size_t _point_count{};
 
     public:
-        explicit ModelWriter(shared_ptr <BasePointCloud> target);
+        explicit ModelWriter(shared_ptr<BasePointCloud> target);
 
         void add_points(const scored_cloud_payload& points);
 

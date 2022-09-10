@@ -10,11 +10,24 @@ namespace rcsop::launcher {
     using rcsop::common::coloring::local_colormap_func;
     using rcsop::common::coloring::map_jet;
 
+    constexpr double STIGLER_SIGMA = M_2_SQRTPI * M_SQRT1_2 / 2;
+
     const string DEFAULT_TASK = "azimuth-rcs";
+    const string DEFAULT_POINT_GENERATOR = "data-projection";
+
+    constexpr double DEFAULT_CAMERA_DISTANCE = 750.0;
+    constexpr height_t DEFAULT_HEIGHT = 40;
+
+    constexpr double DEFAULT_VERTICAL_ANGLE_SPREAD = 2.5;
+    constexpr double DEFAULT_VERTICAL_DISTRIBUTION_VARIANCE = STIGLER_SIGMA * STIGLER_SIGMA;
+    constexpr double DEFAULT_CAMERA_PITCH_CORRECTION = 0.;
+
+    constexpr double DEFAULT_MIN_DB = -20.;
+    constexpr double DEFAULT_MAX_DB = 5.;
+
     const string DEFAULT_COLOR_MAP = "jet";
-    const double DEFAULT_CAMERA_DISTANCE = 750.0;
-    const double DEFAULT_CAMERA_PITCH_CORRECTION = 0.;
-    const height_t DEFAULT_HEIGHT = 40;
+    constexpr float DEFAULT_ALPHA = 0.3;
+    constexpr float DEFAULT_GRADIENT_RADIUS = 15.;
 }
 
 #endif //RCSOP_LAUNCHER_DEFAULT_OPTIONS_H

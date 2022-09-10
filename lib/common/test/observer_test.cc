@@ -15,6 +15,7 @@ using ::testing::Return;
 
 using rcsop::common::Observer;
 using rcsop::common::ScoredPoint;
+using rcsop::common::SimplePoint;
 using rcsop::common::observed_point;
 
 using rcsop::common::ObserverPosition;
@@ -200,8 +201,8 @@ protected:
     shared_ptr<vector<observed_point>> observe_points(
             const vector<vec3>& test_input) {
         point_id_t id{};
-        const auto input = map_vec<vec3, ScoredPoint, false>(test_input, [&id](const vec3& point) {
-            return ScoredPoint(point, id++);
+        const auto input = map_vec<vec3, SimplePoint>(test_input, [&id](const vec3& point) {
+            return SimplePoint(id++, point);
         });
         return _sut->observe_points(input);
     }
@@ -445,7 +446,7 @@ TEST_F(ObserverShould, ProjectToEdgeVerticesZ) {
 TEST_F(ObserverShould, CalculateDistanceEqualToSphericalRadialComponent) {
     rcsop::common::point_id_t id{0};
     for (const auto& point: ALL_POINTS) {
-        const auto observed = _sut->observe_point(ScoredPoint(point, id++));
+        const auto observed = _sut->observe_point(SimplePoint(id++, point));
         const auto spherical = Observer::cartesian_to_spherical(this->_mock_camera->map_to_observer_local(point, 0.));
 
         const auto distance = observed.distance_in_world * UNITS_PER_CENTIMETER;

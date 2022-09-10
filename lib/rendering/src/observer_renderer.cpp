@@ -11,16 +11,22 @@ namespace rcsop::rendering {
     using rcsop::common::utils::time::start_time;
     using rcsop::common::utils::time::log_and_start_next;
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::sort_in_place;
+
     using rcsop::common::ModelCamera;
-    using rcsop::common::ImagePoint;
 
     using rcsop::rendering::rendered_point;
 
-    static vector<rendered_point> project_in_camera_with_color(
+    float ObserverRenderer::get_point_perspective_scale(const ImagePoint& point) const {
+        return atan(_reference_radius / _reference_distance)
+               / atan(point.distance() / _reference_distance);
+    }
+
+    vector<rendered_point> ObserverRenderer::project_in_camera_with_color(
             const vector<ImagePoint>& points,
             const ModelCamera& camera,
-            const global_colormap_func& color_map) {
-        return map_vec<ImagePoint, rendered_point>(points, [camera, color_map](const ImagePoint& point) {
+            const global_colormap_func& color_map) const {
+        return map_vec<ImagePoint, rendered_point>(points, [this, camera, color_map](const ImagePoint& point) {
             auto camera_coordinates = camera.project_from_image(point.coordinates());
             auto score = point.score();
             if (isnan(score)) {
@@ -29,16 +35,19 @@ namespace rcsop::rendering {
             auto color = color_map(point.score());
             return rendered_point{
                     .coordinates = camera_coordinates,
+                    .size_factor = get_point_perspective_scale(point),
                     .color = color
             };
         });
     }
 
-    vector<rendered_point> ObserverRenderer::project_points() {
+    vector<rendered_point> ObserverRenderer::project_points() const {
         const auto& camera = _observer.native_camera();
         auto img_points = camera.project_to_image(*_points);
 
-        std::ranges::sort(img_points, std::ranges::greater(), &ImagePoint::distance);
+        sort_in_place<ImagePoint, double>(img_points, [](const ImagePoint& point) {
+            return point.distance();
+        });
         auto rendered_points = project_in_camera_with_color(
                 img_points, camera, this->_color_map);
         return rendered_points;
@@ -75,15 +84,20 @@ namespace rcsop::rendering {
     ObserverRenderer::ObserverRenderer(
             const ScoredCloud& points_with_observer,
             const global_colormap_func& color_map,
-            const rendering_options& options)
+            const rendering_options& options,
+            double reference_distance_centimeters)
             : _observer(points_with_observer.observer()),
               _points(points_with_observer.points()),
               _color_map(color_map) {
         this->_textures = make_unique<vector<pair<texture_rendering_options, Texture>>>();
+
+        this->_reference_radius = options.gradient.radius;
+        this->_reference_distance = _observer.world_to_local_units(reference_distance_centimeters);
+
         if (options.use_gpu_rendering) {
-            this->_renderer = make_shared<SfmlRenderer>(options.gradient);
+            this->_renderer = make_unique<SfmlRenderer>(options.gradient);
         } else {
-            this->_renderer = make_shared<CairoRenderer>(options.gradient);
+            this->_renderer = make_unique<CairoRenderer>(options.gradient);
         }
     }
 

@@ -23,6 +23,7 @@ namespace rcsop::launcher::utils {
     using rcsop::common::utils::filter_vec_shared;
 
     using rcsop::common::ScoredPoint;
+    using rcsop::common::SimplePoint;
     using rcsop::common::Observer;
 
     using rcsop::data::AbstractDataSet;
@@ -57,6 +58,84 @@ namespace rcsop::launcher::utils {
                 });
     }
 
+    struct filtered_scored_points {
+        size_t total_count;
+        shared_ptr<vector<ScoredPoint>> filtered_points;
+    };
+
+    static auto generate_base_points(const InputDataCollector& inputs,
+                                     const task_options& task_options) -> shared_ptr<vector<SimplePoint>> {
+        const auto point_provider = make_unique<PointCloudProvider>(inputs, task_options.camera);
+        switch (task_options.point_generator) {
+            case MODEL_POINT_CLOUD:
+            case MODEL_WITH_PROJECTION:
+                return point_provider->get_base_points();
+            case BOUNDING_BOX:
+                return point_provider->generate_homogenous_cloud(30);
+            case DATA_PROJECTION:
+                return make_shared<vector<SimplePoint>>();
+        }
+        throw invalid_argument("task_options");
+    }
+
+    static inline auto value_observed_points(
+            const vector<observed_point>& observed_points,
+            const AbstractDataSet* data_for_observer,
+            const observed_factor_func& factor_func
+    ) -> shared_ptr<vector<ScoredPoint>> {
+        auto scored_points = map_vec<observed_point, ScoredPoint, true>(
+                observed_points,
+                [&data_for_observer, &factor_func](const observed_point& point) {
+                    double value = data_for_observer->map_to_nearest(point);
+                    if (abs(point.vertical_angle) > 5.0 || std::isnan(value)) {
+                        return ScoredPoint(point.position, point.id, 0);
+                    }
+
+                    double factor = factor_func(point);
+                    double final_value = factor * value;
+                    return ScoredPoint(point.position, point.id, final_value);
+                });
+        auto result = make_shared<vector<ScoredPoint>>();
+        for (const auto& point : scored_points) {
+            if (!point.is_discarded()) {
+                result->push_back(point);
+            }
+        }
+        return result;
+    }
+
+    static auto filter_and_score_points(
+            const AbstractDataSet* data_for_observer,
+            const vector<SimplePoint>& base_points,
+            const Observer& observer,
+            const observed_factor_func& factor_func,
+            const dB_range_filter& range_filter) -> filtered_scored_points {
+        const auto observed_points = observer.observe_points(base_points);
+        const auto scored_points = value_observed_points(*observed_points, data_for_observer, factor_func);
+        auto filtered_points = filter_points(*scored_points, range_filter);
+        return {
+            .total_count = observed_points->size(),
+            .filtered_points = filtered_points,
+        };
+    }
+
+    static auto project_data_to_points(
+            const AbstractDataSet* data_for_observer,
+            const Observer& observer,
+            const DataPointProjector& projector,
+            const observed_factor_func& factor_func,
+            const dB_range_filter& range_filter) -> filtered_scored_points {
+
+        auto projected_points = projector.project_data(
+                data_for_observer, range_filter, factor_func, observer);
+        auto total_count = projected_points->size();
+        auto filtered_points = filter_points(*projected_points, range_filter);
+        return {
+                .total_count = total_count,
+                .filtered_points = filtered_points
+        };
+    }
+
     auto score_points(
             const InputDataCollector& inputs,
             const vector<data_with_observer_options>& labeled_data,
@@ -69,31 +148,46 @@ namespace rcsop::launcher::utils {
 
         auto observers = observer_provider->observers_with_positions();
         auto observer_count = observers.size();
+        auto base_points = generate_base_points(inputs, task_options);
 
         auto total_time = start_time();
         auto range_filter = get_range_filter(dB_range);
 
         size_t total_count{0};
         size_t filtered_count{0};
-        const vector<ScoredCloud> complete_payload = map_vec<Observer, ScoredCloud>(
+        auto complete_payload = map_vec<Observer, ScoredCloud, false>(
                 observers,
-                [&labeled_data, &projector, range_filter, &factor_func,
-                        &observer_count, &total_count, &filtered_count]
+                [&labeled_data, &task_options,
+                 &base_points, &projector, range_filter, &factor_func,
+                 &observer_count, &total_count, &filtered_count]
                         (const size_t index, const Observer& observer) {
                     auto time = start_time();
                     auto relevant_points = make_shared<vector<ScoredPoint>> ();
                     for (const auto& [observer_options, data_collection]: labeled_data) {
                         auto data_for_observer = data_collection->get_for_exact_position(observer);
                         auto observer_with_translation = observer.clone_with_data(observer_options);
-                        auto projected_points = projector->project_data(
-                                data_for_observer, range_filter, factor_func, observer_with_translation);
-                        total_count += projected_points->size();
 
-                        auto filtered_points = filter_points(*projected_points, range_filter);
-                        filtered_count += filtered_points->size();
+                        // 1. observed base points
+                        auto [total_observed_count, observed_points] = filter_and_score_points(
+                                data_for_observer, *base_points, observer_with_translation,
+                                factor_func, range_filter);
+                        total_count += total_observed_count;
+                        filtered_count += observed_points->size();
 
                         relevant_points->insert(relevant_points->end(),
-                                                filtered_points->cbegin(), filtered_points->cend());
+                                                observed_points->cbegin(), observed_points->cend());
+
+                        // 2. projected points
+                        if ((task_options.point_generator & PointGenerator::DATA_PROJECTION) != 0) {
+                            auto [projected_count, projected_points] = project_data_to_points(
+                                    data_for_observer, observer_with_translation, *projector,
+                                    factor_func, range_filter);
+                            total_count += projected_count;
+                            filtered_count += projected_points->size();
+
+                            relevant_points->insert(relevant_points->end(),
+                                                    projected_points->cbegin(), projected_points->cend());
+                        }
                     }
 
                     log_and_start_next(time, construct_log_prefix(index + 1, observer_count)

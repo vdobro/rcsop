@@ -5,10 +5,10 @@
 #include "utils/sparse.h"
 #include "model_camera.h"
 
-#include "id_point.h"
+#include "simple_point.h"
 
 namespace rcsop::common {
-    using rcsop::common::IdPoint;
+    using rcsop::common::SimplePoint;
     using rcsop::common::ModelCamera;
     using rcsop::common::utils::sparse::color_vec;
 
@@ -21,14 +21,14 @@ namespace rcsop::common {
 
         virtual ~BasePointCloud() = default;
 
-        auto model_path() -> path;
+        [[nodiscard]] auto model_path() -> path;
 
     public:
-        [[nodiscard]] virtual shared_ptr<vector<IdPoint>> get_points() const = 0;
+        [[nodiscard]] virtual shared_ptr<vector<SimplePoint>> get_points() const = 0;
 
         [[nodiscard]] virtual size_t point_count() const = 0;
 
-        virtual void add_point(const vec3& point, const color_vec& color) = 0;
+        virtual void add_point(const IdPoint* point, const color_vec& color) = 0;
 
         virtual void filter_points(const function<bool(const vec3&)>& predicate_to_keep) = 0;
 

@@ -22,6 +22,9 @@ namespace rcsop::data {
     class AzimuthRcsDataSet : public AbstractDataSet {
     private:
         vector<rcs_distance_t> _ranges;
+        size_t _last_range_index;
+        rcs_distance_t _last_range_step;
+
         vector<rcs_angle_t> _angles;
 
         az_value_map_t _raw_values;

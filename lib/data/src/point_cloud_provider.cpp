@@ -26,7 +26,7 @@ namespace rcsop::data {
             this->sparse_cloud = input.data<SPARSE_CLOUD_COLMAP>();
             this->sparse_cloud_points = sparse_cloud->get_points();
 
-            auto point_ids = map_vec<IdPoint, point_id_t>(*sparse_cloud_points, &IdPoint::id);
+            auto point_ids = map_vec<SimplePoint, point_id_t>(*sparse_cloud_points, &SimplePoint::id);
             max_sparse_point_id = *std::max_element(point_ids.begin(), point_ids.end());
 
             auto observer_provider = ObserverProvider(input, camera_options, false);
@@ -38,11 +38,11 @@ namespace rcsop::data {
         }
     }
 
-    shared_ptr<vector<IdPoint>> PointCloudProvider::get_base_points(
+    shared_ptr<vector<SimplePoint>> PointCloudProvider::get_base_points(
             size_t take_every_nth) const {
         assert(take_every_nth >= 1);
 
-        auto result = make_shared<vector<IdPoint>>(*sparse_cloud_points);
+        auto result = make_shared<vector<SimplePoint>>(*sparse_cloud_points);
         auto dense_point_id = max_sparse_point_id + 1;
         for (const auto& point: *dense_cloud_points) {
             result->emplace_back(dense_point_id, point.position());
@@ -51,14 +51,14 @@ namespace rcsop::data {
 
         if (take_every_nth == 1) return result;
 
-        auto filtered_result = make_shared<vector<IdPoint>>();
+        auto filtered_result = make_shared<vector<SimplePoint>>();
         for (size_t i = 0; i < result->size(); i += take_every_nth) {
             filtered_result->push_back(result->at(i));
         }
         return filtered_result;
     }
 
-    shared_ptr<vector<IdPoint>> PointCloudProvider::generate_homogenous_cloud(size_t points_per_meter) const {
+    shared_ptr<vector<SimplePoint>> PointCloudProvider::generate_homogenous_cloud(size_t points_per_meter) const {
         auto base_points = make_shared<vector<Point>>();
         auto raw_points = get_base_points();
         for (const auto& point: *raw_points) {
@@ -85,7 +85,7 @@ namespace rcsop::data {
         const double span_y = (end_y - begin_y);
         const double span_z = (end_z - begin_z);
 
-        auto result = make_shared<vector<IdPoint>>();
+        auto result = make_shared<vector<SimplePoint>>();
         size_t point_count = ceil(
                 (span_x / step_size - 1)
                 * (span_y / step_size - 1)

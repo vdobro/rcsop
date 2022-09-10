@@ -15,7 +15,7 @@ namespace rcsop::data {
     void ModelWriter::add_points(const scored_cloud_payload& payload) {
         for (const auto& point: *(payload.point_cloud.points())) {
             _target_model->add_point(
-                    point.position(),
+                    &point,
                     payload.color_map(point.score_to_dB())
             );
         }

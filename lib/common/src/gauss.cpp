@@ -3,12 +3,10 @@
 #include <cmath>
 
 namespace rcsop::common::utils::gauss {
-    //static const double HORIZONTAL_SPREAD = 45. / 2.;
-    static const double STIGLER_SIGMA_SQUARED = M_2_SQRTPI * M_SQRT1_2 / 2;
 
-    static double raw_gauss(const double x) {
-        auto exponent_to_square = x / STIGLER_SIGMA_SQUARED;
-        return (M_SQRT1_2 * M_2_SQRTPI / (2 * STIGLER_SIGMA_SQUARED))
+    double gauss(double x, double sigma, double mu) {
+        auto exponent_to_square = (x - mu) / sigma;
+        return (M_SQRT1_2 * M_2_SQRTPI / (2 * sigma))
                * exp(-0.5 * exponent_to_square * exponent_to_square);
     }
 
@@ -18,9 +16,9 @@ namespace rcsop::common::utils::gauss {
         return 1 / integral;
     }
 
-    observed_factor_func rcs_gaussian_vertical(double vertical_spread) {
-        return [vertical_spread](const observed_point& point) {
-            return raw_gauss(point.vertical_angle / vertical_spread);
+    observed_factor_func rcs_gaussian_vertical(double vertical_spread, double sigma) {
+        return [vertical_spread, sigma](const observed_point& point) {
+            return gauss(point.vertical_angle / vertical_spread, sigma, 0.);
         };
     }
 

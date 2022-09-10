@@ -2,6 +2,7 @@
 
 namespace rcsop::data {
     using std::filesystem::directory_iterator;
+    using rcsop::common::utils::sort_in_place;
 
     InputDataCollector::InputDataCollector(const path& root_path, const camera_options& options) {
         this->_root_path = root_path;
@@ -25,10 +26,9 @@ namespace rcsop::data {
             }
             this->_images.emplace_back(file_path, _image_path, options.default_height);
         }
-        std::sort(this->_images.begin(), this->_images.end(),
-                  [](const CameraInputImage& a, const CameraInputImage& b) -> bool {
-                      return a.image_name() < b.image_name();
-                  });
+        sort_in_place<CameraInputImage, string>(this->_images, [](const CameraInputImage& a) {
+            return a.image_name();
+        });
     }
 
     void InputDataCollector::collect_models() {

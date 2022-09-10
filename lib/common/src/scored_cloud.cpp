@@ -29,7 +29,7 @@ namespace rcsop::common {
     auto multiple_scored_cloud_payload::extract_single_payloads() const -> vector<scored_cloud_payload> {
         return utils::map_vec<ScoredCloud, scored_cloud_payload>(
                 this->point_clouds,
-                [this](const ScoredCloud cloud) -> scored_cloud_payload {
+                [this](const ScoredCloud& cloud) -> scored_cloud_payload {
                     return scored_cloud_payload{
                         .point_cloud = cloud,
                         .color_map = this->color_map,

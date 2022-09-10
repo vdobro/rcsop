@@ -86,7 +86,8 @@ namespace rcsop::launcher::tasks {
                 point_clouds,
                 [&color_map, &options, &minimaps, &minimap_position]
                         (const ScoredCloud& scored_cloud) -> shared_ptr<OutputDataWriter> {
-                    auto renderer = make_shared<ObserverRenderer>(scored_cloud, color_map, options.rendering);
+                    auto renderer = make_shared<ObserverRenderer>(scored_cloud, color_map, options.rendering,
+                                                                  options.camera.distance_to_origin);
                     const auto& minimap = minimaps.for_position(scored_cloud.observer());
 
                     renderer->add_texture(minimap, minimap_position);
@@ -101,7 +102,7 @@ namespace rcsop::launcher::tasks {
                                const global_colormap_func& color_map,
                                const task_options& options) {
         auto point_clouds_exploded = payload.extract_single_payloads();
-        auto model_writers = map_vec<scored_cloud_payload, shared_ptr<OutputDataWriter>, true>(
+        auto model_writers = map_vec<scored_cloud_payload, shared_ptr<OutputDataWriter>>(
                 point_clouds_exploded,
                 [&inputs, color_map](const scored_cloud_payload& payload) -> shared_ptr<OutputDataWriter> {
                     auto model_writer = inputs.get_model_writer();
@@ -125,22 +126,30 @@ namespace rcsop::launcher::tasks {
 
         auto data_with_translation = map_labeled_data(azimuth_data);
 
-        auto vertical_distribution = rcs_gaussian_vertical(options.vertical_spread);
-        auto scored_payload = score_points(inputs, data_with_translation, options, color_map, vertical_distribution);
+        auto vertical_distribution = rcs_gaussian_vertical(options.vertical_options.angle_spread,
+                                                           options.vertical_options.normal_variance);
+
+        {
+            clog << endl << "Scoring points with unfiltered data ..." << endl;
+            auto scored_payload = score_points(inputs, data_with_translation, options, color_map,
+                                               vertical_distribution);
+
+            clog << endl << "Rendering to sparse cloud models ..." << endl;
+            plot_to_models(*scored_payload, inputs, color_map, options);
+        }
 
         if (options.prefilter_data) {
             for (auto& [_, data]: azimuth_data) {
                 data->use_filtered_peaks();
             }
         }
+        {
+            clog << endl << "Scoring points with filtered data ..." << endl;
+            auto scored_payload = score_points(inputs, data_with_translation, options, color_map,
+                                               vertical_distribution);
 
-        auto scored_filtered_payload = score_points(inputs, data_with_translation, options, color_map,
-                                                    vertical_distribution);
-
-        clog << endl << "Rendering to sparse cloud models:" << endl;
-        plot_to_models(*scored_payload, inputs, color_map, options);
-
-        clog << endl << "Rendering to images:" << endl;
-        plot_to_images(*scored_filtered_payload, *minimaps, color_map, options);
+            clog << endl << "Rendering to images ..." << endl;
+            plot_to_images(*scored_payload, *minimaps, color_map, options);
+        }
     }
 }

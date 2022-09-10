@@ -27,7 +27,7 @@ namespace rcsop::common {
 
         [[nodiscard]] vector<ModelCamera> get_cameras() const;
 
-        [[nodiscard]] shared_ptr<vector<IdPoint>> get_points() const override;
+        [[nodiscard]] shared_ptr<vector<SimplePoint>> get_points() const override;
 
         [[nodiscard]] size_t point_count() const override;
 
@@ -37,7 +37,7 @@ namespace rcsop::common {
 
         void filter_points(const function<bool(const vec3&)>& predicate_to_keep) override;
 
-        void add_point(const vec3& point, const color_vec& color) override;
+        void add_point(const IdPoint* point, const color_vec& color) override;
 
         void write(const path& output_path) override;
 

@@ -12,7 +12,7 @@
 
 #include "utils/types.h"
 #include "utils/points.h"
-#include "id_point.h"
+#include "simple_point.h"
 #include "base_point_cloud.h"
 
 namespace rcsop::common {
@@ -23,7 +23,7 @@ namespace rcsop::common {
     using VertexDescriptor = SurfaceMesh::Vertex_index;
 
     using rcsop::common::utils::points::vec3;
-    using rcsop::common::IdPoint;
+    using rcsop::common::SimplePoint;
     using rcsop::common::BasePointCloud;
 
     class DenseCloud : public BasePointCloud {
@@ -36,13 +36,13 @@ namespace rcsop::common {
 
         [[nodiscard]] bool is_inside(const vec3& point) const;
 
-        [[nodiscard]] shared_ptr<vector<IdPoint>> get_points() const override;
+        [[nodiscard]] shared_ptr<vector<SimplePoint>> get_points() const override;
 
         [[nodiscard]] size_t point_count() const override;
 
         void filter_points(const function<bool(const vec3&)>& predicate_to_keep) override;
 
-        void add_point(const vec3& point, const color_vec& color) override;
+        void add_point(const IdPoint* point, const color_vec& color) override;
 
         void purge_cameras(camera_id_t camera_to_keep) override;
 

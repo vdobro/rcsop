@@ -30,7 +30,7 @@ add_library(rcsop-common SHARED
         src/gauss.cpp
         src/colmap_observer_camera.cpp
         src/rcs.cpp
-        src/id_point.cpp
+        src/simple_point.cpp
         src/base_point_cloud.cpp
         src/observer_position.cpp
         src/points.cpp)

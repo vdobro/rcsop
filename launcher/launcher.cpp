@@ -52,7 +52,7 @@ namespace rcsop::launcher {
                 string confirmation;
                 getline(cin, confirmation);
                 if (!(confirmation == "y" || confirmation == "Y")) {
-                    cout << "Task aborted, existing folder intact. Exiting." << endl;
+                    cout << "Task aborted, leaving existing folder intact. Exiting." << endl;
                     return EXIT_SUCCESS;
                 }
                 cout << "Removing contents of " << task_output_path.string() << endl;

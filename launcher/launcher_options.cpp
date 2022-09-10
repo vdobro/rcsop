@@ -9,6 +9,8 @@
 #include "default_options.h"
 
 namespace rcsop::launcher {
+    using rcsop::launcher::utils::PointGenerator;
+
     namespace po = boost::program_options;
     using std::chrono::system_clock;
     using std::cout;
@@ -26,11 +28,13 @@ namespace rcsop::launcher {
     static const char* PARAM_DB_MIN = "db-min";
     static const char* PARAM_DB_MAX = "db-max";
     static const char* PARAM_VERTICAL_ANGLE_SPREAD = "vertical-spread";
+    static const char* PARAM_VERTICAL_DISTRIBUTION_VARIANCE = "vertical-variance";
+    static const char* PARAM_POINT_GENERATOR = "points";
     static const char* PARAM_GRADIENT_RADIUS = "gradient-radius";
     static const char* PARAM_COLOR_MAP = "color-map";
     static const char* PARAM_ALPHA = "alpha";
 
-    static string get_current_timestamp() {
+    [[nodiscard]] static string get_current_timestamp() {
         const auto now = system_clock::now();
         const time_t t = system_clock::to_time_t(now);
         std::stringstream ss;
@@ -66,11 +70,34 @@ namespace rcsop::launcher {
             throw invalid_argument("Gradient center alpha must be in range (0, 1].");
         }
         if (options.rendering.gradient.radius <= 0) {
-            throw invalid_argument("Gradient radius must be larger than 0, exiting.");
+            throw invalid_argument("Gradient radius must be larger than 0.");
         }
         if (options.db_range.min >= options.db_range.max) {
-            throw invalid_argument("dB range must be well defined: lower bound smaller than the upper bound, exiting.");
+            throw invalid_argument("dB range must be well defined: lower bound smaller than the upper bound.");
         }
+        if (options.vertical_options.angle_spread <= 0) {
+            throw invalid_argument("No data to display with a negative vertical angle spread.");
+        }
+        if (options.vertical_options.normal_variance == 0) {
+            throw invalid_argument("Vertical spread variance must not be 0.");
+        }
+    }
+
+    static auto parse_point_generator_option(const string& option) -> PointGenerator {
+        if (option == "model-cloud") {
+            return PointGenerator::MODEL_POINT_CLOUD;
+        }
+        if (option == "bounding-box") {
+            return PointGenerator::BOUNDING_BOX;
+        }
+        if (option == DEFAULT_POINT_GENERATOR) {
+            return PointGenerator::DATA_PROJECTION;
+        }
+        if (option == "model-with-projection") {
+            return PointGenerator::MODEL_WITH_PROJECTION;
+        }
+        throw invalid_argument(string(PARAM_POINT_GENERATOR)
+                               + " must be one of the following: model-cloud, bounding-box, data-projection or model-with-projection");
     }
 
     [[nodiscard]] po::variables_map parse_arguments(int argc, char* argv[]) {
@@ -94,17 +121,21 @@ namespace rcsop::launcher {
                  "camera pitch correction")
                 (PARAM_DEFAULT_HEIGHT, po::value<height_t>()->default_value(DEFAULT_HEIGHT),
                  "default camera height, used if not specified in point cloud data or source image names")
-                (PARAM_DB_MIN, po::value<double>()->default_value(-20.),
+                (PARAM_DB_MIN, po::value<double>()->default_value(DEFAULT_MIN_DB),
                  "lower bound of the decibel range")
-                (PARAM_DB_MAX, po::value<double>()->default_value(5.),
+                (PARAM_DB_MAX, po::value<double>()->default_value(DEFAULT_MAX_DB),
                  "upper bound of the decibel range")
-                (PARAM_GRADIENT_RADIUS, po::value<float>()->default_value(25.),
+                (PARAM_GRADIENT_RADIUS, po::value<float>()->default_value(DEFAULT_GRADIENT_RADIUS),
                  "gradient radius in points")
-                (PARAM_VERTICAL_ANGLE_SPREAD, po::value<double>()->default_value(2.5),
+                (PARAM_VERTICAL_ANGLE_SPREAD, po::value<double>()->default_value(DEFAULT_VERTICAL_ANGLE_SPREAD),
                  "Maximum vertical spread applied to point clouds, both projected and observed")
+                (PARAM_VERTICAL_DISTRIBUTION_VARIANCE, po::value<double>()->default_value(DEFAULT_VERTICAL_DISTRIBUTION_VARIANCE),
+                 "variance (sigma squared) for the vertical distribution of dB values, defaults to Stephen Stigler's definition")
+                (PARAM_POINT_GENERATOR, po::value<string>()->default_value(DEFAULT_POINT_GENERATOR),
+                 "use the legacy point generator (only filtering a bounding box or using the sparse cloud model)")
                 (PARAM_COLOR_MAP, po::value<string>()->default_value(DEFAULT_COLOR_MAP),
                  "default color map to use")
-                (PARAM_ALPHA, po::value<float>()->default_value(0.3),
+                (PARAM_ALPHA, po::value<float>()->default_value(DEFAULT_ALPHA),
                  "base alpha value/factor to apply and full color intensity");
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -143,14 +174,22 @@ namespace rcsop::launcher {
         const auto color_map = rcsop::common::coloring::resolve_map_by_name(vm.at(PARAM_COLOR_MAP).as<string>());
         const bool filter_data = !vm.at(PARAM_NO_DATA_PREFILTER).as<bool>();
         const double vertical_spread = vm.at(PARAM_VERTICAL_ANGLE_SPREAD).as<double>();
+        const double vertical_distribution_variance = sqrt(abs(vm.at(PARAM_VERTICAL_DISTRIBUTION_VARIANCE).as<double>()));
         const bool use_any_closest_observer = vm.at(PARAM_USE_CLOSEST_CAMERA).as<bool>();
+        const PointGenerator point_generator = vm.contains(PARAM_POINT_GENERATOR)
+                ? parse_point_generator_option(vm.at(PARAM_POINT_GENERATOR).as<string>())
+                : PointGenerator::DATA_PROJECTION; // default
 
         task_options options{
                 .task_name = task,
                 .input_path = input_path,
                 .output_path = task_output_path,
                 .prefilter_data = filter_data,
-                .vertical_spread = vertical_spread,
+                .vertical_options = {
+                        .angle_spread = vertical_spread,
+                        .normal_variance = vertical_distribution_variance,
+                },
+                .point_generator = point_generator,
                 .db_range = {
                         .min = min_db,
                         .max = max_db,

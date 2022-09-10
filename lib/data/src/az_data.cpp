@@ -6,6 +6,8 @@
 
 namespace rcsop::data {
     using std::reduce;
+    using std::nanf;
+
     using rcsop::common::utils::map_vec;
     using rcsop::common::utils::find_nearest;
     using rcsop::common::utils::find_nearest_index;
@@ -65,7 +67,7 @@ namespace rcsop::data {
 
     void AzimuthRcsDataSet::filter_peaks() {
         for (const auto& [angle, raw_column]: _raw_values) {
-            double max_value = *std::max_element(raw_column.cbegin(), raw_column.cend());
+            double max_value = rcsop::common::utils::max_value(raw_column);
 
             vector<double> filtered_column = map_vec<double, double>(raw_column, [&max_value]
                     (const double& value) -> double {
@@ -97,7 +99,8 @@ namespace rcsop::data {
         Mat_Close(mat_file_handle);
 
         _ranges.erase(_ranges.begin()); // first row contains only NaN
-
+        _last_range_index = _ranges.size() - 1;
+        _last_range_step = abs(_ranges[_last_range_index] - _ranges[_last_range_index - 1]);
         filter_peaks();
     }
 
@@ -105,10 +108,7 @@ namespace rcsop::data {
                                                  size_t range_index) const {
         const auto& value_map = (use_filtered) ? _filtered_values : _raw_values;
         const auto& range_to_values = value_map.at(angle);
-        if (range_index >= range_to_values.size()) {
-            return std::nanf("Distance out of range.");
-        }
-        return range_to_values.at(range_index);
+        return range_to_values[range_index];
     }
 
     double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
@@ -117,7 +117,12 @@ namespace rcsop::data {
         rcs_angle_t nearest_angle = find_nearest(point.horizontal_angle, _angles);
         size_t nearest_range_index = find_nearest_index(range_distance, _ranges);
 
-        return resolve_value(nearest_angle, nearest_range_index);
+        const auto is_last = nearest_range_index == _last_range_index;
+        const auto last_range = _ranges[_last_range_index];
+        const auto out_of_range = nearest_range_index >= _ranges.size()
+                                  || (is_last && abs(last_range - range_distance) > _last_range_step);
+
+        return out_of_range ? nanf("Distance out of range.") : resolve_value(nearest_angle, nearest_range_index);
     }
 
     void AzimuthRcsDataSet::use_filtered_peaks() {

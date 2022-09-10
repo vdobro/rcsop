@@ -4,6 +4,9 @@
 #include "utils/mapping.h"
 
 namespace rcsop::common {
+    using std::filesystem::is_regular_file;
+    using rcsop::common::utils::sort_in_place;
+
     using rcsop::common::utils::sparse::Image;
 
     const static char* FILE_CAMERAS = "cameras.bin";
@@ -17,11 +20,10 @@ namespace rcsop::common {
         for (auto& [_, image]: reconstruction->Images()) {
             images.push_back(image);
         }
-        std::sort(std::execution::par_unseq,
-                  images.begin(), images.end(),
-                  [](const Image& a, const Image& b) {
-                      return a.Name() < b.Name();
-                  });
+        utils::sort_in_place<Image, string>(images, [](const Image& a) -> string {
+            return a.Name();
+        });
+
         for (auto& image: images) {
             ModelCamera camera(image, *reconstruction);
             this->cameras.push_back(camera);
@@ -32,9 +34,8 @@ namespace rcsop::common {
         path cameras_path{root_path / FILE_CAMERAS};
         path images_path{root_path / FILE_IMAGES};
         path points_path{root_path / FILE_POINTS};
-        return std::filesystem::is_regular_file(cameras_path)
-               && std::filesystem::is_regular_file(images_path)
-               && std::filesystem::is_regular_file(points_path);
+
+        return is_regular_file(cameras_path) && is_regular_file(images_path) && is_regular_file(points_path);
     }
 
     void SparseCloud::reload() {
@@ -60,14 +61,16 @@ namespace rcsop::common {
         return this->cameras;
     }
 
-    shared_ptr<vector<IdPoint>> SparseCloud::get_points() const {
+    shared_ptr<vector<SimplePoint>> SparseCloud::get_points() const {
         auto point_map = reconstruction->Points3D();
-        auto result = make_shared<vector<IdPoint>>();
+        auto result = make_shared<vector<SimplePoint>>();
         for (const auto& [point_id, point]: point_map) {
             result->emplace_back(point_id, point.XYZ());
         }
 
-        std::ranges::sort(result->begin(), result->end(), std::ranges::greater(), &IdPoint::id);
+        sort_in_place<SimplePoint, point_id_t>(*result, [](const SimplePoint& point) {
+            return point.id();
+        });
         return result;
     }
 
@@ -85,8 +88,18 @@ namespace rcsop::common {
         return color.head(3);
     }
 
-    void SparseCloud::add_point(const vec3& point, const color_vec& color) {
-        reconstruction->AddPoint3D(point, colmap::Track(), convert_color(color));
+    void SparseCloud::add_point(const IdPoint* point,
+                                const color_vec& color) {
+        auto id = point->id();
+        auto position = point->position();
+        auto target_color = convert_color(color);
+        if (reconstruction->ExistsPoint3D(id)) {
+            auto& existing_point = reconstruction->Point3D(id);
+            existing_point.SetXYZ(position);
+            existing_point.SetColor(target_color);
+        } else {
+            reconstruction->AddPoint3D(position, colmap::Track(), target_color);
+        }
     }
 
     void SparseCloud::write(const path& output_path) {

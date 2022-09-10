@@ -12,7 +12,7 @@ namespace rcsop::rendering {
     static const double RGB = 256.0;
 
     void CairoRendererContext::render_point(const rendered_point& point) {
-        const auto [coordinates, color] = point;
+        const auto [coordinates, size_factor, color] = point;
 
         const double x = coordinates.x(),
                 y = coordinates.y();
@@ -21,7 +21,7 @@ namespace rcsop::rendering {
                 b = static_cast<double>(point.color.z()) / RGB,
                 a = static_cast<double>(point.color.w()) / RGB;
 
-        const auto& radius = _options.radius;
+        const auto radius = _options.radius * size_factor;
         auto radial_pattern = Cairo::RadialGradient::create(x, y, 0, x, y, radius);
         radial_pattern->add_color_stop_rgba(0, r, g, b, a * _options.center_alpha);
         radial_pattern->add_color_stop_rgba(1, r, g, b, 0);

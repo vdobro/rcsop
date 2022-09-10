@@ -10,6 +10,7 @@
 #include "rendering_options.h"
 #include "base_renderer.h"
 #include "output_data_writer.h"
+#include "image_point.h"
 
 namespace rcsop::rendering {
     using rcsop::common::ScoredCloud;
@@ -17,12 +18,18 @@ namespace rcsop::rendering {
     using rcsop::common::Texture;
     using rcsop::common::height_t;
     using rcsop::common::OutputDataWriter;
+    using rcsop::common::ModelCamera;
+    using rcsop::common::ImagePoint;
 
     using rcsop::common::coloring::global_colormap_func;
 
     class ObserverRenderer : public OutputDataWriter {
     private:
         Observer _observer;
+
+        double _reference_radius;
+        double _reference_distance;
+
         shared_ptr<vector<ScoredPoint>> _points;
         global_colormap_func _color_map;
 
@@ -30,12 +37,20 @@ namespace rcsop::rendering {
 
         shared_ptr<vector<pair<texture_rendering_options, Texture>>> _textures;
 
-        vector<rendered_point> project_points();
+        [[nodiscard]] vector<rendered_point> project_points() const;
+
+        [[nodiscard]] float get_point_perspective_scale(const common::ImagePoint& point) const;
+
+        [[nodiscard]] vector<rendered_point> project_in_camera_with_color(
+                const vector<ImagePoint>& points,
+                const ModelCamera& camera,
+                const global_colormap_func& color_map) const;
 
     public:
-        explicit ObserverRenderer(const ScoredCloud& pointsWithObserver,
-                                  const global_colormap_func& color_map,
-                                  const rendering_options& options);
+        ObserverRenderer(const ScoredCloud& pointsWithObserver,
+                         const global_colormap_func& color_map,
+                         const rendering_options& options,
+                         double reference_distance_centimeters);
 
         [[nodiscard]] height_t observer_height() const override;
 

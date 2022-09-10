@@ -4,6 +4,8 @@
 #include "utils/mapping.h"
 
 namespace rcsop::common {
+    using rcsop::common::utils::map_vec;
+
     using rcsop::common::utils::sparse::Image;
     using rcsop::common::utils::sparse::Reconstruction;
     using rcsop::common::utils::points::vec2;

@@ -39,10 +39,11 @@ namespace rcsop::rendering {
         auto x = static_cast<float>(point.coordinates.x());
         auto y = static_cast<float>(point.coordinates.y());
 
-        auto x_begin = x - _options.radius;
-        auto x_end = x + _options.radius;
-        auto y_begin = y - _options.radius;
-        auto y_end = y + _options.radius;
+        auto radius = _options.radius * point.size_factor;
+        auto x_begin = x - radius;
+        auto x_end = x + radius;
+        auto y_begin = y - radius;
+        auto y_end = y + radius;
 
         quad[0].position = sf::Vector2f(x_begin, y_begin);
         quad[1].position = sf::Vector2f(x_end, y_begin);
@@ -68,7 +69,7 @@ namespace rcsop::rendering {
         shader.setUniform("p_color", sf::Glsl::Vec4(r, g, b, a * _options.center_alpha));
         shader.setUniform("p_center", sf::Glsl::Vec2(x, y));
         shader.setUniform("degree", 3.0f);
-        shader.setUniform("p_radius", _options.radius);
+        shader.setUniform("p_radius", radius);
 
         _render_target->draw(quad, &shader);
     }

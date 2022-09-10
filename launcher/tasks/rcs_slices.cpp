@@ -23,7 +23,7 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::height_t;
     using rcsop::common::Observer;
     using rcsop::common::ScoredPoint;
-    using rcsop::common::IdPoint;
+    using rcsop::common::SimplePoint;
     using rcsop::common::ScoredCloud;
     using rcsop::common::OutputDataWriter;
 
@@ -99,10 +99,10 @@ namespace rcsop::launcher::tasks {
                 ->rcs();
         const vector<height_t> heights{default_height};
 
-        auto points = map_vec_shared<IdPoint, ScoredPoint, true>(
+        auto points = map_vec_shared<SimplePoint, ScoredPoint, true>(
                 *base_points,
                 [&data, &origin, &flattened_image_positions, &image_count]
-                        (const IdPoint& point) {
+                        (const SimplePoint& point) {
                     auto flat_point = flat_down_from_above(point.position());
 
                     for (size_t image_id = 0; image_id < image_count; image_id++) {
@@ -126,7 +126,8 @@ namespace rcsop::launcher::tasks {
                 observers,
                 [&filtered_points, &color_map, &options](const Observer& observer) -> shared_ptr<OutputDataWriter> {
                     ScoredCloud payload(observer, filtered_points);
-                    return make_shared<ObserverRenderer>(payload, color_map, options.rendering);
+                    return make_shared<ObserverRenderer>(payload, color_map, options.rendering,
+                                                         options.camera.distance_to_origin);
                 });
 
         batch_output(renderers, options, heights);

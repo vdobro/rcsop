@@ -9,8 +9,19 @@
 using rcsop::common::ColmapObserverCamera;
 
 namespace rcsop::data {
+    using std::clog;
+    using std::endl;
+    using std::reduce;
+    using std::distance;
+    using std::min_element;
+    using std::back_inserter;
+    using std::copy;
+
     using rcsop::common::utils::points::vec3;
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::min_value;
+    using rcsop::common::utils::sort_in_place;
+
     using rcsop::common::ModelCamera;
     using rcsop::common::height_t;
     using rcsop::common::ObserverPosition;
@@ -42,8 +53,7 @@ namespace rcsop::data {
 
     static inline auto get_farthest_camera_position(const vec3& camera_position,
                                                     const vector<vec3>& positions) -> vec3 {
-        return rcsop::common::utils::points::find_farthest(
-                camera_position, positions);
+        return rcsop::common::utils::points::find_farthest(camera_position, positions);
     }
 
     static double average_distance_to_center(const vector<ModelCamera>& cameras) {
@@ -72,7 +82,7 @@ namespace rcsop::data {
             double height_average = average_distance_to_center(cameras_at_height);
             averages_per_height.push_back(height_average);
         }
-        auto total_average = std::reduce(averages_per_height.begin(), averages_per_height.end())
+        auto total_average = reduce(averages_per_height.begin(), averages_per_height.end())
                              / static_cast<double>(averages_per_height.size());
 
         const auto result = total_average / options.distance_to_origin;
@@ -84,11 +94,9 @@ namespace rcsop::data {
     }
 
     static void sort_by_image_name(vector<Observer>& observers) {
-        std::sort(PARALLEL_EXECUTOR,
-                  observers.begin(), observers.end(), [](const Observer& a, const Observer& b) {
-                    return a.source_image_path().filename().string()
-                           < b.source_image_path().filename().string();
-                });
+        sort_in_place<Observer, string>(observers, [](const Observer& a) {
+            return a.source_image_path().filename().string();
+        });
     }
 
     static auto collect_from_cameras(const vector<CameraInputImage>& source_images,
@@ -119,26 +127,26 @@ namespace rcsop::data {
                     [&position, &options](const Observer& observer) -> double {
                         return position.distance_to(observer.position(), options.distance_to_origin);
                     });
-            auto iterator = std::min_element(distances.cbegin(), distances.cend());
-            auto index = std::distance(distances.cbegin(), iterator);
+            auto iterator = min_element(distances.cbegin(), distances.cend());
+            auto index = distance(distances.cbegin(), iterator);
             auto result = positioned_observers[index];
 
-            std::clog << "Warning: Observer at " << result.position().str()
-                      << " will be used for data set at " << position.str()
-                      << std::endl;
+            clog << "Warning: Observer at " << result.position().str()
+                 << " will be used for data set at " << position.str()
+                 << endl;
             return result;
         } else {
             for (const auto& observer: positioned_observers) {
                 if (observer.position().azimuth != position.azimuth) {
                     continue;
                 }
-                std::clog << "Info: Observer at " << observer.position().str()
-                          << " will be used for data set at " << position.str()
-                          << std::endl;
+                clog << "Info: Observer at " << observer.position().str()
+                     << " will be used for data set at " << position.str()
+                     << endl;
                 return observer;
             }
-            std::clog << "Warning: No viable observer found for data at " << position.str()
-                      << ", data set will be skipped entirely." << std::endl;
+            clog << "Warning: No viable observer found for data at " << position.str()
+                 << ", data set will be skipped entirely." << endl;
             return {};
         }
     }
@@ -156,7 +164,7 @@ namespace rcsop::data {
                 position_set.insert(position);
             }
         }
-        std::copy(position_set.begin(), position_set.end(), std::back_inserter(result));
+        copy(position_set.begin(), position_set.end(), back_inserter(result));
         return result;
     }
 
@@ -190,12 +198,12 @@ namespace rcsop::data {
             /// there
             auto actual_source_path = observer_with_translation.source_image_path().parent_path() / (position.str() + ".png" );
             if (!is_regular_file(actual_source_path)) {
-                std::clog << "Warning: no source image found for approximated observer: " << position.str() << std::endl;
+                clog << "Warning: no source image found for approximated observer: " << position.str() << std::endl;
                 result.push_back(observer_with_translation);
                 continue;
             }
 
-            std::clog << "Info: original source image found for approximated observer : " << position.str() << std::endl;
+            clog << "Info: original source image found for approximated observer : " << position.str() << std::endl;
             auto observer_with_actual_source_path = observer_with_translation.clone_with_source_path(actual_source_path);
             result.push_back(observer_with_actual_source_path);
         }
@@ -218,7 +226,7 @@ namespace rcsop::data {
         auto all_observers = collect_from_cameras(source_images, cameras, camera_options);
         if (fill_in_missing_observers) {
             auto extended_observers = collect_missing_data_observers(all_observers, input, camera_options);
-            std::copy(extended_observers.begin(), extended_observers.end(), std::back_inserter(all_observers));
+            copy(extended_observers.begin(), extended_observers.end(), back_inserter(all_observers));
         }
         sort_by_image_name(all_observers);
 

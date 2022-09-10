@@ -75,7 +75,7 @@ namespace rcsop::data {
     static vector<angle_t> get_angles(size_t index, matvar_t* table) {
         auto raw_values = get_raw_values(index, RCS_COLUMN_ANGLE, table);
 
-        return cast_vec<double, angle_t>(raw_values);
+        return cast_vec<double, angle_t, true>(raw_values);
     }
 
     /**

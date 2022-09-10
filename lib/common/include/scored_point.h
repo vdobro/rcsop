@@ -3,10 +3,10 @@
 
 #include "utils/types.h"
 #include "utils/points.h"
-#include "id_point.h"
+#include "simple_point.h"
 
 namespace rcsop::common {
-    using rcsop::common::IdPoint;
+    using rcsop::common::SimplePoint;
 
     struct ScoreRange {
         double min;
@@ -15,15 +15,15 @@ namespace rcsop::common {
 
     const double default_point_score = 0;
 
-    class ScoredPoint {
+    class ScoredPoint : public IdPoint {
     private:
-        IdPoint _point;
+        SimplePoint _point;
         double _score{default_point_score};
 
     public:
         ScoredPoint() = default;
 
-        ~ScoredPoint() = default;
+        ~ScoredPoint() override = default;
 
         ScoredPoint(vec3 position, point_id_t id, double score = default_point_score);
 
@@ -49,9 +49,9 @@ namespace rcsop::common {
             return *this;
         }
 
-        [[nodiscard]] vec3 position() const;
+        [[nodiscard]] vec3 position() const override;
 
-        [[nodiscard]] point_id_t id() const;
+        [[nodiscard]] point_id_t id() const override;
 
         [[nodiscard]] double score_to_dB() const;
 

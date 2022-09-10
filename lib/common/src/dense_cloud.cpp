@@ -27,8 +27,8 @@ namespace rcsop::common {
         return res == CGAL::ON_BOUNDED_SIDE || res == CGAL::ON_BOUNDARY;
     }
 
-    shared_ptr<vector<IdPoint>> DenseCloud::get_points() const {
-        auto result = make_shared<vector<IdPoint>>();
+    shared_ptr<vector<SimplePoint>> DenseCloud::get_points() const {
+        auto result = make_shared<vector<SimplePoint>>();
         for (VertexDescriptor vertex_index: this->_mesh->vertices()) {
             const Point vertex = this->_mesh->point(vertex_index);
             result->emplace_back(vertex_index, vec3(vertex.x(), vertex.y(), vertex.z()));
@@ -45,7 +45,8 @@ namespace rcsop::common {
         }
     }
 
-    void DenseCloud::add_point(const vec3& point, const color_vec& color) {
+    void DenseCloud::add_point(const IdPoint* point,
+                               const color_vec& color) {
         //TODO:
         throw runtime_error("Adding points to dense clouds not supported yet.");
     }

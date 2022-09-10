@@ -12,6 +12,8 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::camera_options;
 
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::min_value;
+    using rcsop::common::utils::max_value;
     using rcsop::common::utils::points::vec3;
 
     using rcsop::data::ObserverProvider;
@@ -35,8 +37,8 @@ namespace rcsop::launcher::tasks {
         auto distances = map_vec<vec3, double>(positions, [origin](const vec3& point) {
             return distance_from_origin(point, origin);
         });
-        auto max = *std::max_element(distances.begin(), distances.end());
-        auto min = *std::min_element(distances.begin(), distances.end());
+        auto max = max_value(distances);
+        auto min = min_value(distances);
         return std::min(min * 1.5, max);
     }
 
