@@ -13,8 +13,11 @@
 namespace rcsop::launcher::utils {
     using rcsop::common::utils::time::start_time;
     using rcsop::common::utils::time::log_and_start_next;
+
     using rcsop::common::utils::rcs::raw_rcs_to_dB;
     using rcsop::common::utils::rcs::rcs_value_t;
+
+    using rcsop::common::utils::gauss::rcs_gaussian_vertical;
 
     using rcsop::common::utils::logging::construct_log_prefix;
 
@@ -25,11 +28,13 @@ namespace rcsop::launcher::utils {
     using rcsop::common::ScoredPoint;
     using rcsop::common::SimplePoint;
     using rcsop::common::Observer;
+    using rcsop::common::observed_factor_func;
 
     using rcsop::data::AbstractDataSet;
     using rcsop::data::PointCloudProvider;
     using rcsop::data::ObserverProvider;
     using rcsop::data::DataPointProjector;
+    using rcsop::data::projection_options;
 
     using rcsop::common::coloring::global_colormap_func;
 
@@ -71,23 +76,25 @@ namespace rcsop::launcher::utils {
             case MODEL_WITH_PROJECTION:
                 return point_provider->get_base_points();
             case BOUNDING_BOX:
-                return point_provider->generate_homogenous_cloud(30);
+                return point_provider->generate_homogenous_cloud(task_options.point_density);
             case DATA_PROJECTION:
                 return make_shared<vector<SimplePoint>>();
         }
         throw invalid_argument("task_options");
     }
 
-    static inline auto value_observed_points(
+    static inline auto score_observed_points(
             const vector<observed_point>& observed_points,
             const AbstractDataSet* data_for_observer,
-            const observed_factor_func& factor_func
+            const projection_options& projection_options
     ) -> shared_ptr<vector<ScoredPoint>> {
+        const auto vertical_angle_limit = projection_options.vertical_angle_limit;
+        const auto& factor_func = projection_options.factor_func;
         auto scored_points = map_vec<observed_point, ScoredPoint, true>(
                 observed_points,
-                [&data_for_observer, &factor_func](const observed_point& point) {
+                [&data_for_observer, &factor_func, &vertical_angle_limit](const observed_point& point) {
                     double value = data_for_observer->map_to_nearest(point);
-                    if (abs(point.vertical_angle) > 5.0 || std::isnan(value)) {
+                    if (abs(point.vertical_angle) > vertical_angle_limit || std::isnan(value)) {
                         return ScoredPoint(point.position, point.id, 0);
                     }
 
@@ -108,11 +115,11 @@ namespace rcsop::launcher::utils {
             const AbstractDataSet* data_for_observer,
             const vector<SimplePoint>& base_points,
             const Observer& observer,
-            const observed_factor_func& factor_func,
-            const dB_range_filter& range_filter) -> filtered_scored_points {
+            const projection_options& projection_params
+    ) -> filtered_scored_points {
         const auto observed_points = observer.observe_points(base_points);
-        const auto scored_points = value_observed_points(*observed_points, data_for_observer, factor_func);
-        auto filtered_points = filter_points(*scored_points, range_filter);
+        const auto scored_points = score_observed_points(*observed_points, data_for_observer, projection_params);
+        auto filtered_points = filter_points(*scored_points, projection_params.db_filter);
         return {
             .total_count = observed_points->size(),
             .filtered_points = filtered_points,
@@ -123,13 +130,11 @@ namespace rcsop::launcher::utils {
             const AbstractDataSet* data_for_observer,
             const Observer& observer,
             const DataPointProjector& projector,
-            const observed_factor_func& factor_func,
-            const dB_range_filter& range_filter) -> filtered_scored_points {
-
+            const data::projection_options& projection_params) -> filtered_scored_points {
         auto projected_points = projector.project_data(
-                data_for_observer, range_filter, factor_func, observer);
+                data_for_observer, observer, projection_params);
         auto total_count = projected_points->size();
-        auto filtered_points = filter_points(*projected_points, range_filter);
+        auto filtered_points = filter_points(*projected_points, projection_params.db_filter);
         return {
                 .total_count = total_count,
                 .filtered_points = filtered_points
@@ -140,8 +145,7 @@ namespace rcsop::launcher::utils {
             const InputDataCollector& inputs,
             const vector<data_with_observer_options>& labeled_data,
             const task_options& task_options,
-            const global_colormap_func& color_map_func,
-            const observed_factor_func& factor_func) -> shared_ptr<multiple_scored_cloud_payload const> {
+            const global_colormap_func& color_map_func) -> shared_ptr<multiple_scored_cloud_payload const> {
         auto dB_range = task_options.db_range;
         auto observer_provider = make_shared<ObserverProvider>(inputs, task_options.camera, true);
         auto projector = make_shared<DataPointProjector>();
@@ -153,13 +157,21 @@ namespace rcsop::launcher::utils {
         auto total_time = start_time();
         auto range_filter = get_range_filter(dB_range);
 
+        auto vertical_distribution = rcs_gaussian_vertical(task_options.vertical_options.angle_spread,
+                                                           task_options.vertical_options.normal_variance);
+        auto projection_params = data::projection_options {
+            .db_filter = range_filter,
+            .factor_func = vertical_distribution,
+            .vertical_angle_limit = task_options.vertical_options.angle_spread,
+            .steps_per_angle = task_options.point_density,
+        };
+
         size_t total_count{0};
         size_t filtered_count{0};
         auto complete_payload = map_vec<Observer, ScoredCloud, false>(
                 observers,
                 [&labeled_data, &task_options,
-                 &base_points, &projector, range_filter, &factor_func,
-                 &observer_count, &total_count, &filtered_count]
+                 &base_points, &projector, &observer_count, &total_count, &filtered_count, &projection_params]
                         (const size_t index, const Observer& observer) {
                     auto time = start_time();
                     auto relevant_points = make_shared<vector<ScoredPoint>> ();
@@ -169,8 +181,7 @@ namespace rcsop::launcher::utils {
 
                         // 1. observed base points
                         auto [total_observed_count, observed_points] = filter_and_score_points(
-                                data_for_observer, *base_points, observer_with_translation,
-                                factor_func, range_filter);
+                                data_for_observer, *base_points, observer_with_translation, projection_params);
                         total_count += total_observed_count;
                         filtered_count += observed_points->size();
 
@@ -180,8 +191,7 @@ namespace rcsop::launcher::utils {
                         // 2. projected points
                         if ((task_options.point_generator & PointGenerator::DATA_PROJECTION) != 0) {
                             auto [projected_count, projected_points] = project_data_to_points(
-                                    data_for_observer, observer_with_translation, *projector,
-                                    factor_func, range_filter);
+                                    data_for_observer, observer_with_translation, *projector, projection_params);
                             total_count += projected_count;
                             filtered_count += projected_points->size();
 
@@ -204,9 +214,5 @@ namespace rcsop::launcher::utils {
                 .point_clouds = complete_payload,
                 .color_map = color_map_func,
         });
-    }
-
-    auto identity_factor(const observed_point& point) -> double {
-        return 1;
     }
 }

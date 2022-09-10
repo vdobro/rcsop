@@ -32,17 +32,26 @@ namespace rcsop::launcher::utils {
         double normal_variance;
     };
 
+    enum OutputFormat {
+        NONE = 0,
+        RENDERING = 1,
+        SPARSE_MODEL = 2,
+
+        BOTH = RENDERING | SPARSE_MODEL,
+    };
+
     struct task_options {
         string task_name;
         path input_path;
         path output_path;
         bool prefilter_data;
         vertical_spread vertical_options;
-
         PointGenerator point_generator;
+        size_t point_density;
         ScoreRange db_range;
         camera_options camera;
         rendering_options rendering;
+        OutputFormat output_format;
     };
 
     using launcher_task = std::function<void(const InputDataCollector&, const task_options&)>;

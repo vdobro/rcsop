@@ -10,6 +10,7 @@
 
 namespace rcsop::launcher {
     using rcsop::launcher::utils::PointGenerator;
+    using rcsop::launcher::utils::OutputFormat;
 
     namespace po = boost::program_options;
     using std::chrono::system_clock;
@@ -30,6 +31,8 @@ namespace rcsop::launcher {
     static const char* PARAM_VERTICAL_ANGLE_SPREAD = "vertical-spread";
     static const char* PARAM_VERTICAL_DISTRIBUTION_VARIANCE = "vertical-variance";
     static const char* PARAM_POINT_GENERATOR = "points";
+    static const char* PARAM_OUTPUT_FORMAT = "output-format";
+    static const char* PARAM_POINT_DENSITY = "density";
     static const char* PARAM_GRADIENT_RADIUS = "gradient-radius";
     static const char* PARAM_COLOR_MAP = "color-map";
     static const char* PARAM_ALPHA = "alpha";
@@ -67,13 +70,16 @@ namespace rcsop::launcher {
         }
         auto gradient_alpha = options.rendering.gradient.center_alpha;
         if (gradient_alpha > 1. || gradient_alpha <= 0.) {
-            throw invalid_argument("Gradient center alpha must be in range (0, 1].");
+            throw invalid_argument("Gradient center alpha must be within (0, 1].");
         }
         if (options.rendering.gradient.radius <= 0) {
             throw invalid_argument("Gradient radius must be larger than 0.");
         }
         if (options.db_range.min >= options.db_range.max) {
             throw invalid_argument("dB range must be well defined: lower bound smaller than the upper bound.");
+        }
+        if (options.point_density <= 0) {
+            throw invalid_argument("Point density must be a positive integer.");
         }
         if (options.vertical_options.angle_spread <= 0) {
             throw invalid_argument("No data to display with a negative vertical angle spread.");
@@ -97,7 +103,24 @@ namespace rcsop::launcher {
             return PointGenerator::MODEL_WITH_PROJECTION;
         }
         throw invalid_argument(string(PARAM_POINT_GENERATOR)
-                               + " must be one of the following: model-cloud, bounding-box, data-projection or model-with-projection");
+                               + " must be one of the following: model-cloud, bounding-box, data-projection or model-with-projection.");
+    }
+
+    static auto parse_output_format_option(const string& option) -> OutputFormat {
+        if (option == "all") {
+            return OutputFormat::BOTH;
+        }
+        if (option == "model") {
+            return OutputFormat::SPARSE_MODEL;
+        }
+        if (option == "image") {
+            return OutputFormat::RENDERING;
+        }
+        if (option == "none") {
+            return OutputFormat::NONE;
+        }
+        throw invalid_argument(string(PARAM_OUTPUT_FORMAT)
+                               + " must be one of the following: all, image, model or none.");
     }
 
     [[nodiscard]] po::variables_map parse_arguments(int argc, char* argv[]) {
@@ -133,10 +156,14 @@ namespace rcsop::launcher {
                  "variance (sigma squared) for the vertical distribution of dB values, defaults to Stephen Stigler's definition")
                 (PARAM_POINT_GENERATOR, po::value<string>()->default_value(DEFAULT_POINT_GENERATOR),
                  "use the legacy point generator (only filtering a bounding box or using the sparse cloud model)")
+                (PARAM_POINT_DENSITY, po::value<size_t>()->default_value(DEFAULT_POINT_DENSITY),
+                "point density, either in points per degree or per meter, depending on point generation strategy")
                 (PARAM_COLOR_MAP, po::value<string>()->default_value(DEFAULT_COLOR_MAP),
                  "default color map to use")
                 (PARAM_ALPHA, po::value<float>()->default_value(DEFAULT_ALPHA),
-                 "base alpha value/factor to apply and full color intensity");
+                 "base alpha value/factor to apply and full color intensity")
+                (PARAM_OUTPUT_FORMAT, po::value<string>()->default_value(DEFAULT_OUTPUT_FORMAT),
+                 "output formats enabled for the processing, defaults to both available ones");
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
@@ -176,9 +203,9 @@ namespace rcsop::launcher {
         const double vertical_spread = vm.at(PARAM_VERTICAL_ANGLE_SPREAD).as<double>();
         const double vertical_distribution_variance = sqrt(abs(vm.at(PARAM_VERTICAL_DISTRIBUTION_VARIANCE).as<double>()));
         const bool use_any_closest_observer = vm.at(PARAM_USE_CLOSEST_CAMERA).as<bool>();
-        const PointGenerator point_generator = vm.contains(PARAM_POINT_GENERATOR)
-                ? parse_point_generator_option(vm.at(PARAM_POINT_GENERATOR).as<string>())
-                : PointGenerator::DATA_PROJECTION; // default
+        const PointGenerator point_generator = parse_point_generator_option(vm.at(PARAM_POINT_GENERATOR).as<string>());
+        const size_t point_density = vm.at(PARAM_POINT_DENSITY).as<size_t>();
+        const OutputFormat output_format = parse_output_format_option(vm.at(PARAM_OUTPUT_FORMAT).as<string>());
 
         task_options options{
                 .task_name = task,
@@ -190,6 +217,7 @@ namespace rcsop::launcher {
                         .normal_variance = vertical_distribution_variance,
                 },
                 .point_generator = point_generator,
+                .point_density = point_density,
                 .db_range = {
                         .min = min_db,
                         .max = max_db,
@@ -208,6 +236,7 @@ namespace rcsop::launcher {
                                 .center_alpha = base_alpha,
                         },
                 },
+                .output_format = output_format,
         };
         validate_task_options(options);
         return options;

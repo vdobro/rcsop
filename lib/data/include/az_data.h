@@ -46,6 +46,8 @@ namespace rcsop::data {
 
         [[nodiscard]] vector<rcs_distance_t> distances() const override;
 
+        [[nodiscard]] rcs_distance_t distance_step() const override;
+
         [[nodiscard]] vector<rcs_angle_t> angles() const override;
 
         void use_filtered_peaks();

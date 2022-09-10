@@ -13,6 +13,13 @@ namespace rcsop::data {
     using rcsop::common::observed_factor_func;
     using rcsop::common::utils::points::vec3;
 
+    struct projection_options {
+        function<bool(double)> db_filter;
+        observed_factor_func& factor_func;
+        double vertical_angle_limit;
+        size_t steps_per_angle;
+    };
+
     class DataPointProjector {
     private:
 
@@ -54,12 +61,9 @@ namespace rcsop::data {
         }
 
     public:
-        explicit DataPointProjector();
-
         auto project_data(const AbstractDataSet* data,
-                          const function<bool(double)>& db_filter,
-                          const observed_factor_func& factor_func,
-                          const Observer& observer) const -> shared_ptr<vector<ScoredPoint>>;
+                          const Observer& observer,
+                          const projection_options& projection_params) const -> shared_ptr<vector<ScoredPoint>>;
 
     };
 

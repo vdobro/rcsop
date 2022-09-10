@@ -17,10 +17,7 @@ namespace rcsop::launcher::utils {
     using rcsop::data::AbstractDataCollection;
     using rcsop::common::multiple_scored_cloud_payload;
     using rcsop::common::data_observer_translation;
-    using rcsop::common::observed_factor_func;
     using rcsop::common::coloring::global_colormap_func;
-
-    double identity_factor(const observed_point& point);
 
     struct data_with_observer_options {
         data_observer_translation observer_options;
@@ -31,8 +28,7 @@ namespace rcsop::launcher::utils {
             const InputDataCollector& inputs,
             const vector<data_with_observer_options>& data,
             const task_options& task_options,
-            const global_colormap_func& color_map_func,
-            const observed_factor_func& factor_func = &identity_factor) -> shared_ptr<multiple_scored_cloud_payload const>;
+            const global_colormap_func& color_map_func) -> shared_ptr<multiple_scored_cloud_payload const>;
 
 }
 

@@ -14,6 +14,8 @@ namespace rcsop::launcher {
 
     const string DEFAULT_TASK = "azimuth-rcs";
     const string DEFAULT_POINT_GENERATOR = "data-projection";
+    const string DEFAULT_OUTPUT_FORMAT = "all";
+    const size_t DEFAULT_POINT_DENSITY = 3;
 
     constexpr double DEFAULT_CAMERA_DISTANCE = 750.0;
     constexpr height_t DEFAULT_HEIGHT = 40;

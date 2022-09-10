@@ -141,4 +141,8 @@ namespace rcsop::data {
     vector<rcs_angle_t> AzimuthRcsDataSet::angles() const {
         return this->_angles;
     }
+
+    rcs_distance_t AzimuthRcsDataSet::distance_step() const {
+        return this->_last_range_step;
+    }
 }

@@ -26,6 +26,8 @@ namespace rcsop::data {
 
         [[nodiscard]] virtual auto distances() const -> vector<rcs_distance_t> = 0;
 
+        [[nodiscard]] virtual auto distance_step() const -> rcs_distance_t = 0;
+
         [[nodiscard]] virtual auto angles() const -> vector<rcs_angle_t> = 0;
 
         virtual ~AbstractDataSet() = default;

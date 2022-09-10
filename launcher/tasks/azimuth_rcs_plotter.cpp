@@ -39,6 +39,7 @@ namespace rcsop::launcher::tasks {
     using rcsop::common::global_colormap_func;
 
     using rcsop::launcher::utils::data_with_observer_options;
+    using rcsop::launcher::utils::OutputFormat;
 
     using std::clog;
     using std::endl;
@@ -126,27 +127,22 @@ namespace rcsop::launcher::tasks {
 
         auto data_with_translation = map_labeled_data(azimuth_data);
 
-        auto vertical_distribution = rcs_gaussian_vertical(options.vertical_options.angle_spread,
-                                                           options.vertical_options.normal_variance);
-
-        {
+        if ((options.output_format & OutputFormat::SPARSE_MODEL) != 0) {
             clog << endl << "Scoring points with unfiltered data ..." << endl;
-            auto scored_payload = score_points(inputs, data_with_translation, options, color_map,
-                                               vertical_distribution);
+            auto scored_payload = score_points(inputs, data_with_translation, options, color_map);
 
             clog << endl << "Rendering to sparse cloud models ..." << endl;
             plot_to_models(*scored_payload, inputs, color_map, options);
         }
 
-        if (options.prefilter_data) {
-            for (auto& [_, data]: azimuth_data) {
-                data->use_filtered_peaks();
+        if ((options.output_format & OutputFormat::RENDERING) != 0) {
+            if (options.prefilter_data) {
+                for (auto& [_, data]: azimuth_data) {
+                    data->use_filtered_peaks();
+                }
             }
-        }
-        {
             clog << endl << "Scoring points with filtered data ..." << endl;
-            auto scored_payload = score_points(inputs, data_with_translation, options, color_map,
-                                               vertical_distribution);
+            auto scored_payload = score_points(inputs, data_with_translation, options, color_map);
 
             clog << endl << "Rendering to images ..." << endl;
             plot_to_images(*scored_payload, *minimaps, color_map, options);
