@@ -8,16 +8,20 @@
 #include "rendering_options.h"
 
 namespace rcsop::rendering {
+    using sf::Shader;
+    using sf::RenderTarget;
+    using sf::RenderTexture;
+
     class SfmlRendererContext : public BaseRendererContext {
     private:
         const gradient_options& _options;
 
-        shared_ptr<sf::Shader> _shader;
-        unique_ptr<sf::RenderTexture> _render_target;
+        shared_ptr<Shader> _shader;
+        unique_ptr<RenderTexture> _render_target;
 
     public:
         explicit SfmlRendererContext(const Observer& observer,
-                                     shared_ptr<sf::Shader> shader,
+                                     shared_ptr<Shader> shader,
                                      const gradient_options& options);
 
         void render_point(const rendered_point& point) override;

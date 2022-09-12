@@ -17,7 +17,6 @@ add_executable(
 
         hello_test.cc
         observer_test.cc
-        colmap_observer_camera_test.cc
 )
 
 target_link_libraries(

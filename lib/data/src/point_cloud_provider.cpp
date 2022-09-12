@@ -9,12 +9,14 @@
 #include "utils/mapping.h"
 #include "utils/chronometer.h"
 #include "observer_provider.h"
+#include "utils/random.h"
 
 namespace rcsop::data {
     using rcsop::common::utils::points::point_pair;
     using rcsop::common::utils::time::start_time;
     using rcsop::common::utils::time::log_and_start_next;
     using rcsop::common::utils::map_vec;
+    using rcsop::common::utils::get_uniform_distribution;
 
     PointCloudProvider::PointCloudProvider(const InputDataCollector& input,
                                            const camera_options& camera_options)
@@ -100,9 +102,7 @@ namespace rcsop::data {
         std::clog << "A maximum of " << std::to_string(point_count)
                   << " points to be generated" << std::endl;
 
-        std::random_device rd;
-        std::mt19937 e2(rd());
-        std::uniform_real_distribution<double> dist(-step_size / 2, step_size / 2);
+        auto dist = get_uniform_distribution(step_size, true);
 
         const auto distance_threshold = radius_limit;
         size_t index = 0;
@@ -113,7 +113,7 @@ namespace rcsop::data {
             while (y < end_y) {
                 auto z = begin_z;
                 while (z < end_z) {
-                    const vec3 point_vector(x + dist(e2), y + dist(e2), z + dist(e2));
+                    const vec3 point_vector(x + dist(), y + dist(), z + dist());
                     const double distance_from_origin = (middle_point - point_vector).norm();
                     if (distance_from_origin <= distance_threshold) {
                         result->emplace_back(index, point_vector);

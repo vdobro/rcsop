@@ -20,7 +20,7 @@ namespace rcsop::launcher {
     constexpr double DEFAULT_CAMERA_DISTANCE = 750.0;
     constexpr height_t DEFAULT_HEIGHT = 40;
 
-    constexpr double DEFAULT_VERTICAL_ANGLE_SPREAD = 2.5;
+    constexpr double DEFAULT_VERTICAL_ANGLE_SPREAD = 5.0;
     constexpr double DEFAULT_VERTICAL_DISTRIBUTION_VARIANCE = STIGLER_SIGMA * STIGLER_SIGMA;
     constexpr double DEFAULT_CAMERA_PITCH_CORRECTION = 0.;
 

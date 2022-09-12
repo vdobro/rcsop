@@ -18,11 +18,11 @@ namespace rcsop::common::utils::gauss {
 
     observed_factor_func rcs_gaussian_vertical(double vertical_spread, double sigma) {
         return [vertical_spread, sigma](const observed_point& point) {
-            return gauss(point.vertical_angle / vertical_spread, sigma, 0.);
+            return gauss(point.vertical_angle / vertical_spread * 2, sigma, 0.);
         };
     }
 
-/*
+/* TODO
     static double raw_gauss(const double& x,
                             const double& y,
                             const double& sigma) {

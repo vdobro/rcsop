@@ -10,7 +10,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 find_package(Eigen3 3.4 REQUIRED)
-find_package(CGAL REQUIRED)
+find_package(CGAL   5.5 REQUIRED)
 find_package(COLMAP 3.8 CONFIG REQUIRED)
 
 include(GenerateExportHeader)
@@ -33,7 +33,7 @@ add_library(rcsop-common SHARED
         src/simple_point.cpp
         src/base_point_cloud.cpp
         src/observer_position.cpp
-        src/points.cpp)
+        src/points.cpp include/utils/random.h)
 
 generate_export_header(rcsop-common)
 

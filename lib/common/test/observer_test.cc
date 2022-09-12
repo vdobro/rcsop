@@ -11,6 +11,7 @@ using ::testing::Return;
 #include "utils/types.h"
 #include "utils/mapping.h"
 #include "utils/sparse.h"
+#include "utils/random.h"
 #include "observer.h"
 
 using rcsop::common::Observer;
@@ -29,6 +30,7 @@ using rcsop::common::utils::points::vec3;
 using rcsop::common::utils::points::vec3_spherical;
 using rcsop::common::utils::points::point_id_t;
 using rcsop::common::utils::map_vec;
+using rcsop::common::utils::get_uniform_distribution;
 
 struct observation {
     double vertical_angle{};
@@ -458,17 +460,15 @@ TEST_F(ObserverShould, CalculateDistanceEqualToSphericalRadialComponent) {
 
 using uniform_distribution = std::uniform_real_distribution<double>;
 TEST_F(ObserverShould, ConvertSphericalToCartesianToSpherical) {
-    std::random_device rd;
-    std::mt19937 e2(rd());
-    uniform_distribution radius_distribution(0, 10);
-    uniform_distribution theta_distribution(0, M_PI);
-    uniform_distribution phi_distribution(0, M_2_PI - STANDARD_ERROR);
+    auto radius_distribution = get_uniform_distribution(0., 10., false);
+    auto theta_distribution = get_uniform_distribution(0., M_PI, false);
+    auto phi_distribution = get_uniform_distribution(0., M_2_PI, true);
 
     for (size_t i{0}; i < 750; i++) {
         vec3_spherical input{
-                .radial = radius_distribution(e2),
-                .azimuthal = theta_distribution(e2),
-                .polar = phi_distribution(e2),
+                .radial = radius_distribution(),
+                .azimuthal = theta_distribution(),
+                .polar = phi_distribution(),
         };
         auto cartesian = Observer::spherical_to_cartesian(input);
         auto result = Observer::cartesian_to_spherical(cartesian);
@@ -480,15 +480,13 @@ TEST_F(ObserverShould, ConvertSphericalToCartesianToSpherical) {
 }
 
 TEST_F(ObserverShould, ConvertCartesianToSphericalToCartesian) {
-    std::random_device rd;
-    std::mt19937 e2(rd());
-    uniform_distribution real_distribution(-10, 10);
+    auto real_distribution = get_uniform_distribution(10., false);
 
     for (size_t i{0}; i < 750; i++) {
         vec3 input{
-                real_distribution(e2),
-                real_distribution(e2),
-                real_distribution(e2),
+                real_distribution(),
+                real_distribution(),
+                real_distribution(),
         };
         auto spherical = Observer::cartesian_to_spherical(input);
         auto result = Observer::spherical_to_cartesian(spherical);

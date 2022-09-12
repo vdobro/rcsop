@@ -1,5 +1,5 @@
-#ifndef RCSOP_COLMAP_OBSERVER_CAMERA_H
-#define RCSOP_COLMAP_OBSERVER_CAMERA_H
+#ifndef RCSOP_COMMON_COLMAP_OBSERVER_CAMERA_H
+#define RCSOP_COMMON_COLMAP_OBSERVER_CAMERA_H
 
 #include "observer_camera.h"
 
@@ -33,4 +33,4 @@ namespace rcsop::common {
     };
 }
 
-#endif //RCSOP_COLMAP_OBSERVER_CAMERA_H
+#endif //RCSOP_COMMON_COLMAP_OBSERVER_CAMERA_H

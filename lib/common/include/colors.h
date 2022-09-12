@@ -1,5 +1,5 @@
-#ifndef RCSOP_RENDERING_COLORS_H
-#define RCSOP_RENDERING_COLORS_H
+#ifndef RCSOP_COMMON_COLORS_H
+#define RCSOP_COMMON_COLORS_H
 
 #include "utils/types.h"
 #include "utils/sparse.h"
@@ -38,4 +38,4 @@ namespace rcsop::common::coloring {
 
 }
 
-#endif //RCSOP_RENDERING_COLORS_H
+#endif //RCSOP_COMMON_COLORS_H

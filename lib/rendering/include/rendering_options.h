@@ -1,5 +1,5 @@
-#ifndef RCSOP_RENDERING_OPTIONS_H
-#define RCSOP_RENDERING_OPTIONS_H
+#ifndef RCSOP_RENDERING_RENDERING_OPTIONS_H
+#define RCSOP_RENDERING_RENDERING_OPTIONS_H
 
 #include "colors.h"
 
@@ -18,4 +18,4 @@ namespace rcsop::rendering {
     };
 }
 
-#endif //RCSOP_RENDERING_OPTIONS_H
+#endif //RCSOP_RENDERING_RENDERING_OPTIONS_H

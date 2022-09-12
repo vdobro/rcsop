@@ -1,30 +1,30 @@
 #include "data_point_projector.h"
 
+#include "utils/random.h"
+
 namespace rcsop::data {
-    using common::utils::points::point_id_t;
-    using common::utils::rcs::raw_rcs_to_dB;
-    using uniform_distribution = std::uniform_real_distribution<double>;
+    using rcsop::common::utils::points::point_id_t;
+    using rcsop::common::utils::rcs::raw_rcs_to_dB;
+    using rcsop::common::utils::get_uniform_distribution;
 
     static auto combine_ranges(const vector<double>& angles,
                                const vector<double>& distances,
                                const double angle_step,
                                const double distance_epsilon,
                                const double secondary_angle_limit) -> vector<observed_point> {
-        std::random_device rd;
-        std::mt19937 e2(rd());
 
         auto half_step{angle_step / 2.};
-        uniform_distribution angle_noise(-half_step, half_step);
-        uniform_distribution distance_noise(-distance_epsilon, distance_epsilon);
+        auto angle_noise = get_uniform_distribution(half_step, true);
+        auto distance_noise = get_uniform_distribution(distance_epsilon, true);
 
         vector<observed_point> points;
         for (auto primary_angle: angles) {
             for (auto ranged_distance: distances) {
                 double secondary_angle{-secondary_angle_limit};
                 while (secondary_angle <= secondary_angle_limit) {
-                    auto horizontal_angle = primary_angle + angle_noise(e2);
-                    auto vertical_angle = secondary_angle + angle_noise(e2);
-                    auto distance = ranged_distance + distance_noise(e2);
+                    auto horizontal_angle = primary_angle + angle_noise();
+                    auto vertical_angle = secondary_angle + angle_noise();
+                    auto distance = ranged_distance + distance_noise();
                     secondary_angle += angle_step;
 
                     if (horizontal_angle < -90 || horizontal_angle > 90) {
