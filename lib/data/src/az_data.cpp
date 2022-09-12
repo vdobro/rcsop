@@ -112,15 +112,14 @@ namespace rcsop::data {
     }
 
     double AzimuthRcsDataSet::map_to_nearest(const observed_point& point) const {
-        long range_distance = lround(point.distance_in_world);
+        const long range_distance = lround(point.distance_in_world);
 
-        rcs_angle_t nearest_angle = find_nearest(point.horizontal_angle, _angles);
-        size_t nearest_range_index = find_nearest_index(range_distance, _ranges);
+        const rcs_angle_t nearest_angle = find_nearest(point.horizontal_angle, _angles);
+        const size_t nearest_range_index = find_nearest_index(range_distance, _ranges);
 
         const auto is_last = nearest_range_index == _last_range_index;
         const auto last_range = _ranges[_last_range_index];
-        const auto out_of_range = nearest_range_index >= _ranges.size()
-                                  || (is_last && abs(last_range - range_distance) > _last_range_step);
+        const auto out_of_range = (is_last && abs(last_range - range_distance) > _last_range_step);
 
         return out_of_range ? nanf("Distance out of range.") : resolve_value(nearest_angle, nearest_range_index);
     }

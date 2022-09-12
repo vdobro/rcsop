@@ -22,7 +22,7 @@ namespace rcsop::common::utils::time {
                                      const string& message) {
         auto last_duration = get_time_seconds(last_timer);
         clog << "[ " << fixed << setw(7) << setprecision(3)
-             << last_duration << " s ]: " << message << endl;
+             << last_duration << "s ]: " << message << endl;
 
         return start_time();
     }

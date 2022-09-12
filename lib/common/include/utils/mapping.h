@@ -152,21 +152,37 @@ namespace rcsop::common::utils {
 
     template<typename DataType>
     size_t find_nearest_index(DataType search_value,
-                              const vector<DataType>& list) {
-        auto iterator = min_element(
-                list.cbegin(), list.cend(),
-                [&search_value](const DataType& a, const DataType& b) {
-                    return abs(search_value - a) < abs(search_value - b);
-                });
-        auto index = distance(list.cbegin(), iterator);
-        return index;
+                              const vector<DataType>& sorted_list) {
+        const auto last = sorted_list.size() - 1;
+        if (search_value < sorted_list[0]) {
+            return 0;
+        }
+        if (search_value > sorted_list[last]) {
+            return last;
+        }
+
+        size_t low = 0;
+        size_t high = last;
+        while (low <= high) {
+            auto middle = (high + low) / 2;
+            auto mid_value = sorted_list[middle];
+            if (search_value < mid_value) {
+                high = middle - 1;
+            } else if (search_value > mid_value) {
+                low = middle + 1;
+            } else {
+                return middle;
+            }
+        }
+        return ((sorted_list[low] - search_value) < (search_value - sorted_list[high]))
+                ? low : high;
     }
 
     template<typename DataType>
     DataType find_nearest(DataType search_value,
-                          const vector<DataType>& list) {
-        const size_t index = find_nearest_index(search_value, list);
-        return list[index];
+                          const vector<DataType>& sorted_list) {
+        const size_t index = find_nearest_index(search_value, sorted_list);
+        return sorted_list[index];
     }
 
     template<typename DataType>
