@@ -1,4 +1,4 @@
-image: registry.git.fh-aachen.de/ba-vd/rcsop/rcsop-runtime:generic
+image: registry.git.fh-aachen.de/ba-vd/rcsop/rcsop-runtime:latest
 
 stages:
   - build
