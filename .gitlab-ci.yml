@@ -1,4 +1,4 @@
-image: registry.git.fh-aachen.de/ba-vd/sfm-pipeline/rcsop-gitlab-ci:generic
+image: registry.git.fh-aachen.de/ba-vd/rcsop/rcsop-runtime:generic
 
 stages:
   - build

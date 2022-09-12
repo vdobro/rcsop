@@ -1,4 +1,4 @@
-FROM registry.git.fh-aachen.de/ba-vd/sfm-pipeline/colmap:generic
+FROM registry.git.fh-aachen.de/ba-vd/rcsop/colmap:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 USER root
@@ -14,8 +14,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     libgoogle-glog-dev \
     libgflags-dev \
     libglew-dev \
-    qtbase5-dev \
-    libqt5opengl5-dev \
     libomp-dev \
     libgmp-dev \
     libmpfr-dev \
