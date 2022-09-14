@@ -125,7 +125,7 @@ namespace rcsop::common {
             return this->_camera->native_camera().position();
         }
         auto radial = distance_in_world * this->_units_per_centimeter;
-        auto azimuthal = -(horizontal_angle - HALF_PI_RADIANS);
+        auto azimuthal = HALF_PI_RADIANS - horizontal_angle;
         auto polar = HALF_PI_RADIANS - vertical_angle;
 
         auto cartesian_local = spherical_to_cartesian({.radial = radial, .azimuthal = azimuthal, .polar = polar});

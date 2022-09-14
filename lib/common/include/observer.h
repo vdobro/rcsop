@@ -17,6 +17,7 @@ namespace rcsop::common {
         double distance_to_origin{};
         height_t default_height{};
         bool use_any_camera_nearby{false};
+        bool force_use_original_image{false};
     };
 
     struct data_observer_translation {

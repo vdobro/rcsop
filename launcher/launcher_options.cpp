@@ -23,6 +23,7 @@ namespace rcsop::launcher {
     static const char* PARAM_SOFTWARE_RENDERING = "software-rendering";
     static const char* PARAM_CAMERA_DISTANCE = "camera-distance";
     static const char* PARAM_USE_CLOSEST_CAMERA = "use-closest-camera";
+    static const char* PARAM_FORCE_ORIGINAL_IMAGE = "force-original-image";
     static const char* PARAM_NO_DATA_PREFILTER = "no-data-prefilter";
     static const char* PARAM_PITCH_CORRECTION = "pitch-correction";
     static const char* PARAM_DEFAULT_HEIGHT = "default-height";
@@ -144,6 +145,8 @@ namespace rcsop::launcher {
                  "distance from the camera to the origin/center in centimeters")
                 (PARAM_USE_CLOSEST_CAMERA, po::bool_switch(),
                  "use any closest camera if none found at the same angle")
+                (PARAM_FORCE_ORIGINAL_IMAGE, po::bool_switch(),
+                 "if using a replacement camera, still try to use the original camera image")
                 (PARAM_NO_DATA_PREFILTER, po::bool_switch(),
                  "filter RCS data to only contain one maximum value per azimuth angle")
                 (PARAM_PITCH_CORRECTION, po::value<double>()->default_value(DEFAULT_CAMERA_PITCH_CORRECTION),
@@ -208,7 +211,8 @@ namespace rcsop::launcher {
         const bool filter_data = !vm.at(PARAM_NO_DATA_PREFILTER).as<bool>();
         const double vertical_spread = vm.at(PARAM_VERTICAL_ANGLE_SPREAD).as<double>();
         const double vertical_distribution_variance = sqrt(abs(vm.at(PARAM_VERTICAL_DISTRIBUTION_VARIANCE).as<double>()));
-        const bool use_any_closest_observer = vm.at(PARAM_USE_CLOSEST_CAMERA).as<bool>();
+        const bool use_closest_camera = vm.at(PARAM_USE_CLOSEST_CAMERA).as<bool>();
+        const bool force_use_original_image = vm.at(PARAM_FORCE_ORIGINAL_IMAGE).as<bool>();
         const PointGenerator point_generator = parse_point_generator_option(vm.at(PARAM_POINT_GENERATOR).as<string>());
         const size_t point_density = vm.at(PARAM_POINT_DENSITY).as<size_t>();
         const OutputFormat output_format = parse_output_format_option(vm.at(PARAM_OUTPUT_FORMAT).as<string>());
@@ -232,7 +236,8 @@ namespace rcsop::launcher {
                         .pitch_correction = pitch_correction,
                         .distance_to_origin = camera_distance,
                         .default_height = default_camera_height,
-                        .use_any_camera_nearby = use_any_closest_observer,
+                        .use_any_camera_nearby = use_closest_camera,
+                        .force_use_original_image = force_use_original_image,
                 },
                 .rendering = {
                         .use_gpu_rendering = !use_software_rendering,
